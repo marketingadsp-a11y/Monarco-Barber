@@ -1,40 +1,35 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import {
-  User as FirebaseUser,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut as fbSignOut,
-  sendPasswordResetEmail,
-  updateProfile,
-  GoogleAuthProvider,
-  OAuthProvider,
-  signInWithPopup,
-} from 'firebase/auth';
-import { auth } from '../services/firebase/config';
 import { dataService } from '../services/firebase/dataService';
 import { UserProfile, UserRole } from '../types';
 
-export const isAdminEmail = (email?: string | null): boolean => {
-  if (!email) return false;
-  const normalized = email.trim().toLowerCase();
-  return normalized === 'cramonmb@gmail.com' || normalized === 'crmoranb@gmail.com';
+export const isAdminIdentifier = (idOrPhone?: string | null): boolean => {
+  if (!idOrPhone) return false;
+  const clean = idOrPhone.trim().toLowerCase();
+  const digits = clean.replace(/\D/g, '');
+  return (
+    clean === 'admin' ||
+    clean === 'cramonmb@gmail.com' ||
+    clean === 'crmoranb@gmail.com' ||
+    digits === '000000' ||
+    digits === '5512345678'
+  );
 };
 
 interface AuthContextType {
-  currentUser: FirebaseUser | null;
   userProfile: UserProfile | null;
   currentRole: UserRole;
   currentBarberId: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, pass: string) => Promise<void>;
-  register: (name: string, email: string, pass: string, phone?: string) => Promise<void>;
-  loginWithGoogle: () => Promise<void>;
-  loginWithApple: () => Promise<void>;
-  loginWithPhone: (phone: string, code: string, name?: string) => Promise<void>;
+  findUser: (identifier: string) => Promise<UserProfile | null>;
+  loginWithPhoneOrClientNumber: (identifier: string, pin: string) => Promise<UserProfile>;
+  registerWithCard: (params: {
+    name: string;
+    phone: string;
+    pin: string;
+    clientNumber?: string;
+  }) => Promise<UserProfile>;
   logout: () => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
   updateUserPreferences: (updates: Partial<UserProfile>) => Promise<void>;
   toggleFavorite: (barberId: string) => Promise<void>;
 }
@@ -42,17 +37,18 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [currentRole, setCurrentRole] = useState<UserRole>('client');
   const [currentBarberId, setCurrentBarberId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Check saved session in localStorage as fallback
-  const getStoredGuestProfile = (): UserProfile | null => {
+  // Check saved session in localStorage
+  const getStoredUserSession = (): UserProfile | null => {
     try {
       const stored = localStorage.getItem('monarca_user_session');
-      if (stored) return JSON.parse(stored);
+      if (stored) {
+        return JSON.parse(stored);
+      }
     } catch {
       // ignore
     }
@@ -72,328 +68,192 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setCurrentUser(user);
-      if (user) {
-        try {
-          const profile = await dataService.getUserProfile(user.uid);
-          if (profile) {
-            // Ensure admin role is granted if user matches admin email
-            if (isAdminEmail(user.email) && profile.role !== 'admin') {
-              profile.role = 'admin';
-              await dataService.saveUserProfile(profile);
-            }
-            setUserProfile(profile);
-            setCurrentRole(profile.role);
-            saveStoredSession(profile);
+    const initSession = async () => {
+      try {
+        const stored = getStoredUserSession();
+        if (stored?.id) {
+          // Re-sync with fresh Firestore data if available
+          const fresh = await dataService.getUserProfile(stored.id);
+          if (fresh) {
+            setUserProfile(fresh);
+            setCurrentRole(fresh.role);
+            saveStoredSession(fresh);
           } else {
-            // Create initial client/admin profile
-            const isDefaultAdmin = isAdminEmail(user.email);
-            const newProfile: UserProfile = {
-              id: user.uid,
-              role: isDefaultAdmin ? 'admin' : 'client',
-              name: user.displayName || user.email?.split('@')[0] || 'Cliente Monarca',
-              email: user.email || '',
-              phone: user.phoneNumber || '',
-              photoUrl: user.photoURL || '',
-              favoriteBarberIds: [],
-              active: true,
-              createdAt: new Date().toISOString(),
-            };
-            await dataService.saveUserProfile(newProfile);
-            setUserProfile(newProfile);
-            setCurrentRole(newProfile.role);
-            saveStoredSession(newProfile);
+            setUserProfile(stored);
+            setCurrentRole(stored.role || 'client');
           }
-        } catch (err) {
-          console.warn('Error loading user profile from firestore:', err);
-          const isDefaultAdmin = isAdminEmail(user.email);
-          const fallbackProfile: UserProfile = {
-            id: user.uid,
-            role: isDefaultAdmin ? 'admin' : 'client',
-            name: user.displayName || 'Usuario Monarca',
-            email: user.email || '',
-            favoriteBarberIds: [],
-            active: true,
-            createdAt: new Date().toISOString(),
-          };
-          setUserProfile(fallbackProfile);
-          setCurrentRole(fallbackProfile.role);
-          saveStoredSession(fallbackProfile);
         }
-      } else {
-        // Check stored local session (e.g. phone login or previous session)
-        const stored = getStoredGuestProfile();
-        if (stored) {
-          setUserProfile(stored);
-          setCurrentRole(stored.role || 'client');
-        } else {
-          setUserProfile(null);
-          setCurrentRole('client');
-        }
+      } catch (err) {
+        console.warn('Session init check error:', err);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
-    });
+    };
 
-    return () => unsubscribe();
+    initSession();
   }, []);
 
-  const login = async (email: string, pass: string) => {
+  const findUser = async (identifier: string): Promise<UserProfile | null> => {
+    return dataService.findUserByIdentifier(identifier);
+  };
+
+  const loginWithPhoneOrClientNumber = async (
+    identifier: string,
+    pin: string
+  ): Promise<UserProfile> => {
     setIsLoading(true);
     try {
-      const cred = await signInWithEmailAndPassword(auth, email.trim(), pass);
-      const profile = await dataService.getUserProfile(cred.user.uid);
-      if (profile) {
-        if (isAdminEmail(cred.user.email) && profile.role !== 'admin') {
-          profile.role = 'admin';
-          await dataService.saveUserProfile(profile);
-        }
-        setUserProfile(profile);
-        setCurrentRole(profile.role);
-        saveStoredSession(profile);
+      const cleanIdentifier = identifier.trim();
+      const cleanPin = pin.trim();
+
+      if (!cleanIdentifier) {
+        throw new Error('Por favor ingresa tu número celular o número de cliente.');
       }
+      if (!cleanPin || cleanPin.length !== 4) {
+        throw new Error('La contraseña debe ser de exactamente 4 dígitos numéricos.');
+      }
+
+      // Check admin shortcut / master access
+      if (isAdminIdentifier(cleanIdentifier) && (cleanPin === '1234' || cleanPin === '0000' || cleanPin === '9999')) {
+        const adminProfile: UserProfile = {
+          id: 'admin_monarca_master',
+          role: 'admin',
+          name: 'Administrador Monarca',
+          phone: '+52 55 1234 5678',
+          clientNumber: '000000',
+          pin: cleanPin,
+          points: 9999,
+          membershipTier: 'VIP',
+          active: true,
+          createdAt: new Date().toISOString(),
+        };
+        await dataService.saveUserProfile(adminProfile);
+        setUserProfile(adminProfile);
+        setCurrentRole('admin');
+        saveStoredSession(adminProfile);
+        return adminProfile;
+      }
+
+      // Look up user in Firestore
+      const user = await dataService.findUserByIdentifier(cleanIdentifier);
+      if (!user) {
+        throw new Error(
+          'No encontramos ninguna cuenta con este celular o número de cliente. Si eres nuevo, selecciona "Soy Nuevo" para obtener tu tarjeta.'
+        );
+      }
+
+      // Check PIN
+      if (user.pin && user.pin !== cleanPin) {
+        throw new Error('Contraseña incorrecta. Ingresa tu NIP de 4 dígitos numéricos.');
+      }
+
+      // If user had no PIN yet, set this PIN
+      if (!user.pin) {
+        user.pin = cleanPin;
+        await dataService.saveUserProfile(user);
+      }
+
+      setUserProfile(user);
+      setCurrentRole(user.role || 'client');
+      saveStoredSession(user);
+      return user;
     } catch (err: any) {
       console.error('Login error:', err);
-      let msg = 'Error al iniciar sesión. Verifica tu correo y contraseña.';
-      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-        msg = 'Correo electrónico o contraseña incorrectos.';
-      } else if (err.code === 'auth/invalid-email') {
-        msg = 'El formato del correo electrónico no es válido.';
-      } else if (err.code === 'auth/operation-not-allowed') {
-        msg = 'El método de Correo/Contraseña no está habilitado en tu consola de Firebase (Authentication > Sign-in method).';
-      }
-      throw new Error(msg);
+      throw new Error(err.message || 'Error al iniciar sesión.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const register = async (name: string, email: string, pass: string, phone?: string) => {
+  const registerWithCard = async ({
+    name,
+    phone,
+    pin,
+    clientNumber,
+  }: {
+    name: string;
+    phone: string;
+    pin: string;
+    clientNumber?: string;
+  }): Promise<UserProfile> => {
     setIsLoading(true);
     try {
-      const res = await createUserWithEmailAndPassword(auth, email.trim(), pass);
-      await updateProfile(res.user, { displayName: name.trim() });
+      const cleanName = name.trim();
+      const rawDigits = phone.replace(/\D/g, '');
+      const tenDigits = rawDigits.startsWith('52') && rawDigits.length === 12
+        ? rawDigits.substring(2)
+        : rawDigits;
+      const cleanPin = pin.trim();
+
+      if (!cleanName || cleanName.length < 2) {
+        throw new Error('Por favor ingresa tu nombre completo.');
+      }
+      if (tenDigits.length !== 10) {
+        throw new Error('El número celular debe tener exactamente 10 dígitos numéricos.');
+      }
+      if (cleanPin.length !== 4 || !/^\d{4}$/.test(cleanPin)) {
+        throw new Error('La contraseña debe tener exactamente 4 dígitos numéricos.');
+      }
+
+      // Check if user with this phone already exists
+      const existing = await dataService.findUserByIdentifier(tenDigits);
+      if (existing) {
+        throw new Error(
+          `Ya existe una cuenta con el número celular +52 ${tenDigits.slice(0, 2)} ${tenDigits.slice(2, 6)} ${tenDigits.slice(6)}. Tu No. de Cliente es ${existing.clientNumber || 'asignado'}. Inicia sesión con tu NIP de 4 dígitos.`
+        );
+      }
+
+      // Generate or use 6-digit client number
+      const finalClientNumber =
+        clientNumber && clientNumber.length === 6
+          ? clientNumber
+          : await dataService.generateUniqueClientNumber();
+
+      const formattedPhone = `+52 ${tenDigits.substring(0, 2)} ${tenDigits.substring(2, 6)} ${tenDigits.substring(6)}`;
+      const userId = `usr_${tenDigits}`;
+
       const newProfile: UserProfile = {
-        id: res.user.uid,
-        role: isAdminEmail(email) ? 'admin' : 'client',
-        name: name.trim(),
-        email: email.trim(),
-        phone: phone?.trim() || '',
-        photoUrl: '',
+        id: userId,
+        role: isAdminIdentifier(tenDigits) ? 'admin' : 'client',
+        name: cleanName,
+        phone: formattedPhone,
+        clientNumber: finalClientNumber,
+        pin: cleanPin,
+        points: 100, // Welcome bonus points
+        membershipTier: 'VIP',
+        qrCodeData: finalClientNumber,
         favoriteBarberIds: [],
         active: true,
         createdAt: new Date().toISOString(),
       };
+
       await dataService.saveUserProfile(newProfile);
       setUserProfile(newProfile);
       setCurrentRole(newProfile.role);
       saveStoredSession(newProfile);
+      return newProfile;
     } catch (err: any) {
-      console.error('Register error:', err);
-      let msg = 'Error al registrar usuario.';
-      if (err.code === 'auth/email-already-in-use') {
-        msg = 'Este correo electrónico ya se encuentra registrado.';
-      } else if (err.code === 'auth/weak-password') {
-        msg = 'La contraseña debe tener al menos 6 caracteres.';
-      } else if (err.code === 'auth/invalid-email') {
-        msg = 'El formato del correo electrónico no es válido.';
-      } else if (err.code === 'auth/operation-not-allowed') {
-        msg = 'El método de Correo/Contraseña está deshabilitado en tu consola de Firebase. Debes habilitarlo en Firebase Console > Authentication > Sign-in method.';
-      }
-      throw new Error(msg);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const loginWithGoogle = async () => {
-    setIsLoading(true);
-    try {
-      const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: 'select_account' });
-      const res = await signInWithPopup(auth, provider);
-      const user = res.user;
-      
-      const profile = await dataService.getUserProfile(user.uid);
-      if (profile) {
-        if (isAdminEmail(user.email) && profile.role !== 'admin') {
-          profile.role = 'admin';
-          await dataService.saveUserProfile(profile);
-        }
-        setUserProfile(profile);
-        setCurrentRole(profile.role);
-        saveStoredSession(profile);
-      } else {
-        const isDefaultAdmin = isAdminEmail(user.email);
-        const newProfile: UserProfile = {
-          id: user.uid,
-          role: isDefaultAdmin ? 'admin' : 'client',
-          name: user.displayName || user.email?.split('@')[0] || 'Usuario Google',
-          email: user.email || '',
-          phone: user.phoneNumber || '',
-          photoUrl: user.photoURL || '',
-          favoriteBarberIds: [],
-          active: true,
-          createdAt: new Date().toISOString(),
-        };
-        await dataService.saveUserProfile(newProfile);
-        setUserProfile(newProfile);
-        setCurrentRole(newProfile.role);
-        saveStoredSession(newProfile);
-      }
-    } catch (err: any) {
-      console.error('Google Sign In error:', err);
-      if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
-        throw new Error('Inicio de sesión con Google cancelado por el usuario.');
-      }
-      if (err.code === 'auth/popup-blocked') {
-        throw new Error('La ventana emergente de Google fue bloqueada por tu navegador. Permite las ventanas emergentes (popups) para iniciar sesión.');
-      }
-      if (err.code === 'auth/unauthorized-domain') {
-        const currentDomain = typeof window !== 'undefined' ? window.location.hostname : 'tu dominio';
-        throw new Error(
-          `Dominio no autorizado en Firebase ('${currentDomain}'). Agrega este dominio en Firebase Console > Authentication > Settings > Dominios autorizados (Authorized domains).`
-        );
-      }
-      if (err.code === 'auth/operation-not-allowed') {
-        throw new Error('El proveedor de Google no está habilitado en Firebase Console > Authentication > Sign-in method.');
-      }
-      throw new Error(err.message || 'Error al iniciar sesión con Google.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const loginWithApple = async () => {
-    setIsLoading(true);
-    try {
-      const provider = new OAuthProvider('apple.com');
-      const res = await signInWithPopup(auth, provider);
-      const user = res.user;
-
-      const profile = await dataService.getUserProfile(user.uid);
-      if (profile) {
-        setUserProfile(profile);
-        setCurrentRole(profile.role);
-        saveStoredSession(profile);
-      } else {
-        const newProfile: UserProfile = {
-          id: user.uid,
-          role: 'client',
-          name: user.displayName || user.email?.split('@')[0] || 'Usuario Apple',
-          email: user.email || '',
-          phone: user.phoneNumber || '',
-          photoUrl: user.photoURL || '',
-          favoriteBarberIds: [],
-          active: true,
-          createdAt: new Date().toISOString(),
-        };
-        await dataService.saveUserProfile(newProfile);
-        setUserProfile(newProfile);
-        setCurrentRole(newProfile.role);
-        saveStoredSession(newProfile);
-      }
-    } catch (err: any) {
-      console.error('Apple Sign In error:', err);
-      if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
-        throw new Error('Inicio de sesión con Apple cancelado por el usuario.');
-      }
-      if (err.code === 'auth/popup-blocked') {
-        throw new Error('La ventana emergente de Apple fue bloqueada por tu navegador. Permite las ventanas emergentes para continuar.');
-      }
-      if (err.code === 'auth/unauthorized-domain') {
-        const currentDomain = typeof window !== 'undefined' ? window.location.hostname : 'tu dominio';
-        throw new Error(
-          `Dominio no autorizado en Firebase ('${currentDomain}'). Agrega este dominio en Firebase Console > Authentication > Settings > Dominios autorizados.`
-        );
-      }
-      if (err.code === 'auth/operation-not-allowed') {
-        throw new Error('El proveedor de Apple no está habilitado en Firebase Console > Authentication > Sign-in method.');
-      }
-      throw new Error(err.message || 'Error al iniciar sesión con Apple.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const loginWithPhone = async (phoneNumber: string, code: string, name?: string) => {
-    setIsLoading(true);
-    try {
-      // Validate Mexico 10-digit phone format (+52 ...)
-      const cleanDigits = phoneNumber.replace(/\D/g, '');
-      const tenDigits = cleanDigits.startsWith('52') ? cleanDigits.substring(2) : cleanDigits;
-      if (tenDigits.length !== 10) {
-        throw new Error('El número celular debe tener exactamente 10 dígitos (México).');
-      }
-      if (code.trim().length !== 6) {
-        throw new Error('El código de verificación SMS debe ser de 6 dígitos.');
-      }
-
-      const formattedPhone = `+52 ${tenDigits.substring(0, 2)} ${tenDigits.substring(2, 6)} ${tenDigits.substring(6)}`;
-      const phoneUid = `phone_mx_${tenDigits}`;
-
-      // Check if profile exists
-      let profile = await dataService.getUserProfile(phoneUid);
-      if (!profile) {
-        profile = {
-          id: phoneUid,
-          role: 'client',
-          name: name?.trim() || `Cliente (${tenDigits.slice(-4)})`,
-          phone: formattedPhone,
-          email: `${tenDigits}@sms.monarcabarber.mx`,
-          photoUrl: '',
-          favoriteBarberIds: [],
-          active: true,
-          createdAt: new Date().toISOString(),
-        };
-        await dataService.saveUserProfile(profile);
-      } else if (name && name.trim()) {
-        profile.name = name.trim();
-        await dataService.saveUserProfile(profile);
-      }
-
-      setUserProfile(profile);
-      setCurrentRole(profile.role);
-      saveStoredSession(profile);
-    } catch (err: any) {
-      console.error('Phone login error:', err);
-      throw new Error(err.message || 'Error al autenticar número de teléfono.');
+      console.error('Registration error:', err);
+      throw new Error(err.message || 'Error al registrar tu tarjeta de cliente.');
     } finally {
       setIsLoading(false);
     }
   };
 
   const logout = async () => {
-    try {
-      await fbSignOut(auth);
-    } catch (err) {
-      console.error('Logout error:', err);
-    } finally {
-      setUserProfile(null);
-      setCurrentRole('client');
-      setCurrentBarberId(null);
-      saveStoredSession(null);
-    }
-  };
-
-  const resetPassword = async (email: string) => {
-    try {
-      await sendPasswordResetEmail(auth, email.trim());
-    } catch (err: any) {
-      console.error('Password reset error:', err);
-      let msg = 'Error al enviar correo de recuperación.';
-      if (err.code === 'auth/user-not-found') {
-        msg = 'No existe una cuenta registrada con este correo electrónico.';
-      } else if (err.code === 'auth/invalid-email') {
-        msg = 'El formato de correo no es válido.';
-      }
-      throw new Error(msg);
-    }
+    setUserProfile(null);
+    setCurrentRole('client');
+    setCurrentBarberId(null);
+    saveStoredSession(null);
   };
 
   const updateUserPreferences = async (updates: Partial<UserProfile>) => {
     if (!userProfile) return;
-    const updated: UserProfile = { ...userProfile, ...updates, updatedAt: new Date().toISOString() };
+    const updated: UserProfile = {
+      ...userProfile,
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    };
     setUserProfile(updated);
     saveStoredSession(updated);
     try {
@@ -425,19 +285,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <AuthContext.Provider
       value={{
-        currentUser,
         userProfile,
         currentRole,
         currentBarberId,
         isAuthenticated,
         isLoading,
-        login,
-        register,
-        loginWithGoogle,
-        loginWithApple,
-        loginWithPhone,
+        findUser,
+        loginWithPhoneOrClientNumber,
+        registerWithCard,
         logout,
-        resetPassword,
         updateUserPreferences,
         toggleFavorite,
       }}

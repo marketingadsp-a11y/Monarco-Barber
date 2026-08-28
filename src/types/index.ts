@@ -12,8 +12,13 @@ export interface UserProfile {
   id: string;
   role: UserRole;
   name: string;
-  email: string;
-  phone?: string;
+  email?: string;
+  phone: string;
+  clientNumber?: string; // Unique 6-digit numeric client ID, e.g. "849201"
+  pin?: string; // 4-digit numeric password
+  points?: number;
+  membershipTier?: 'VIP' | 'Gold' | 'Black' | 'Classic';
+  qrCodeData?: string;
   photoUrl?: string;
   favoriteBarberIds?: string[];
   active: boolean;

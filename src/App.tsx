@@ -113,6 +113,7 @@ const MainAppContent: React.FC = () => {
               <ProfileView
                 onOpenBarberProfile={(b) => setSelectedBarberForProfile(b)}
                 onStartBookingWithBarber={(bId) => handleBookWithBarber(bId)}
+                onNavigateTab={(tab) => setActiveTab(tab)}
               />
             )}
           </>

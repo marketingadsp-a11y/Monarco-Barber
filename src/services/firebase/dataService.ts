@@ -76,6 +76,11 @@ export function toSpanishUser(profile: UserProfile): Record<string, any> {
     nombre: profile.name || '',
     correo: profile.email || '',
     telefono: profile.phone || '',
+    numero_cliente: profile.clientNumber || '',
+    pin: profile.pin || '',
+    puntos: profile.points || 0,
+    nivel_membresia: profile.membershipTier || 'VIP',
+    qr_datos: profile.qrCodeData || profile.clientNumber || '',
     foto_url: extractCleanUrl(profile.photoUrl),
     barberos_favoritos: profile.favoriteBarberIds || [],
     activo: profile.active !== undefined ? profile.active : true,
@@ -100,6 +105,11 @@ export function fromSpanishUser(data: any, docId: string): UserProfile {
     name: data.nombre || data.name || 'Usuario',
     email: data.correo || data.email || '',
     phone: data.telefono || data.phone || '',
+    clientNumber: data.numero_cliente || data.clientNumber || '',
+    pin: data.pin || data.codigo_acceso || '',
+    points: data.puntos !== undefined ? Number(data.puntos) : 100,
+    membershipTier: data.nivel_membresia || data.membershipTier || 'VIP',
+    qrCodeData: data.qr_datos || data.qrCodeData || data.numero_cliente || '',
     photoUrl: data.foto_url || data.photoUrl || '',
     favoriteBarberIds: data.barberos_favoritos || data.favoriteBarberIds || [],
     active: data.activo !== undefined ? data.activo : (data.active !== undefined ? data.active : true),
@@ -478,6 +488,97 @@ export class DataService {
       return null;
     } catch (error) {
       handleFirestoreError(error, OperationType.GET, `usuarios/${userId}`);
+      return null;
+    }
+  }
+
+  /**
+   * Search user by 10-digit phone OR 6-digit client number OR email
+   */
+  static async findUserByIdentifier(identifier: string): Promise<UserProfile | null> {
+    try {
+      const cleanRaw = identifier.trim();
+      if (!cleanRaw) return null;
+
+      const digitsOnly = cleanRaw.replace(/\D/g, '');
+      const tenDigits = digitsOnly.startsWith('52') && digitsOnly.length === 12
+        ? digitsOnly.substring(2)
+        : digitsOnly;
+
+      // 1. Direct ID match
+      const byId = await this.getUserProfile(cleanRaw);
+      if (byId) return byId;
+
+      if (tenDigits) {
+        const byPhoneId = await this.getUserProfile(`usr_${tenDigits}`);
+        if (byPhoneId) return byPhoneId;
+        const byPhoneIdOld = await this.getUserProfile(`phone_mx_${tenDigits}`);
+        if (byPhoneIdOld) return byPhoneIdOld;
+      }
+
+      // 2. Query in 'usuarios'
+      const snap = await getDocs(collection(db, 'usuarios'));
+      const users: UserProfile[] = [];
+      snap.forEach((docSnap) => {
+        users.push(fromSpanishUser(docSnap.data(), docSnap.id));
+      });
+
+      for (const u of users) {
+        // Match 6-digit client number
+        if (u.clientNumber && u.clientNumber.trim() === cleanRaw) {
+          return u;
+        }
+
+        // Match phone (either 10 digits or exact string)
+        if (u.phone) {
+          const uDigits = u.phone.replace(/\D/g, '');
+          const uTenDigits = uDigits.startsWith('52') && uDigits.length === 12 ? uDigits.substring(2) : uDigits;
+          if (tenDigits && uTenDigits === tenDigits) {
+            return u;
+          }
+          if (u.phone.trim() === cleanRaw) {
+            return u;
+          }
+        }
+
+        // Match email
+        if (u.email && u.email.toLowerCase() === cleanRaw.toLowerCase()) {
+          return u;
+        }
+      }
+
+      return null;
+    } catch (error) {
+      console.warn('Error finding user by identifier:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Generate a unique 6-digit numeric client ID (e.g. "849201")
+   */
+  static async generateUniqueClientNumber(): Promise<string> {
+    try {
+      const snap = await getDocs(collection(db, 'usuarios'));
+      const existingNumbers = new Set<string>();
+      snap.forEach((docSnap) => {
+        const data = docSnap.data();
+        if (data.numero_cliente) existingNumbers.add(String(data.numero_cliente));
+        if (data.clientNumber) existingNumbers.add(String(data.clientNumber));
+      });
+
+      let attempts = 0;
+      while (attempts < 100) {
+        // Generate a 6-digit number from 100000 to 999999
+        const randomNum = Math.floor(100000 + Math.random() * 900000).toString();
+        if (!existingNumbers.has(randomNum)) {
+          return randomNum;
+        }
+        attempts++;
+      }
+      return `${Math.floor(100000 + Math.random() * 900000)}`;
+    } catch {
+      return `${Math.floor(100000 + Math.random() * 900000)}`;
     }
   }
 
