@@ -18,12 +18,17 @@ export const Header: React.FC<HeaderProps> = ({ onOpenProfile }) => {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-[#0D0F12]/85 backdrop-blur-xl border-b border-white/10 px-4 py-3 transition-all">
-      <div className="max-w-6xl mx-auto flex items-center justify-between">
+    <header 
+      className="sticky top-0 z-40 w-full bg-[#0D0F12]/90 backdrop-blur-xl border-b border-white/10 px-3 sm:px-4 pb-3 transition-all"
+      style={{
+        paddingTop: 'max(env(safe-area-inset-top, 0px), 0.75rem)',
+      }}
+    >
+      <div className="max-w-6xl mx-auto flex items-center justify-between gap-2">
         {/* Brand Logo & Name */}
-        <div className="flex items-center gap-3 cursor-pointer" onClick={onOpenProfile}>
+        <div className="flex items-center gap-2.5 sm:gap-3 cursor-pointer min-w-0 flex-1 sm:flex-initial" onClick={onOpenProfile}>
           {businessSettings.logoUrl ? (
-            <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-[#12151B] border border-[#D4AF37]/40 shadow-lg shadow-[#D4AF37]/15 p-0.5">
+            <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden bg-[#12151B] border border-[#D4AF37]/40 shadow-lg shadow-[#D4AF37]/15 p-0.5 shrink-0">
               <img
                 src={businessSettings.logoUrl}
                 alt={businessSettings.name || 'Monarca Barber'}
@@ -32,40 +37,40 @@ export const Header: React.FC<HeaderProps> = ({ onOpenProfile }) => {
               />
             </div>
           ) : (
-            <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#996515] p-[1px] shadow-lg shadow-[#D4AF37]/15">
+            <div className="relative flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#996515] p-[1px] shadow-lg shadow-[#D4AF37]/15 shrink-0">
               <div className="w-full h-full bg-[#12151B] rounded-[11px] flex items-center justify-center">
                 <Crown className="w-5 h-5 text-[#D4AF37]" />
               </div>
             </div>
           )}
 
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <span className="font-serif font-black tracking-wider text-base text-white">
+              <span className="font-serif font-black tracking-wider text-sm sm:text-base text-white truncate">
                 {businessSettings.name || 'MONARCA'}
               </span>
-              <span className="text-[10px] font-semibold tracking-widest uppercase bg-[#D4AF37]/20 text-[#D4AF37] px-1.5 py-0.5 rounded border border-[#D4AF37]/30">
+              <span className="text-[9px] sm:text-[10px] font-semibold tracking-widest uppercase bg-[#D4AF37]/20 text-[#D4AF37] px-1 sm:px-1.5 py-0.5 rounded border border-[#D4AF37]/30 shrink-0">
                 BARBER
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 font-medium truncate max-w-[170px] sm:max-w-xs">
+            <p className="text-[10px] sm:text-[11px] text-slate-400 font-medium truncate max-w-[140px] xs:max-w-[200px] sm:max-w-xs">
               {businessSettings.address.split(',')[0]}
             </p>
           </div>
         </div>
 
         {/* Right Actions: Role Badge (if Admin/Barber), WhatsApp Direct, User Avatar & Logout */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* Active Role Badge (Only for Staff) */}
           {currentRole === 'admin' && (
-            <span className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[11px] font-bold">
+            <span className="hidden md:flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[11px] font-bold">
               <Shield className="w-3 h-3" />
               <span>Panel Admin</span>
             </span>
           )}
 
           {currentRole === 'barber' && (
-            <span className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/30 text-[#D4AF37] text-[11px] font-bold">
+            <span className="hidden md:flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/30 text-[#D4AF37] text-[11px] font-bold">
               <Scissors className="w-3 h-3" />
               <span>Panel Barbero</span>
             </span>
@@ -77,7 +82,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenProfile }) => {
               href={`https://wa.me/${businessSettings.whatsapp.replace(/\+/g, '')}?text=Hola%20Monarca%20Barber,%20quisiera%20información.`}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 rounded-full bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all active:scale-95 shadow-sm"
+              className="p-1.5 sm:p-2 rounded-full bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all active:scale-95 shadow-sm shrink-0"
               title="Contacto directo por WhatsApp"
             >
               <MessageCircle className="w-4 h-4" />
@@ -87,10 +92,10 @@ export const Header: React.FC<HeaderProps> = ({ onOpenProfile }) => {
           {/* User Avatar / Profile Access */}
           <button
             onClick={onOpenProfile}
-            className="flex items-center gap-2 p-1 pl-1 pr-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/15 transition-all hover:border-[#D4AF37]/50 active:scale-95"
+            className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1 pr-2 sm:pr-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/15 transition-all hover:border-[#D4AF37]/50 active:scale-95 shrink-0"
             title="Mi Perfil y Cuenta"
           >
-            <div className="w-7 h-7 rounded-full bg-slate-800 border border-white/20 overflow-hidden flex items-center justify-center">
+            <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-slate-800 border border-white/20 overflow-hidden flex items-center justify-center shrink-0">
               {userProfile?.photoUrl ? (
                 <img
                   src={userProfile.photoUrl}
@@ -102,7 +107,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenProfile }) => {
                 <User className="w-3.5 h-3.5 text-slate-300" />
               )}
             </div>
-            <span className="text-xs font-semibold text-slate-200 max-w-[90px] truncate hidden xs:inline-block">
+            <span className="text-xs font-semibold text-slate-200 max-w-[75px] sm:max-w-[90px] truncate hidden xs:inline-block">
               {isAuthenticated ? userProfile?.name?.split(' ')[0] : 'Ingresar'}
             </span>
           </button>
@@ -111,7 +116,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenProfile }) => {
           {isAuthenticated && (
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1.5 p-2 sm:px-2.5 sm:py-1.5 rounded-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-xs font-bold transition-all active:scale-95"
+              className="flex items-center gap-1 p-1.5 sm:px-2.5 sm:py-1.5 rounded-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-xs font-bold transition-all active:scale-95 shrink-0"
               title="Cerrar Sesión"
             >
               <LogOut className="w-3.5 h-3.5" />

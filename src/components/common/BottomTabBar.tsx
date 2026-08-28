@@ -29,8 +29,13 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({ activeTab, onTabChan
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 pointer-events-none flex justify-center pb-4 px-3 sm:pb-6">
-      <nav className="pointer-events-auto relative flex items-center justify-around w-full max-w-md bg-[#12151B]/90 backdrop-blur-2xl border border-white/15 rounded-full px-2 py-1.5 shadow-[0_12px_40px_rgba(0,0,0,0.7)] shadow-black/80">
+    <div 
+      className="fixed bottom-0 left-0 right-0 z-40 pointer-events-none flex justify-center px-3"
+      style={{
+        paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 1rem)',
+      }}
+    >
+      <nav className="pointer-events-auto relative flex items-center justify-around w-full max-w-md bg-[#12151B]/95 backdrop-blur-2xl border border-white/15 rounded-full px-2 py-1.5 shadow-[0_12px_40px_rgba(0,0,0,0.7)] shadow-black/80">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;

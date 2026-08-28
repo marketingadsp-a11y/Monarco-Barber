@@ -60,12 +60,12 @@ const MainAppContent: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0D0F12] text-slate-100 flex flex-col selection:bg-[#D4AF37] selection:text-slate-950 font-sans">
+    <div className="min-h-screen bg-[#0D0F12] text-slate-100 flex flex-col selection:bg-[#D4AF37] selection:text-slate-950 font-sans w-full max-w-full overflow-x-hidden">
       {/* Fixed Spatial Header */}
       <Header onOpenProfile={() => setActiveTab('profile')} />
 
       {/* Main Responsive Canvas */}
-      <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 pt-5">
+      <main className="flex-1 w-full max-w-5xl mx-auto px-3.5 sm:px-6 pt-4 sm:pt-6 pb-28 sm:pb-32 overflow-x-hidden">
         {/* Role-based Router */}
         {currentRole === 'admin' ? (
           <AdminDashboardView />

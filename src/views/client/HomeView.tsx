@@ -127,15 +127,15 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </button>
         </div>
 
-        <div className="grid gap-3">
+        <div className="grid gap-3 w-full">
           {featuredServices.map((service) => (
             <div
               key={service.id}
               onClick={() => onStartBooking(service.id)}
-              className="group flex items-center justify-between p-4 rounded-2xl bg-[#14171E] hover:bg-[#181D26] border border-white/10 hover:border-[#D4AF37]/40 transition-all cursor-pointer shadow-md"
+              className="group flex items-center justify-between p-3.5 sm:p-4 rounded-2xl bg-[#14171E] hover:bg-[#181D26] border border-white/10 hover:border-[#D4AF37]/40 transition-all cursor-pointer shadow-md w-full overflow-hidden"
             >
-              <div className="flex items-center gap-3.5 min-w-0">
-                <div className="w-14 h-14 rounded-2xl overflow-hidden bg-slate-800 shrink-0 border border-white/10 group-hover:scale-105 transition-transform">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl overflow-hidden bg-slate-800 shrink-0 border border-white/10 group-hover:scale-105 transition-transform">
                   <img
                     src={service.imageUrl}
                     alt={service.name}
@@ -143,31 +143,31 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     referrerPolicy="no-referrer"
                   />
                 </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
+                <div className="min-w-0 flex-1 pr-2">
+                  <div className="flex items-center gap-1.5 flex-wrap">
                     <h3 className="font-bold text-white text-sm truncate group-hover:text-[#D4AF37] transition-colors">
                       {service.name}
                     </h3>
-                    <span className="text-[9px] bg-amber-500/20 text-[#D4AF37] px-1.5 py-0.2 rounded font-bold uppercase">
+                    <span className="text-[9px] bg-amber-500/20 text-[#D4AF37] px-1.5 py-0.5 rounded font-bold uppercase shrink-0">
                       VIP
                     </span>
                   </div>
-                  <p className="text-xs text-slate-400 truncate max-w-xs sm:max-w-sm mt-0.5">
+                  <p className="text-xs text-slate-400 truncate w-full mt-0.5">
                     {service.description}
                   </p>
                   <div className="flex items-center gap-3 mt-1 text-xs text-slate-300">
-                    <span className="flex items-center gap-1 text-slate-400">
+                    <span className="flex items-center gap-1 text-slate-400 shrink-0">
                       <Clock className="w-3 h-3 text-[#D4AF37]" />
                       {service.durationMinutes} min
                     </span>
-                    <span className="font-bold text-[#D4AF37]">
+                    <span className="font-bold text-[#D4AF37] shrink-0">
                       {formatCurrency(service.price)}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="p-2 rounded-xl bg-white/5 text-slate-400 group-hover:bg-[#D4AF37] group-hover:text-slate-950 transition-colors shrink-0">
+              <div className="p-2 rounded-xl bg-white/5 text-slate-400 group-hover:bg-[#D4AF37] group-hover:text-slate-950 transition-colors shrink-0 ml-1">
                 <ChevronRight className="w-4 h-4" />
               </div>
             </div>
