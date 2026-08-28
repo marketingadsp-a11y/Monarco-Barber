@@ -7,6 +7,7 @@ import { ToastContainer } from './components/common/ToastContainer';
 import { BookingWizard } from './components/booking/BookingWizard';
 import { BarberPublicProfileModal } from './components/barbers/BarberPublicProfileModal';
 import { AppointmentDetailModal } from './components/appointments/AppointmentDetailModal';
+import { ClientQRModal } from './components/common/ClientQRModal';
 import { PWAInstallPrompt } from './components/common/PWAInstallPrompt';
 
 // Views
@@ -19,7 +20,7 @@ import { AdminDashboardView } from './views/admin/AdminDashboardView';
 import { Barber, Appointment } from './types';
 
 const MainAppContent: React.FC = () => {
-  const { currentRole } = useAuth();
+  const { currentRole, userProfile } = useAuth();
   const { isLoading } = useBarbershop();
 
   // Client Tab State
@@ -32,6 +33,7 @@ const MainAppContent: React.FC = () => {
   // Modals
   const [selectedBarberForProfile, setSelectedBarberForProfile] = useState<Barber | null>(null);
   const [selectedAppointmentForDetail, setSelectedAppointmentForDetail] = useState<Appointment | null>(null);
+  const [isQrModalOpen, setIsQrModalOpen] = useState<boolean>(false);
 
   const handleStartBooking = (serviceId?: string, barberId?: string) => {
     setBookingServiceId(serviceId);
@@ -62,7 +64,10 @@ const MainAppContent: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#0D0F12] text-slate-100 flex flex-col selection:bg-[#D4AF37] selection:text-slate-950 font-sans w-full max-w-full overflow-x-hidden">
       {/* Fixed Spatial Header */}
-      <Header onOpenProfile={() => setActiveTab('profile')} />
+      <Header 
+        onOpenProfile={() => setActiveTab('profile')} 
+        onOpenQr={() => setIsQrModalOpen(true)} 
+      />
 
       {/* Main Responsive Canvas */}
       <main className="flex-1 w-full max-w-5xl mx-auto px-3.5 sm:px-6 pt-4 sm:pt-6 pb-28 sm:pb-32 overflow-x-hidden">
@@ -134,8 +139,19 @@ const MainAppContent: React.FC = () => {
         userRole={currentRole}
       />
 
+      {/* Instant Client VIP Pass & QR Modal */}
+      <ClientQRModal
+        isOpen={isQrModalOpen}
+        onClose={() => setIsQrModalOpen(false)}
+        userProfile={userProfile}
+      />
+
       {/* Floating Spatial Bottom Navigation Bar */}
-      <BottomTabBar activeTab={activeTab} onTabChange={(tab) => setActiveTab(tab)} />
+      <BottomTabBar 
+        activeTab={activeTab} 
+        onTabChange={(tab) => setActiveTab(tab)} 
+        onOpenQr={() => setIsQrModalOpen(true)}
+      />
 
       {/* PWA Smart Installation Prompt (Auto-hidden if already installed) */}
       <PWAInstallPrompt />

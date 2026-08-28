@@ -70,6 +70,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
   );
   const [selectedDate, setSelectedDate] = useState<string>(getTodayDateString());
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<AvailableTimeSlot | null>(null);
+  const [selectedUnavailableTime, setSelectedUnavailableTime] = useState<string | null>(null);
   const [clientName, setClientName] = useState<string>(userProfile?.name || '');
   const [clientPhone, setClientPhone] = useState<string>(userProfile?.phone || '');
   const [clientEmail, setClientEmail] = useState<string>(userProfile?.email || '');
@@ -139,11 +140,11 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
     [timeSlots]
   );
 
-  // Calculate Alternative Barbers Suggestions if selected barber has limited slots
+  // Calculate Alternative Barbers Suggestions if selected barber has no availability or user clicked an occupied time
   const alternativeSuggestions = useMemo(() => {
     if (!selectedService || !selectedDate || !effectiveBarberId) return [];
 
-    const desiredTime = selectedTimeSlot?.startTime || '17:00';
+    const desiredTime = selectedUnavailableTime || selectedTimeSlot?.startTime || '12:00';
 
     return findAlternativeBarbers({
       serviceId: selectedService.id,
@@ -158,7 +159,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
       allBlockedSlots: blockedSlots,
       settings: businessSettings,
     });
-  }, [selectedService, selectedDate, effectiveBarberId, selectedTimeSlot, activeBarbers, userProfile, appointments, schedules, blockedSlots, businessSettings]);
+  }, [selectedService, selectedDate, effectiveBarberId, selectedUnavailableTime, selectedTimeSlot, activeBarbers, userProfile, appointments, schedules, blockedSlots, businessSettings]);
 
   // Trigger celebration confetti on success
   const triggerConfetti = () => {
@@ -553,6 +554,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
                     onClick={() => {
                       setSelectedDate(day.dateStr);
                       setSelectedTimeSlot(null);
+                      setSelectedUnavailableTime(null);
                     }}
                     className={`flex flex-col items-center justify-center w-18 py-3.5 px-2 rounded-2xl border transition-all ${
                       isSelected
@@ -636,12 +638,12 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
           </div>
 
           {/* Time Slots Grid */}
-          {timeSlots.length === 0 ? (
+          {timeSlots.length === 0 || availableSlotsCount === 0 ? (
             <div className="p-6 rounded-3xl bg-[#14171E] border border-white/10 text-center space-y-3">
               <AlertTriangle className="w-8 h-8 text-amber-400 mx-auto" />
-              <h3 className="font-bold text-white text-base">Sin disponibilidad en esta fecha</h3>
+              <h3 className="font-bold text-white text-base">Sin disponibilidad con {selectedBarber?.displayName || 'este barbero'}</h3>
               <p className="text-xs text-slate-400 max-w-xs mx-auto">
-                {selectedBarber?.displayName} no tiene turnos libres para el día seleccionado.
+                No hay turnos libres para la fecha seleccionada.
               </p>
             </div>
           ) : (
@@ -654,26 +656,41 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5 pt-1">
                 {timeSlots.map((slot) => {
                   const isSelected = selectedTimeSlot?.startTime === slot.startTime;
+                  const isTargetedUnavailable = selectedUnavailableTime === slot.startTime;
 
                   if (!slot.available) {
                     return (
-                      <div
+                      <button
                         key={slot.startTime}
-                        className="p-3 rounded-2xl bg-white/[0.02] border border-white/5 text-center cursor-not-allowed opacity-40"
-                        title={slot.conflictReason || 'No disponible'}
+                        type="button"
+                        onClick={() => {
+                          setSelectedUnavailableTime(slot.startTime);
+                          setSelectedTimeSlot(null);
+                        }}
+                        className={`p-3 rounded-2xl border text-center transition-all cursor-pointer ${
+                          isTargetedUnavailable
+                            ? 'bg-amber-500/15 border-amber-400/70 shadow-lg ring-1 ring-amber-400/40 scale-[1.02]'
+                            : 'bg-white/[0.02] hover:bg-white/[0.06] border-white/5 opacity-50 hover:opacity-85'
+                        }`}
+                        title={slot.conflictReason || 'Turno ocupado. Clic para buscar otros barberos disponibles a esta hora'}
                       >
-                        <span className="text-xs font-semibold text-slate-500 line-through block">
+                        <span className="text-xs font-semibold text-slate-400 line-through block">
                           {formatTime12h(slot.startTime)}
                         </span>
-                        <span className="text-[9px] text-slate-600 truncate block mt-0.5">Ocupado</span>
-                      </div>
+                        <span className={`text-[9px] truncate block mt-0.5 font-medium ${isTargetedUnavailable ? 'text-[#D4AF37]' : 'text-slate-500'}`}>
+                          {isTargetedUnavailable ? 'Buscando...' : 'Ocupado'}
+                        </span>
+                      </button>
                     );
                   }
 
                   return (
                     <button
                       key={slot.startTime}
-                      onClick={() => setSelectedTimeSlot(slot)}
+                      onClick={() => {
+                        setSelectedTimeSlot(slot);
+                        setSelectedUnavailableTime(null);
+                      }}
                       className={`p-3 rounded-2xl border text-center transition-all focus:outline-none ${
                         isSelected
                           ? 'bg-[#D4AF37] border-[#D4AF37] text-slate-950 font-bold shadow-lg shadow-[#D4AF37]/25 scale-105'
@@ -693,14 +710,34 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
             </div>
           )}
 
-          {/* ALTERNATIVE BARBERS SUGGESTIONS ENGINE (Sections 17-18) */}
-          {alternativeSuggestions.length > 0 && (
-            <div className="mt-6 pt-4 border-t border-white/10 space-y-3">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[#D4AF37]" />
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">
-                  Otros Barberos Disponibles para esta Fecha
-                </h4>
+          {/* ALTERNATIVE BARBERS - SHOWN ONLY IF SELECTED BARBER HAS ZERO SLOTS OR USER CLICKED AN OCCUPIED SLOT */}
+          {(availableSlotsCount === 0 || !!selectedUnavailableTime) && alternativeSuggestions.length > 0 && (
+            <div className="mt-6 pt-4 border-t border-white/10 space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[#D4AF37] shrink-0" />
+                  <div>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-200">
+                      {selectedUnavailableTime
+                        ? `Barberos disponibles a las ${formatTime12h(selectedUnavailableTime)}`
+                        : 'Otros Barberos Disponibles para esta Fecha'}
+                    </h4>
+                    <p className="text-[11px] text-slate-400">
+                      {selectedUnavailableTime
+                        ? `${selectedBarber?.displayName || 'El barbero'} no tiene disponible a esa hora, pero estos profesionales sí:`
+                        : `${selectedBarber?.displayName || 'El barbero'} no tiene turnos libres hoy. Puedes agendar con:`}
+                    </p>
+                  </div>
+                </div>
+                {selectedUnavailableTime && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedUnavailableTime(null)}
+                    className="text-[11px] text-slate-400 hover:text-white px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 transition-colors shrink-0 ml-2"
+                  >
+                    Ocultar
+                  </button>
+                )}
               </div>
 
               <div className="grid gap-2.5">
@@ -735,6 +772,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
                       onClick={() => {
                         setSelectedBarberId(alt.barber.id);
                         setSelectedTimeSlot(alt.availableSlot);
+                        setSelectedUnavailableTime(null);
                         setCurrentStep(5);
                       }}
                       className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-[#D4AF37] hover:text-slate-950 text-xs font-bold text-slate-200 transition-all flex items-center gap-1"

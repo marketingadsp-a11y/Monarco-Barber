@@ -28,6 +28,7 @@ import { Barber, UserProfile } from '../../types';
 import { dataService } from '../../services/firebase/dataService';
 import { imageService } from '../../services/imgbb/imageService';
 import { ClientMembershipCard } from '../../components/common/ClientMembershipCard';
+import { ClientQRModal } from '../../components/common/ClientQRModal';
 
 interface ProfileViewProps {
   onOpenBarberProfile: (barber: Barber) => void;
@@ -894,60 +895,11 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       )}
 
       {/* FULL SCREEN QR MODAL */}
-      {showQrModal && userProfile && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in">
-          <div className="w-full max-w-sm rounded-3xl bg-[#14171E] border-2 border-[#D4AF37]/50 p-6 space-y-5 shadow-2xl text-center">
-            <div className="flex items-center justify-between pb-2 border-b border-white/10">
-              <div className="flex items-center gap-2">
-                <Crown className="w-5 h-5 text-[#D4AF37]" />
-                <span className="font-serif font-black text-white text-sm">
-                  {businessSettings.name || 'MONARCA BARBER'}
-                </span>
-              </div>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#D4AF37]">
-                VIP PASS
-              </span>
-            </div>
-
-            {/* QR Card Container */}
-            <div className="bg-white rounded-2xl p-4 shadow-2xl max-w-[220px] mx-auto">
-              <img
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(
-                  JSON.stringify({
-                    monarca_client_id: userProfile.clientNumber,
-                    name: userProfile.name,
-                    phone: userProfile.phone,
-                  })
-                )}`}
-                alt="QR Code"
-                className="w-full aspect-square object-contain"
-              />
-            </div>
-
-            <div>
-              <p className="text-xs text-slate-400 uppercase font-semibold">
-                No. de Cliente
-              </p>
-              <p className="font-mono text-xl font-black text-white tracking-[0.25em] text-[#D4AF37]">
-                {userProfile.clientNumber}
-              </p>
-              <p className="font-serif font-bold text-sm text-slate-200 mt-1 uppercase">
-                {userProfile.name}
-              </p>
-              <p className="text-[11px] text-slate-400 mt-2">
-                Muestra este código al barbero o en recepción para registrar tu servicio y acumular puntos.
-              </p>
-            </div>
-
-            <button
-              onClick={() => setShowQrModal(false)}
-              className="w-full py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition-all"
-            >
-              Cerrar
-            </button>
-          </div>
-        </div>
-      )}
+      <ClientQRModal
+        isOpen={showQrModal}
+        onClose={() => setShowQrModal(false)}
+        userProfile={userProfile}
+      />
     </div>
   );
 };

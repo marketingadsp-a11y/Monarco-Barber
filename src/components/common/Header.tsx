@@ -1,13 +1,14 @@
 import React from 'react';
-import { Crown, User, MessageCircle, Shield, Scissors, LogOut } from 'lucide-react';
+import { Crown, User, MessageCircle, Shield, Scissors, LogOut, QrCode } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 
 interface HeaderProps {
   onOpenProfile?: () => void;
+  onOpenQr?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onOpenProfile }) => {
+export const Header: React.FC<HeaderProps> = ({ onOpenProfile, onOpenQr }) => {
   const { currentRole, userProfile, isAuthenticated, logout } = useAuth();
   const { barbers, businessSettings, showToast } = useBarbershop();
 
@@ -87,6 +88,18 @@ export const Header: React.FC<HeaderProps> = ({ onOpenProfile }) => {
             >
               <MessageCircle className="w-4 h-4" />
             </a>
+          )}
+
+          {/* Quick QR Pass Button (when logged in) */}
+          {isAuthenticated && userProfile && onOpenQr && (
+            <button
+              onClick={onOpenQr}
+              className="flex items-center gap-1.5 p-1.5 sm:px-2.5 sm:py-1.5 rounded-full bg-[#14171E] hover:bg-[#1A1E27] border border-[#D4AF37]/60 text-[#D4AF37] text-xs font-bold transition-all active:scale-95 shadow-[0_0_12px_rgba(212,175,55,0.2)] shrink-0"
+              title="Mostrar mi código QR y No. de Cliente"
+            >
+              <QrCode className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#D4AF37]" />
+              <span className="hidden sm:inline font-mono tracking-wider">{userProfile.clientNumber ? `#${userProfile.clientNumber}` : 'Mi QR'}</span>
+            </button>
           )}
 
           {/* User Avatar / Profile Access */}
