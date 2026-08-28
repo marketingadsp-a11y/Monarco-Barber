@@ -38,6 +38,31 @@ import { doIntervalsOverlap } from '../availabilityEngine';
 // MAPPER FUNCTIONS: Typescript Model <-> Firestore Document en Español
 // ============================================================================
 
+export function extractCleanUrl(val: any): string {
+  if (!val) return '';
+  if (typeof val === 'string') return val;
+  if (typeof val === 'object') {
+    if (typeof val.url === 'string') return val.url;
+    if (typeof val.display_url === 'string') return val.display_url;
+    if (typeof val.thumb === 'string') return val.thumb;
+  }
+  return '';
+}
+
+export function removeUndefinedFields<T extends Record<string, any>>(obj: T): T {
+  const cleaned: any = Array.isArray(obj) ? [] : {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (value === undefined) {
+      continue;
+    } else if (value !== null && typeof value === 'object' && !(value instanceof Date)) {
+      cleaned[key] = removeUndefinedFields(value);
+    } else {
+      cleaned[key] = value;
+    }
+  }
+  return cleaned;
+}
+
 // 1. USUARIOS (users)
 export function toSpanishUser(profile: UserProfile): Record<string, any> {
   const roleMap: Record<UserRole, string> = {
@@ -45,18 +70,18 @@ export function toSpanishUser(profile: UserProfile): Record<string, any> {
     barber: 'barbero',
     admin: 'administrador',
   };
-  return {
+  return removeUndefinedFields({
     id: profile.id,
     rol: roleMap[profile.role] || profile.role || 'cliente',
     nombre: profile.name || '',
     correo: profile.email || '',
     telefono: profile.phone || '',
-    foto_url: profile.photoUrl || '',
+    foto_url: extractCleanUrl(profile.photoUrl),
     barberos_favoritos: profile.favoriteBarberIds || [],
     activo: profile.active !== undefined ? profile.active : true,
     creado_en: profile.createdAt || new Date().toISOString(),
     actualizado_en: profile.updatedAt || new Date().toISOString(),
-  };
+  });
 }
 
 export function fromSpanishUser(data: any, docId: string): UserProfile {
@@ -85,7 +110,11 @@ export function fromSpanishUser(data: any, docId: string): UserProfile {
 
 // 2. BARBEROS (barbers)
 export function toSpanishBarber(barber: Barber): Record<string, any> {
-  return {
+  const cleanGallery = Array.isArray(barber.gallery)
+    ? barber.gallery.map(extractCleanUrl).filter(Boolean)
+    : [];
+
+  return removeUndefinedFields({
     id: barber.id,
     usuario_id: barber.userId || '',
     nombre_mostrado: barber.displayName || '',
@@ -94,10 +123,10 @@ export function toSpanishBarber(barber: Barber): Record<string, any> {
     correo: barber.email || '',
     telefono: barber.phone || '',
     biografia: barber.bio || '',
-    foto_url: barber.photoUrl || '',
-    galeria: barber.gallery || [],
-    especialidades: barber.specialties || [],
-    servicios_ids: barber.serviceIds || [],
+    foto_url: extractCleanUrl(barber.photoUrl),
+    galeria: cleanGallery,
+    especialidades: Array.isArray(barber.specialties) ? barber.specialties : [],
+    servicios_ids: Array.isArray(barber.serviceIds) ? barber.serviceIds : [],
     activo: barber.active !== undefined ? barber.active : true,
     destacado: barber.featured || false,
     calificacion: barber.rating || 5.0,
@@ -106,7 +135,7 @@ export function toSpanishBarber(barber: Barber): Record<string, any> {
     anos_experiencia: barber.experienceYears || 1,
     creado_en: barber.createdAt || new Date().toISOString(),
     actualizado_en: barber.updatedAt || new Date().toISOString(),
-  };
+  });
 }
 
 export function fromSpanishBarber(data: any, docId: string): Barber {
@@ -119,8 +148,10 @@ export function fromSpanishBarber(data: any, docId: string): Barber {
     email: data.correo || data.email || '',
     phone: data.telefono || data.phone || '',
     bio: data.biografia || data.bio || '',
-    photoUrl: data.foto_url || data.photoUrl || '',
-    gallery: data.galeria || data.gallery || [],
+    photoUrl: extractCleanUrl(data.foto_url || data.photoUrl),
+    gallery: Array.isArray(data.galeria || data.gallery)
+      ? (data.galeria || data.gallery).map(extractCleanUrl).filter(Boolean)
+      : [],
     specialties: data.especialidades || data.specialties || [],
     serviceIds: data.servicios_ids || data.serviceIds || [],
     active: data.activo !== undefined ? data.activo : (data.active !== undefined ? data.active : true),
@@ -136,14 +167,14 @@ export function fromSpanishBarber(data: any, docId: string): Barber {
 
 // 3. SERVICIOS (services)
 export function toSpanishService(srv: Service): Record<string, any> {
-  return {
+  return removeUndefinedFields({
     id: srv.id,
     nombre: srv.name || '',
     descripcion: srv.description || '',
     categoria_id: srv.categoryId || 'cat_hair',
     precio: Number(srv.price) || 0,
     duracion_minutos: Number(srv.durationMinutes) || 45,
-    imagen_url: srv.imageUrl || '',
+    imagen_url: extractCleanUrl(srv.imageUrl),
     activo: srv.active !== undefined ? srv.active : true,
     orden: Number(srv.sortOrder) || 1,
     color_acento: srv.accentColor || '#D4AF37',
@@ -153,7 +184,7 @@ export function toSpanishService(srv: Service): Record<string, any> {
     creado_por_tipo: srv.createdByType === 'barber' ? 'barbero' : 'administrador',
     creado_en: srv.createdAt || new Date().toISOString(),
     actualizado_en: srv.updatedAt || new Date().toISOString(),
-  };
+  });
 }
 
 export function fromSpanishService(data: any, docId: string): Service {
@@ -164,7 +195,7 @@ export function fromSpanishService(data: any, docId: string): Service {
     categoryId: data.categoria_id || data.categoryId || 'cat_hair',
     price: Number(data.precio !== undefined ? data.precio : data.price) || 0,
     durationMinutes: Number(data.duracion_minutos !== undefined ? data.duracion_minutos : data.durationMinutes) || 45,
-    imageUrl: data.imagen_url || data.imageUrl || '',
+    imageUrl: extractCleanUrl(data.imagen_url || data.imageUrl),
     active: data.activo !== undefined ? data.activo : (data.active !== undefined ? data.active : true),
     sortOrder: Number(data.orden !== undefined ? data.orden : data.sortOrder) || 1,
     accentColor: data.color_acento || data.accentColor || '#D4AF37',
@@ -179,14 +210,14 @@ export function fromSpanishService(data: any, docId: string): Service {
 
 // 4. CATEGORIAS DE SERVICIOS
 export function toSpanishCategory(cat: ServiceCategory): Record<string, any> {
-  return {
+  return removeUndefinedFields({
     id: cat.id,
     nombre: cat.name,
     descripcion: cat.description || '',
     icono: cat.iconName || '',
     orden: Number(cat.sortOrder) || 1,
     activo: cat.active !== undefined ? cat.active : true,
-  };
+  });
 }
 
 export function fromSpanishCategory(data: any, docId: string): ServiceCategory {
@@ -211,7 +242,7 @@ export function toSpanishAppointment(app: Appointment): Record<string, any> {
     rejected: 'rechazada',
   };
 
-  return {
+  return removeUndefinedFields({
     id: app.id,
     cliente_id: app.clientId,
     cliente_nombre: app.clientName,
@@ -219,7 +250,7 @@ export function toSpanishAppointment(app: Appointment): Record<string, any> {
     cliente_correo: app.clientEmail || '',
     barbero_id: app.barberId,
     barbero_nombre: app.barberName,
-    barbero_foto: app.barberPhoto || '',
+    barbero_foto: extractCleanUrl(app.barberPhoto),
     servicio_id: app.serviceId,
     servicios_ids: app.serviceIds || [app.serviceId],
     servicio_nombre: app.serviceNameSnapshot,
@@ -235,7 +266,7 @@ export function toSpanishAppointment(app: Appointment): Record<string, any> {
     motivo_cancelacion: app.cancelReason || null,
     creado_en: app.createdAt || new Date().toISOString(),
     actualizado_en: app.updatedAt || new Date().toISOString(),
-  };
+  });
 }
 
 export function fromSpanishAppointment(data: any, docId: string): Appointment {
@@ -262,7 +293,7 @@ export function fromSpanishAppointment(data: any, docId: string): Appointment {
     clientEmail: data.cliente_correo || data.clientEmail || '',
     barberId: data.barbero_id || data.barberId || '',
     barberName: data.barbero_nombre || data.barberName || 'Barbero',
-    barberPhoto: data.barbero_foto || data.barberPhoto || '',
+    barberPhoto: extractCleanUrl(data.barbero_foto || data.barberPhoto),
     serviceId: data.servicio_id || data.serviceId || '',
     serviceIds: data.servicios_ids || data.serviceIds || (data.servicio_id ? [data.servicio_id] : []),
     serviceNameSnapshot: data.servicio_nombre || data.serviceNameSnapshot || 'Corte',
@@ -283,13 +314,13 @@ export function fromSpanishAppointment(data: any, docId: string): Appointment {
 
 // 6. HORARIOS DE BARBEROS
 export function toSpanishSchedule(sched: BarberSchedule): Record<string, any> {
-  return {
+  return removeUndefinedFields({
     barbero_id: sched.barberId,
     horario_semanal: sched.weeklySchedule,
     zona_horaria: sched.timeZone || 'America/Mexico_City',
     intervalo_minutos: Number(sched.slotIntervalMinutes) || 30,
     actualizado_en: sched.updatedAt || new Date().toISOString(),
-  };
+  });
 }
 
 export function fromSpanishSchedule(data: any, docId: string): BarberSchedule {
@@ -304,7 +335,7 @@ export function fromSpanishSchedule(data: any, docId: string): BarberSchedule {
 
 // 7. BLOQUEOS DE HORARIOS
 export function toSpanishBlockedSlot(slot: BlockedSlot): Record<string, any> {
-  return {
+  return removeUndefinedFields({
     id: slot.id,
     barbero_id: slot.barberId,
     fecha: slot.date,
@@ -312,7 +343,7 @@ export function toSpanishBlockedSlot(slot: BlockedSlot): Record<string, any> {
     hora_fin: slot.endTime,
     motivo: slot.reason || '',
     creado_en: slot.createdAt || new Date().toISOString(),
-  };
+  });
 }
 
 export function fromSpanishBlockedSlot(data: any, docId: string): BlockedSlot {
@@ -329,11 +360,11 @@ export function fromSpanishBlockedSlot(data: any, docId: string): BlockedSlot {
 
 // 8. CONFIGURACION DEL NEGOCIO
 export function toSpanishSettings(st: BusinessSettings): Record<string, any> {
-  return {
+  return removeUndefinedFields({
     id: st.id || 'principal',
     nombre: st.name || 'MONARCA BARBER',
     eslogan: st.tagline || '',
-    logo_url: st.logoUrl || '',
+    logo_url: extractCleanUrl(st.logoUrl),
     direccion: st.address || '',
     ubicacion_mapa_url: st.googleMapsUrl || '',
     telefono: st.phone || '',
@@ -351,7 +382,7 @@ export function toSpanishSettings(st: BusinessSettings): Record<string, any> {
     horario_cierre: st.closingTime || '21:00',
     anuncio: st.announcement || '',
     actualizado_en: new Date().toISOString(),
-  };
+  });
 }
 
 export function fromSpanishSettings(data: any, docId: string): BusinessSettings {
@@ -359,7 +390,7 @@ export function fromSpanishSettings(data: any, docId: string): BusinessSettings 
     id: data.id || docId || 'principal',
     name: data.nombre || data.name || 'MONARCA BARBER',
     tagline: data.eslogan || data.tagline || 'Donde la elegancia y la maestría se encuentran.',
-    logoUrl: data.logo_url || data.logoUrl || '',
+    logoUrl: extractCleanUrl(data.logo_url || data.logoUrl),
     address: data.direccion || data.address || 'Av. Presidente Masaryk 360, Polanco, CDMX',
     googleMapsUrl: data.ubicacion_mapa_url || data.googleMapsUrl || 'https://maps.google.com',
     phone: data.telefono || data.phone || '+52 55 1234 5678',

@@ -14,7 +14,7 @@ service cloud.firestore {
 
     function esAdministrador() {
       return estaAutenticado() && (
-        request.auth.token.email == 'CRMoranB@gmail.com' ||
+        request.auth.token.email in ['cramonmb@gmail.com', 'CRMoranB@gmail.com', 'crmoranb@gmail.com'] ||
         (exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)) &&
          get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.rol in ['admin', 'administrador'])
       );

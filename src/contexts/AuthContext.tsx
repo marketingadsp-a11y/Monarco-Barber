@@ -15,6 +15,12 @@ import { auth } from '../services/firebase/config';
 import { dataService } from '../services/firebase/dataService';
 import { UserProfile, UserRole } from '../types';
 
+export const isAdminEmail = (email?: string | null): boolean => {
+  if (!email) return false;
+  const normalized = email.trim().toLowerCase();
+  return normalized === 'cramonmb@gmail.com' || normalized === 'crmoranb@gmail.com';
+};
+
 interface AuthContextType {
   currentUser: FirebaseUser | null;
   userProfile: UserProfile | null;
@@ -72,12 +78,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
           const profile = await dataService.getUserProfile(user.uid);
           if (profile) {
+            // Ensure admin role is granted if user matches admin email
+            if (isAdminEmail(user.email) && profile.role !== 'admin') {
+              profile.role = 'admin';
+              await dataService.saveUserProfile(profile);
+            }
             setUserProfile(profile);
             setCurrentRole(profile.role);
             saveStoredSession(profile);
           } else {
-            // Create initial client profile
-            const isDefaultAdmin = user.email?.toLowerCase() === 'crmoranb@gmail.com';
+            // Create initial client/admin profile
+            const isDefaultAdmin = isAdminEmail(user.email);
             const newProfile: UserProfile = {
               id: user.uid,
               role: isDefaultAdmin ? 'admin' : 'client',
@@ -96,17 +107,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         } catch (err) {
           console.warn('Error loading user profile from firestore:', err);
+          const isDefaultAdmin = isAdminEmail(user.email);
           const fallbackProfile: UserProfile = {
             id: user.uid,
-            role: 'client',
-            name: user.displayName || 'Cliente Monarca',
+            role: isDefaultAdmin ? 'admin' : 'client',
+            name: user.displayName || 'Usuario Monarca',
             email: user.email || '',
             favoriteBarberIds: [],
             active: true,
             createdAt: new Date().toISOString(),
           };
           setUserProfile(fallbackProfile);
-          setCurrentRole('client');
+          setCurrentRole(fallbackProfile.role);
           saveStoredSession(fallbackProfile);
         }
       } else {
@@ -132,6 +144,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const cred = await signInWithEmailAndPassword(auth, email.trim(), pass);
       const profile = await dataService.getUserProfile(cred.user.uid);
       if (profile) {
+        if (isAdminEmail(cred.user.email) && profile.role !== 'admin') {
+          profile.role = 'admin';
+          await dataService.saveUserProfile(profile);
+        }
         setUserProfile(profile);
         setCurrentRole(profile.role);
         saveStoredSession(profile);
@@ -159,7 +175,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await updateProfile(res.user, { displayName: name.trim() });
       const newProfile: UserProfile = {
         id: res.user.uid,
-        role: email.toLowerCase() === 'crmoranb@gmail.com' ? 'admin' : 'client',
+        role: isAdminEmail(email) ? 'admin' : 'client',
         name: name.trim(),
         email: email.trim(),
         phone: phone?.trim() || '',
@@ -198,11 +214,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const res = await signInWithPopup(auth, provider);
       const profile = await dataService.getUserProfile(res.user.uid);
       if (profile) {
+        if (isAdminEmail(res.user.email) && profile.role !== 'admin') {
+          profile.role = 'admin';
+          await dataService.saveUserProfile(profile);
+        }
         setUserProfile(profile);
         setCurrentRole(profile.role);
         saveStoredSession(profile);
       } else {
-        const isDefaultAdmin = res.user.email?.toLowerCase() === 'crmoranb@gmail.com';
+        const isDefaultAdmin = isAdminEmail(res.user.email);
         const newProfile: UserProfile = {
           id: res.user.uid,
           role: isDefaultAdmin ? 'admin' : 'client',

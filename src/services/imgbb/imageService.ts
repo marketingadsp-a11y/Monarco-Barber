@@ -47,9 +47,21 @@ export class ImageService {
   }
 
   /**
-   * Upload image via backend proxy to ImgBB (protecting API key)
+   * Upload image via backend proxy to ImgBB and return the URL string directly
    */
   static async uploadImage(
+    fileOrBase64: File | string,
+    imageName?: string,
+    options?: ImageUploadOptions
+  ): Promise<string> {
+    const details = await this.uploadImageDetails(fileOrBase64, imageName, options);
+    return details.url;
+  }
+
+  /**
+   * Upload image via backend proxy to ImgBB and return full upload details
+   */
+  static async uploadImageDetails(
     fileOrBase64: File | string,
     imageName?: string,
     options?: ImageUploadOptions
@@ -96,13 +108,14 @@ export class ImageService {
         throw new Error(result.error || 'Respuesta inválida del servicio de imágenes');
       }
 
+      const rawUrl = result.data.url || result.data.display_url || '';
       return {
-        id: result.data.id,
-        url: result.data.url,
-        display_url: result.data.display_url || result.data.url,
-        thumb: result.data.thumb || result.data.url,
-        delete_url: result.data.delete_url,
-        isSimulated: result.isSimulated,
+        id: result.data.id || '',
+        url: typeof rawUrl === 'string' ? rawUrl : String(rawUrl),
+        display_url: result.data.display_url || rawUrl,
+        thumb: result.data.thumb || rawUrl,
+        delete_url: result.data.delete_url || '',
+        isSimulated: Boolean(result.isSimulated),
       };
     } catch (error: any) {
       console.error('Image upload failed:', error);

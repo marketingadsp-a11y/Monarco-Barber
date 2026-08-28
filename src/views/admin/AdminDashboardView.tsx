@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Shield,
   Users,
@@ -62,6 +62,12 @@ export const AdminDashboardView: React.FC = () => {
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    if (businessSettings) {
+      setSettingsForm(businessSettings);
+    }
+  }, [businessSettings]);
+
   // Appointment filter
   const [appointmentFilterBarber, setAppointmentFilterBarber] = useState<string>('all');
   const [appointmentFilterStatus, setAppointmentFilterStatus] = useState<string>('all');
@@ -85,8 +91,9 @@ export const AdminDashboardView: React.FC = () => {
 
     setIsUploadingLogo(true);
     try {
-      const uploadedUrl = await imageService.uploadImage(file);
-      setSettingsForm((prev) => ({ ...prev, logoUrl: uploadedUrl }));
+      const uploadedResult = await imageService.uploadImage(file);
+      const cleanUrl = typeof uploadedResult === 'string' ? uploadedResult : (uploadedResult as any)?.url || '';
+      setSettingsForm((prev) => ({ ...prev, logoUrl: cleanUrl }));
       showToast('success', 'Logotipo cargado', 'El nuevo logotipo se ha subido. Recuerda guardar la configuración.');
     } catch (err: any) {
       showToast('error', 'Error al subir logotipo', err.message);
@@ -102,8 +109,9 @@ export const AdminDashboardView: React.FC = () => {
 
     setIsUploadingServicePhoto(true);
     try {
-      const uploadedUrl = await imageService.uploadImage(file);
-      setEditingService((prev) => ({ ...prev, imageUrl: uploadedUrl }));
+      const uploadedResult = await imageService.uploadImage(file);
+      const cleanUrl = typeof uploadedResult === 'string' ? uploadedResult : (uploadedResult as any)?.url || '';
+      setEditingService((prev) => ({ ...prev, imageUrl: cleanUrl }));
       showToast('success', 'Foto de servicio subida', 'Imagen cargada correctamente.');
     } catch (err: any) {
       showToast('error', 'Error al subir foto', err.message);

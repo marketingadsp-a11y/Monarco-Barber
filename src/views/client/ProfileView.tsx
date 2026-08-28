@@ -7,9 +7,6 @@ import {
   Eye,
   EyeOff,
   Heart,
-  MapPin,
-  Clock,
-  Instagram,
   Shield,
   Scissors,
   LogOut,
@@ -19,8 +16,6 @@ import {
   Sparkles,
   Camera,
   Upload,
-  ExternalLink,
-  MessageCircle,
   ArrowRight,
   RefreshCw,
   KeyRound,
@@ -250,20 +245,32 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
   return (
     <div className="space-y-5 pb-24 max-w-xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      {/* Centered Brand Logo & Section Header */}
+      <div className="flex flex-col items-center justify-center text-center space-y-3 pt-3 pb-2">
+        <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-3xl overflow-hidden bg-[#14171E] border-2 border-[#D4AF37]/50 shadow-2xl shadow-[#D4AF37]/20 p-1 flex items-center justify-center">
+          {businessSettings.logoUrl ? (
+            <img
+              src={businessSettings.logoUrl}
+              alt={businessSettings.name || 'Logo Monarca Barber'}
+              className="w-full h-full object-contain rounded-2xl"
+              referrerPolicy="no-referrer"
+            />
+          ) : (
+            <div className="w-full h-full rounded-2xl bg-gradient-to-br from-[#D4AF37] to-[#996515] flex items-center justify-center text-slate-950 font-black text-2xl font-serif">
+              MB
+            </div>
+          )}
+        </div>
+
         <div>
-          <h1 className="text-2xl font-black text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight font-serif">
             {isAuthenticated ? 'Mi Cuenta & Perfil' : 'Acceso a Monarca Barber'}
           </h1>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
             {isAuthenticated
               ? 'Administra tus datos, preferencias y barberos favoritos'
-              : 'Inicia sesión o regístrate para agendar y guardar tu historial'}
+              : 'Inicia sesión o regístrate para agendar y gestionar tus citas'}
           </p>
-        </div>
-        <div className="p-2.5 rounded-2xl bg-[#D4AF37]/10 text-[#D4AF37]">
-          <User className="w-5 h-5" />
         </div>
       </div>
 
@@ -775,89 +782,6 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           </div>
         </>
       )}
-
-      {/* ========================================================================= */}
-      {/* MONARCA BARBER SHOP INFORMATION CARD (WITH GLOBAL LOGO) */}
-      {/* ========================================================================= */}
-      <div className="rounded-3xl bg-[#14171E] border border-white/10 p-5 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {businessSettings.logoUrl ? (
-              <img
-                src={businessSettings.logoUrl}
-                alt="Logo Monarca"
-                className="w-10 h-10 rounded-xl object-contain bg-black/40 border border-[#D4AF37]/40 p-0.5"
-                referrerPolicy="no-referrer"
-              />
-            ) : (
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#996515] flex items-center justify-center text-slate-950 font-bold text-sm">
-                MB
-              </div>
-            )}
-            <div>
-              <h3 className="text-sm font-bold text-white">
-                {businessSettings.name || 'MONARCA BARBER'}
-              </h3>
-              <p className="text-[11px] text-slate-400">Sucursal Principal</p>
-            </div>
-          </div>
-
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-            Abierto
-          </span>
-        </div>
-
-        <div className="space-y-2.5 text-xs text-slate-300 pt-1">
-          <div className="flex items-start gap-2.5">
-            <MapPin className="w-4 h-4 text-[#D4AF37] shrink-0 mt-0.5" />
-            <div>
-              <strong className="text-white block">{businessSettings.name}</strong>
-              <span className="text-slate-400">{businessSettings.address}</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2.5">
-            <Clock className="w-4 h-4 text-[#D4AF37] shrink-0" />
-            <span>
-              Lunes a Sábado: {businessSettings.openingTime} - {businessSettings.closingTime}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2.5">
-            <Phone className="w-4 h-4 text-[#D4AF37] shrink-0" />
-            <span>{businessSettings.phone}</span>
-          </div>
-
-          {businessSettings.whatsapp && (
-            <div className="flex items-center gap-2.5">
-              <MessageCircle className="w-4 h-4 text-emerald-400 shrink-0" />
-              <a
-                href={`https://wa.me/${businessSettings.whatsapp.replace(/\+/g, '')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-emerald-400 hover:underline flex items-center gap-1"
-              >
-                <span>WhatsApp: {businessSettings.whatsapp}</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
-            </div>
-          )}
-
-          {businessSettings.instagram && (
-            <div className="flex items-center gap-2.5">
-              <Instagram className="w-4 h-4 text-pink-400 shrink-0" />
-              <a
-                href={`https://instagram.com/${businessSettings.instagram.replace('@', '')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-pink-400 hover:underline"
-              >
-                Instagram: {businessSettings.instagram}
-              </a>
-            </div>
-          )}
-        </div>
-      </div>
 
       {/* Reset Password Lightbox Modal */}
       {showResetModal && (
