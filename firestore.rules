@@ -1,0 +1,99 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Denegación global por defecto
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function estaAutenticado() {
+      return request.auth != null;
+    }
+
+    function esAdministrador() {
+      return estaAutenticado() && (
+        request.auth.token.email == 'CRMoranB@gmail.com' ||
+        (exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.rol in ['admin', 'administrador'])
+      );
+    }
+
+    function esBarbero() {
+      return estaAutenticado() && (
+        esAdministrador() ||
+        (exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.rol in ['barber', 'barbero'])
+      );
+    }
+
+    // COLECCIÓN: usuarios
+    match /usuarios/{usuarioId} {
+      allow get: if true;
+      allow list: if esAdministrador();
+      allow create, update: if true;
+      allow delete: if esAdministrador();
+    }
+
+    // Compatibilidad temporal con colección users
+    match /users/{userId} {
+      allow read, write: if true;
+    }
+
+    // COLECCIÓN: barberos
+    match /barberos/{barberoId} {
+      allow read: if true;
+      allow create, update, delete: if estaAutenticado() || true;
+    }
+
+    // COLECCIÓN: servicios
+    match /servicios/{servicioId} {
+      allow read: if true;
+      allow create, update, delete: if estaAutenticado() || true;
+    }
+
+    // COLECCIÓN: categorias_servicios
+    match /categorias_servicios/{categoriaId} {
+      allow read: if true;
+      allow write: if estaAutenticado() || true;
+    }
+
+    // COLECCIÓN: citas
+    match /citas/{citaId} {
+      allow read: if true;
+      allow create, update: if true;
+      allow delete: if esAdministrador() || estaAutenticado();
+    }
+
+    // COLECCIÓN: horarios_barberos
+    match /horarios_barberos/{barberoId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // COLECCIÓN: bloqueos_horarios
+    match /bloqueos_horarios/{bloqueoId} {
+      allow read: if true;
+      allow create, update, delete: if true;
+    }
+
+    // COLECCIÓN: configuracion_negocio
+    match /configuracion_negocio/{configuracionId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // COLECCIÓN: resenas
+    match /resenas/{resenaId} {
+      allow read: if true;
+      allow create, update: if true;
+      allow delete: if esAdministrador();
+    }
+
+    // COLECCIÓN: notificaciones
+    match /notificaciones/{notificacionId} {
+      allow read, create, update, delete: if true;
+    }
+  }
+}

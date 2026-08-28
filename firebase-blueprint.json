@@ -1,0 +1,253 @@
+{
+  "entities": {
+    "Usuario": {
+      "title": "Usuario",
+      "description": "Perfil de usuario con control de acceso basado en roles",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "rol": { "type": "string", "enum": ["cliente", "barbero", "administrador"] },
+        "nombre": { "type": "string", "maxLength": 100 },
+        "correo": { "type": "string", "maxLength": 120 },
+        "telefono": { "type": "string", "maxLength": 30 },
+        "foto_url": { "type": "string" },
+        "barberos_favoritos": { "type": "array" },
+        "activo": { "type": "boolean" },
+        "creado_en": { "type": "string" },
+        "actualizado_en": { "type": "string" }
+      },
+      "required": ["id", "rol", "nombre", "correo"]
+    },
+    "Barbero": {
+      "title": "Barbero",
+      "description": "Perfil profesional, portafolio y especialidades de los barberos",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "usuario_id": { "type": "string" },
+        "nombre_mostrado": { "type": "string", "maxLength": 80 },
+        "nombre_pila": { "type": "string", "maxLength": 50 },
+        "apellido": { "type": "string", "maxLength": 50 },
+        "correo": { "type": "string" },
+        "telefono": { "type": "string" },
+        "biografia": { "type": "string", "maxLength": 600 },
+        "foto_url": { "type": "string" },
+        "galeria": { "type": "array" },
+        "especialidades": { "type": "array" },
+        "servicios_ids": { "type": "array" },
+        "activo": { "type": "boolean" },
+        "destacado": { "type": "boolean" },
+        "calificacion": { "type": "number" },
+        "total_resenas": { "type": "number" },
+        "instagram": { "type": "string" },
+        "anos_experiencia": { "type": "number" },
+        "creado_en": { "type": "string" },
+        "actualizado_en": { "type": "string" }
+      },
+      "required": ["id", "nombre_mostrado", "activo"]
+    },
+    "Servicio": {
+      "title": "Servicio",
+      "description": "Catálogo de cortes, barbas y servicios de la barbería",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nombre": { "type": "string", "maxLength": 80 },
+        "descripcion": { "type": "string", "maxLength": 500 },
+        "categoria_id": { "type": "string" },
+        "precio": { "type": "number" },
+        "duracion_minutos": { "type": "number" },
+        "imagen_url": { "type": "string" },
+        "activo": { "type": "boolean" },
+        "orden": { "type": "number" },
+        "color_acento": { "type": "string" },
+        "incluye_lavado": { "type": "boolean" },
+        "es_popular": { "type": "boolean" },
+        "barbero_id": { "type": "string" },
+        "creado_por_tipo": { "type": "string", "enum": ["administrador", "barbero"] },
+        "creado_en": { "type": "string" },
+        "actualizado_en": { "type": "string" }
+      },
+      "required": ["id", "nombre", "precio", "duracion_minutos", "activo"]
+    },
+    "CategoriaServicio": {
+      "title": "CategoriaServicio",
+      "description": "Categorías de agrupación de servicios",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nombre": { "type": "string" },
+        "descripcion": { "type": "string" },
+        "icono": { "type": "string" },
+        "orden": { "type": "number" },
+        "activo": { "type": "boolean" }
+      },
+      "required": ["id", "nombre", "activo"]
+    },
+    "Cita": {
+      "title": "Cita",
+      "description": "Reservaciones y citas de corte agendadas",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "cliente_id": { "type": "string" },
+        "cliente_nombre": { "type": "string" },
+        "cliente_telefono": { "type": "string" },
+        "cliente_correo": { "type": "string" },
+        "barbero_id": { "type": "string" },
+        "barbero_nombre": { "type": "string" },
+        "barbero_foto": { "type": "string" },
+        "servicio_id": { "type": "string" },
+        "servicios_ids": { "type": "array" },
+        "servicio_nombre": { "type": "string" },
+        "servicio_precio": { "type": "number" },
+        "servicio_duracion": { "type": "number" },
+        "fecha": { "type": "string" },
+        "hora_inicio": { "type": "string" },
+        "hora_fin": { "type": "string" },
+        "estado": {
+          "type": "string",
+          "enum": ["pendiente", "confirmada", "completada", "cancelada", "no_asistio", "rechazada"]
+        },
+        "notas": { "type": "string", "maxLength": 500 },
+        "cancelado_en": { "type": "string" },
+        "cancelado_por": { "type": "string", "enum": ["cliente", "barbero", "administrador"] },
+        "motivo_cancelacion": { "type": "string" },
+        "creado_en": { "type": "string" },
+        "actualizado_en": { "type": "string" }
+      },
+      "required": ["id", "cliente_id", "barbero_id", "servicio_id", "fecha", "hora_inicio", "hora_fin", "estado"]
+    },
+    "HorarioBarbero": {
+      "title": "HorarioBarbero",
+      "description": "Turnos y horarios semanales asignados a cada barbero",
+      "type": "object",
+      "properties": {
+        "barbero_id": { "type": "string" },
+        "horario_semanal": { "type": "object" },
+        "zona_horaria": { "type": "string" },
+        "intervalo_minutos": { "type": "number" },
+        "actualizado_en": { "type": "string" }
+      },
+      "required": ["barbero_id", "horario_semanal"]
+    },
+    "BloqueoHorario": {
+      "title": "BloqueoHorario",
+      "description": "Bloqueos de tiempo o descansos de los barberos",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "barbero_id": { "type": "string" },
+        "fecha": { "type": "string" },
+        "hora_inicio": { "type": "string" },
+        "hora_fin": { "type": "string" },
+        "motivo": { "type": "string" },
+        "creado_en": { "type": "string" }
+      },
+      "required": ["id", "barbero_id", "fecha", "hora_inicio", "hora_fin"]
+    },
+    "ConfiguracionNegocio": {
+      "title": "ConfiguracionNegocio",
+      "description": "Configuración general, logo y reglas de negocio de Monarca Barber",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nombre": { "type": "string" },
+        "eslogan": { "type": "string" },
+        "logo_url": { "type": "string" },
+        "direccion": { "type": "string" },
+        "ubicacion_mapa_url": { "type": "string" },
+        "telefono": { "type": "string" },
+        "whatsapp": { "type": "string" },
+        "instagram": { "type": "string" },
+        "anticipacion_minima_reserva_minutos": { "type": "number" },
+        "anticipacion_maxima_reserva_dias": { "type": "number" },
+        "tiempo_minimo_cancelacion_horas": { "type": "number" },
+        "tiempo_minimo_reprogramacion_horas": { "type": "number" },
+        "intervalo_turnos_minutos": { "type": "number" },
+        "zona_horaria": { "type": "string" },
+        "moneda": { "type": "string" },
+        "simbolo_moneda": { "type": "string" },
+        "horario_apertura": { "type": "string" },
+        "horario_cierre": { "type": "string" },
+        "anuncio": { "type": "string" },
+        "actualizado_en": { "type": "string" }
+      }
+    },
+    "Resena": {
+      "title": "Resena",
+      "description": "Reseñas y valoraciones de clientes",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "cita_id": { "type": "string" },
+        "cliente_id": { "type": "string" },
+        "cliente_nombre": { "type": "string" },
+        "cliente_foto": { "type": "string" },
+        "barbero_id": { "type": "string" },
+        "calificacion": { "type": "number" },
+        "comentario": { "type": "string" },
+        "creado_en": { "type": "string" }
+      },
+      "required": ["id", "cliente_id", "barbero_id", "calificacion"]
+    },
+    "Notificacion": {
+      "title": "Notificacion",
+      "description": "Notificaciones del sistema para usuarios",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "usuario_id": { "type": "string" },
+        "titulo": { "type": "string" },
+        "mensaje": { "type": "string" },
+        "tipo": { "type": "string" },
+        "leido": { "type": "boolean" },
+        "cita_id": { "type": "string" },
+        "creado_en": { "type": "string" }
+      },
+      "required": ["id", "usuario_id", "titulo", "mensaje"]
+    }
+  },
+  "firestore": {
+    "/usuarios/{usuarioId}": {
+      "schema": "Usuario",
+      "description": "Colección de perfiles de clientes, barberos y administradores"
+    },
+    "/barberos/{barberoId}": {
+      "schema": "Barbero",
+      "description": "Colección de barberos del equipo con su biografía y fotos"
+    },
+    "/servicios/{servicioId}": {
+      "schema": "Servicio",
+      "description": "Colección de catálogo de servicios, precios y duraciones"
+    },
+    "/categorias_servicios/{categoriaId}": {
+      "schema": "CategoriaServicio",
+      "description": "Categorías para organizar los servicios de la barbería"
+    },
+    "/citas/{citaId}": {
+      "schema": "Cita",
+      "description": "Colección de citas y reservaciones agendadas por clientes"
+    },
+    "/horarios_barberos/{barberoId}": {
+      "schema": "HorarioBarbero",
+      "description": "Horarios y jornadas de trabajo semanales por cada barbero"
+    },
+    "/bloqueos_horarios/{bloqueoId}": {
+      "schema": "BloqueoHorario",
+      "description": "Espacios y descansos bloqueados en la agenda"
+    },
+    "/configuracion_negocio/{configuracionId}": {
+      "schema": "ConfiguracionNegocio",
+      "description": "Configuración general, logo y datos de contacto de Monarca Barber"
+    },
+    "/resenas/{resenaId}": {
+      "schema": "Resena",
+      "description": "Comentarios y calificaciones de clientes hacia los barberos"
+    },
+    "/notificaciones/{notificacionId}": {
+      "schema": "Notificacion",
+      "description": "Notificaciones enviadas a los usuarios sobre sus citas"
+    }
+  }
+}

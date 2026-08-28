@@ -1,0 +1,262 @@
+import {
+  Appointment,
+  Barber,
+  BarberSchedule,
+  BlockedSlot,
+  ScheduleException,
+  BusinessSettings,
+  AvailableTimeSlot,
+  AlternativeBarberSuggestion,
+} from '../types';
+import {
+  timeToMinutes,
+  minutesToTime,
+  addMinutesToTime,
+  isTimeSlotInPast,
+} from '../utils/dateTime';
+
+export interface AvailabilityParams {
+  barberId: string;
+  serviceDurationMinutes: number;
+  date: string; // YYYY-MM-DD
+  barberSchedule?: BarberSchedule | null;
+  appointments: Appointment[];
+  blockedSlots: BlockedSlot[];
+  exceptions?: ScheduleException[];
+  settings?: BusinessSettings | null;
+}
+
+export interface AlternativeBarberParams {
+  serviceId: string;
+  serviceDurationMinutes: number;
+  date: string;
+  desiredTime: string; // "17:00"
+  preferredBarberId: string;
+  allBarbers: Barber[];
+  favoriteBarberIds?: string[];
+  allAppointments: Appointment[];
+  allSchedules: Record<string, BarberSchedule>;
+  allBlockedSlots: BlockedSlot[];
+  settings?: BusinessSettings | null;
+}
+
+/**
+ * Checks whether two time intervals overlap: [startA, endA) and [startB, endB)
+ */
+export function doIntervalsOverlap(startA: string, endA: string, startB: string, endB: string): boolean {
+  const minAStart = timeToMinutes(startA);
+  const minAEnd = timeToMinutes(endA);
+  const minBStart = timeToMinutes(startB);
+  const minBEnd = timeToMinutes(endB);
+
+  return Math.max(minAStart, minBStart) < Math.min(minAEnd, minBEnd);
+}
+
+/**
+ * Main Availability Engine: calculates valid bookable time slots for a specific barber, date and duration.
+ */
+export function getAvailableSlots(params: AvailabilityParams): AvailableTimeSlot[] {
+  const {
+    barberId,
+    serviceDurationMinutes,
+    date,
+    barberSchedule,
+    appointments,
+    blockedSlots,
+    exceptions = [],
+    settings,
+  } = params;
+
+  const result: AvailableTimeSlot[] = [];
+  const slotInterval = settings?.slotIntervalMinutes || 30;
+  const minNoticeMinutes = settings?.minBookingNoticeMinutes || 30;
+
+  // 1. Get Day of Week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+  const [year, month, day] = date.split('-').map(Number);
+  const dateObj = new Date(year, month - 1, day);
+  const dayOfWeek = dateObj.getDay() as 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
+  // 2. Check for exceptions for this date
+  const exception = exceptions.find((e) => e.barberId === barberId && e.date === date);
+  if (exception?.isDayOff) {
+    return []; // Barber is on vacation / day off
+  }
+
+  // 3. Determine working windows
+  let workingWindows: Array<{ start: string; end: string }> = [];
+
+  if (exception?.customSlots && exception.customSlots.length > 0) {
+    workingWindows = exception.customSlots;
+  } else if (barberSchedule?.weeklySchedule && barberSchedule.weeklySchedule[dayOfWeek]) {
+    const dayConfig = barberSchedule.weeklySchedule[dayOfWeek];
+    if (!dayConfig.isOpen || !dayConfig.slots || dayConfig.slots.length === 0) {
+      return []; // Not working this day
+    }
+    workingWindows = dayConfig.slots;
+  } else {
+    // Default fallback schedule: Mon-Sat 10:00 - 20:00 with lunch break 14:00 - 15:00
+    if (dayOfWeek === 0) {
+      return []; // Sunday closed by default
+    }
+    workingWindows = [
+      { start: '10:00', end: '14:00' },
+      { start: '15:00', end: '20:00' },
+    ];
+  }
+
+  // Filter relevant appointments for this barber and date
+  const activeAppointments = appointments.filter((app) => {
+    return (
+      app.barberId === barberId &&
+      app.date === date &&
+      app.status !== 'cancelled' &&
+      app.status !== 'rejected'
+    );
+  });
+
+  // Filter relevant blocked slots
+  const activeBlockedSlots = blockedSlots.filter((block) => {
+    return block.barberId === barberId && block.date === date;
+  });
+
+  // 4. Generate prospective slots across all working windows
+  for (const window of workingWindows) {
+    const windowStartMin = timeToMinutes(window.start);
+    const windowEndMin = timeToMinutes(window.end);
+
+    for (let currentMin = windowStartMin; currentMin + serviceDurationMinutes <= windowEndMin; currentMin += slotInterval) {
+      const slotStartTime = minutesToTime(currentMin);
+      const slotEndTime = minutesToTime(currentMin + serviceDurationMinutes);
+
+      // Check if slot is in the past
+      if (isTimeSlotInPast(date, slotStartTime, minNoticeMinutes)) {
+        continue;
+      }
+
+      // Check overlap with existing appointments
+      let hasAppointmentConflict = false;
+      let conflictReason: string | undefined = undefined;
+
+      for (const app of activeAppointments) {
+        if (doIntervalsOverlap(slotStartTime, slotEndTime, app.startTime, app.endTime)) {
+          hasAppointmentConflict = true;
+          conflictReason = `Reservado (${app.startTime} - ${app.endTime})`;
+          break;
+        }
+      }
+
+      // Check overlap with blocked slots / breaks
+      let hasBlockedConflict = false;
+      if (!hasAppointmentConflict) {
+        for (const block of activeBlockedSlots) {
+          if (doIntervalsOverlap(slotStartTime, slotEndTime, block.startTime, block.endTime)) {
+            hasBlockedConflict = true;
+            conflictReason = `Bloqueado: ${block.reason || 'Descanso'}`;
+            break;
+          }
+        }
+      }
+
+      const isAvailable = !hasAppointmentConflict && !hasBlockedConflict;
+
+      result.push({
+        startTime: slotStartTime,
+        endTime: slotEndTime,
+        available: isAvailable,
+        barberId,
+        conflictReason,
+      });
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Intelligent alternative suggestions engine when chosen barber is unavailable at requested time.
+ */
+export function findAlternativeBarbers(params: AlternativeBarberParams): AlternativeBarberSuggestion[] {
+  const {
+    serviceId,
+    serviceDurationMinutes,
+    date,
+    desiredTime,
+    preferredBarberId,
+    allBarbers,
+    favoriteBarberIds = [],
+    allAppointments,
+    allSchedules,
+    allBlockedSlots,
+    settings,
+  } = params;
+
+  const suggestions: AlternativeBarberSuggestion[] = [];
+  const desiredMinutes = timeToMinutes(desiredTime);
+
+  const candidateBarbers = allBarbers.filter(
+    (b) => b.active && b.id !== preferredBarberId && (b.serviceIds.length === 0 || b.serviceIds.includes(serviceId))
+  );
+
+  for (const barber of candidateBarbers) {
+    const schedule = allSchedules[barber.id];
+    const slots = getAvailableSlots({
+      barberId: barber.id,
+      serviceDurationMinutes,
+      date,
+      barberSchedule: schedule,
+      appointments: allAppointments,
+      blockedSlots: allBlockedSlots,
+      settings,
+    });
+
+    const availableSlots = slots.filter((s) => s.available);
+    if (availableSlots.length === 0) continue;
+
+    // Find the slot closest to desiredTime
+    let closestSlot: AvailableTimeSlot | null = null;
+    let minDiff = Infinity;
+
+    for (const slot of availableSlots) {
+      const slotMin = timeToMinutes(slot.startTime);
+      const diff = Math.abs(slotMin - desiredMinutes);
+      if (diff < minDiff) {
+        minDiff = diff;
+        closestSlot = slot;
+      }
+    }
+
+    if (closestSlot) {
+      const isExact = closestSlot.startTime === desiredTime;
+      const isFav = favoriteBarberIds.includes(barber.id);
+
+      suggestions.push({
+        barber,
+        availableSlot: closestSlot,
+        isExactMatch: isExact,
+        isFavorite: isFav,
+        timeDifferenceMinutes: minDiff,
+      });
+    }
+  }
+
+  // Sort suggestions:
+  // 1. Exact time matches first
+  // 2. Shortest time difference
+  // 3. Favorites first
+  // 4. Highest rating
+  suggestions.sort((a, b) => {
+    if (a.isExactMatch && !b.isExactMatch) return -1;
+    if (!a.isExactMatch && b.isExactMatch) return 1;
+
+    if (a.timeDifferenceMinutes !== b.timeDifferenceMinutes) {
+      return a.timeDifferenceMinutes - b.timeDifferenceMinutes;
+    }
+
+    if (a.isFavorite && !b.isFavorite) return -1;
+    if (!a.isFavorite && b.isFavorite) return 1;
+
+    return b.barber.rating - a.barber.rating;
+  });
+
+  return suggestions;
+}
