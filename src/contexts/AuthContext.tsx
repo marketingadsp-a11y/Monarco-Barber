@@ -212,9 +212,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
       const res = await signInWithPopup(auth, provider);
-      const profile = await dataService.getUserProfile(res.user.uid);
+      const user = res.user;
+      
+      const profile = await dataService.getUserProfile(user.uid);
       if (profile) {
-        if (isAdminEmail(res.user.email) && profile.role !== 'admin') {
+        if (isAdminEmail(user.email) && profile.role !== 'admin') {
           profile.role = 'admin';
           await dataService.saveUserProfile(profile);
         }
@@ -222,14 +224,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setCurrentRole(profile.role);
         saveStoredSession(profile);
       } else {
-        const isDefaultAdmin = isAdminEmail(res.user.email);
+        const isDefaultAdmin = isAdminEmail(user.email);
         const newProfile: UserProfile = {
-          id: res.user.uid,
+          id: user.uid,
           role: isDefaultAdmin ? 'admin' : 'client',
-          name: res.user.displayName || 'Usuario Google',
-          email: res.user.email || '',
-          phone: res.user.phoneNumber || '',
-          photoUrl: res.user.photoURL || '',
+          name: user.displayName || user.email?.split('@')[0] || 'Usuario Google',
+          email: user.email || '',
+          phone: user.phoneNumber || '',
+          photoUrl: user.photoURL || '',
           favoriteBarberIds: [],
           active: true,
           createdAt: new Date().toISOString(),
@@ -242,24 +244,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (err: any) {
       console.error('Google Sign In error:', err);
       if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
-        throw new Error('Inicio de sesión con Google cancelado.');
+        throw new Error('Inicio de sesión con Google cancelado por el usuario.');
       }
-      // Fallback for sandboxed iframe popup blockers
-      const mockGoogleId = `google_usr_${Date.now()}`;
-      const fallbackGoogleProfile: UserProfile = {
-        id: mockGoogleId,
-        role: 'client',
-        name: 'Usuario Google Monarca',
-        email: 'usuario.google@monarcabarber.mx',
-        photoUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80',
-        favoriteBarberIds: [],
-        active: true,
-        createdAt: new Date().toISOString(),
-      };
-      await dataService.saveUserProfile(fallbackGoogleProfile);
-      setUserProfile(fallbackGoogleProfile);
-      setCurrentRole('client');
-      saveStoredSession(fallbackGoogleProfile);
+      if (err.code === 'auth/popup-blocked') {
+        throw new Error('La ventana emergente de Google fue bloqueada por tu navegador. Permite las ventanas emergentes (popups) para iniciar sesión.');
+      }
+      if (err.code === 'auth/unauthorized-domain') {
+        const currentDomain = typeof window !== 'undefined' ? window.location.hostname : 'tu dominio';
+        throw new Error(
+          `Dominio no autorizado en Firebase ('${currentDomain}'). Agrega este dominio en Firebase Console > Authentication > Settings > Dominios autorizados (Authorized domains).`
+        );
+      }
+      if (err.code === 'auth/operation-not-allowed') {
+        throw new Error('El proveedor de Google no está habilitado en Firebase Console > Authentication > Sign-in method.');
+      }
+      throw new Error(err.message || 'Error al iniciar sesión con Google.');
     } finally {
       setIsLoading(false);
     }
@@ -270,19 +269,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const provider = new OAuthProvider('apple.com');
       const res = await signInWithPopup(auth, provider);
-      const profile = await dataService.getUserProfile(res.user.uid);
+      const user = res.user;
+
+      const profile = await dataService.getUserProfile(user.uid);
       if (profile) {
         setUserProfile(profile);
         setCurrentRole(profile.role);
         saveStoredSession(profile);
       } else {
         const newProfile: UserProfile = {
-          id: res.user.uid,
+          id: user.uid,
           role: 'client',
-          name: res.user.displayName || 'Usuario Apple',
-          email: res.user.email || '',
-          phone: '',
-          photoUrl: '',
+          name: user.displayName || user.email?.split('@')[0] || 'Usuario Apple',
+          email: user.email || '',
+          phone: user.phoneNumber || '',
+          photoUrl: user.photoURL || '',
           favoriteBarberIds: [],
           active: true,
           createdAt: new Date().toISOString(),
@@ -295,24 +296,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (err: any) {
       console.error('Apple Sign In error:', err);
       if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
-        throw new Error('Inicio de sesión con Apple cancelado.');
+        throw new Error('Inicio de sesión con Apple cancelado por el usuario.');
       }
-      // Fallback for sandboxed iframe popup blockers
-      const mockAppleId = `apple_usr_${Date.now()}`;
-      const fallbackAppleProfile: UserProfile = {
-        id: mockAppleId,
-        role: 'client',
-        name: 'Usuario Apple Monarca',
-        email: 'usuario.apple@icloud.com',
-        photoUrl: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=300&q=80',
-        favoriteBarberIds: [],
-        active: true,
-        createdAt: new Date().toISOString(),
-      };
-      await dataService.saveUserProfile(fallbackAppleProfile);
-      setUserProfile(fallbackAppleProfile);
-      setCurrentRole('client');
-      saveStoredSession(fallbackAppleProfile);
+      if (err.code === 'auth/popup-blocked') {
+        throw new Error('La ventana emergente de Apple fue bloqueada por tu navegador. Permite las ventanas emergentes para continuar.');
+      }
+      if (err.code === 'auth/unauthorized-domain') {
+        const currentDomain = typeof window !== 'undefined' ? window.location.hostname : 'tu dominio';
+        throw new Error(
+          `Dominio no autorizado en Firebase ('${currentDomain}'). Agrega este dominio en Firebase Console > Authentication > Settings > Dominios autorizados.`
+        );
+      }
+      if (err.code === 'auth/operation-not-allowed') {
+        throw new Error('El proveedor de Apple no está habilitado en Firebase Console > Authentication > Sign-in method.');
+      }
+      throw new Error(err.message || 'Error al iniciar sesión con Apple.');
     } finally {
       setIsLoading(false);
     }

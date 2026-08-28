@@ -7,6 +7,7 @@ import { ToastContainer } from './components/common/ToastContainer';
 import { BookingWizard } from './components/booking/BookingWizard';
 import { BarberPublicProfileModal } from './components/barbers/BarberPublicProfileModal';
 import { AppointmentDetailModal } from './components/appointments/AppointmentDetailModal';
+import { PWAInstallPrompt } from './components/common/PWAInstallPrompt';
 
 // Views
 import { HomeView } from './views/client/HomeView';
@@ -134,6 +135,9 @@ const MainAppContent: React.FC = () => {
 
       {/* Floating Spatial Bottom Navigation Bar */}
       <BottomTabBar activeTab={activeTab} onTabChange={(tab) => setActiveTab(tab)} />
+
+      {/* PWA Smart Installation Prompt (Auto-hidden if already installed) */}
+      <PWAInstallPrompt />
 
       {/* Global Toast System */}
       <ToastContainer />

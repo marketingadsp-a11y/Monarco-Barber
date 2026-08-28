@@ -22,13 +22,16 @@ import {
   Image as ImageIcon,
   Check,
   RefreshCw,
+  LogOut,
 } from 'lucide-react';
 import { useBarbershop } from '../../contexts/BarbershopContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { Barber, Service, Appointment, BusinessSettings } from '../../types';
 import { formatCurrency, formatDateSpanish, formatTime12h, getTodayDateString } from '../../utils/dateTime';
 import { imageService } from '../../services/imgbb/imageService';
 
 export const AdminDashboardView: React.FC = () => {
+  const { logout } = useAuth();
   const {
     services,
     barbers,
@@ -205,8 +208,8 @@ export const AdminDashboardView: React.FC = () => {
           </div>
         </div>
 
-        {/* Navigation Section Pills */}
-        <div className="flex flex-wrap p-1 rounded-2xl bg-black/40 border border-white/10 w-full sm:w-auto gap-1">
+        {/* Navigation Section Pills & Logout */}
+        <div className="flex flex-wrap items-center p-1 rounded-2xl bg-black/40 border border-white/10 w-full sm:w-auto gap-1">
           <button
             onClick={() => setActiveSection('overview')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
@@ -246,6 +249,17 @@ export const AdminDashboardView: React.FC = () => {
             }`}
           >
             Logo & Ajustes
+          </button>
+          <button
+            onClick={async () => {
+              await logout();
+              showToast('info', 'Sesión cerrada', 'Has cerrado sesión del panel de administración.');
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 transition-all ml-auto sm:ml-1"
+            title="Cerrar sesión de administrador"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Cerrar Sesión</span>
           </button>
         </div>
       </div>

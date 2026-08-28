@@ -1,5 +1,5 @@
 import React from 'react';
-import { Crown, User, MessageCircle, Shield, Scissors } from 'lucide-react';
+import { Crown, User, MessageCircle, Shield, Scissors, LogOut } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 
@@ -8,8 +8,14 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ onOpenProfile }) => {
-  const { currentRole, userProfile, isAuthenticated } = useAuth();
-  const { barbers, businessSettings } = useBarbershop();
+  const { currentRole, userProfile, isAuthenticated, logout } = useAuth();
+  const { barbers, businessSettings, showToast } = useBarbershop();
+
+  const handleLogout = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    await logout();
+    showToast('info', 'Sesión cerrada', 'Has cerrado sesión correctamente.');
+  };
 
   return (
     <header className="sticky top-0 z-40 w-full bg-[#0D0F12]/85 backdrop-blur-xl border-b border-white/10 px-4 py-3 transition-all">
@@ -48,8 +54,8 @@ export const Header: React.FC<HeaderProps> = ({ onOpenProfile }) => {
           </div>
         </div>
 
-        {/* Right Actions: Role Badge (if Admin/Barber), WhatsApp Direct, & User Avatar */}
-        <div className="flex items-center gap-2.5">
+        {/* Right Actions: Role Badge (if Admin/Barber), WhatsApp Direct, User Avatar & Logout */}
+        <div className="flex items-center gap-2">
           {/* Active Role Badge (Only for Staff) */}
           {currentRole === 'admin' && (
             <span className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[11px] font-bold">
@@ -100,6 +106,18 @@ export const Header: React.FC<HeaderProps> = ({ onOpenProfile }) => {
               {isAuthenticated ? userProfile?.name?.split(' ')[0] : 'Ingresar'}
             </span>
           </button>
+
+          {/* Logout Action (when logged in with ANY role) */}
+          {isAuthenticated && (
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 p-2 sm:px-2.5 sm:py-1.5 rounded-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-xs font-bold transition-all active:scale-95"
+              title="Cerrar Sesión"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Salir</span>
+            </button>
+          )}
         </div>
       </div>
     </header>
