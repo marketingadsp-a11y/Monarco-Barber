@@ -23,6 +23,12 @@ import {
   Check,
   RefreshCw,
   LogOut,
+  Crown,
+  Layout,
+  Type,
+  MousePointerClick,
+  RotateCcw,
+  ChevronRight,
 } from 'lucide-react';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -834,7 +840,131 @@ export const AdminDashboardView: React.FC = () => {
             </div>
           </div>
 
-          {/* 2. GENERAL BUSINESS DETAILS */}
+          {/* 2. BANNER DE INICIO / HERO MODULE EDITOR */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-b from-[#181D27] to-[#12151C] border border-[#D4AF37]/30 space-y-4 shadow-xl">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Layout className="w-4 h-4 text-[#D4AF37]" />
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                  Módulo de Inicio / Banner Principal (Hero)
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  setSettingsForm((prev) => ({
+                    ...prev,
+                    heroBadge: 'EXPERIENCIA EXCLUSIVA EN POLANCO',
+                    heroTitle: 'El arte del corte clásico y la barbería contemporánea.',
+                    heroSubtitle: 'Donde la elegancia y la maestría se encuentran.',
+                    heroButtonText: 'Reservar Cita Ahora',
+                  }))
+                }
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-[11px] font-semibold transition-all self-start sm:self-auto"
+                title="Restaurar textos predeterminados"
+              >
+                <RotateCcw className="w-3 h-3 text-[#D4AF37]" />
+                <span>Restaurar Predeterminados</span>
+              </button>
+            </div>
+            
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Personaliza los textos y llamados a la acción del banner superior que ven todos los clientes al entrar a la aplicación.
+            </p>
+
+            {/* LIVE PREVIEW OF THE HERO BANNER */}
+            <div className="space-y-1.5 pt-1">
+              <span className="text-[11px] font-bold text-[#D4AF37] uppercase tracking-wider block">
+                Vista Previa en Tiempo Real:
+              </span>
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1B202B] via-[#14171F] to-[#0D0F13] border border-white/15 p-5 shadow-lg">
+                <div className="absolute -top-12 -right-12 w-40 h-40 bg-[#D4AF37]/15 rounded-full blur-2xl pointer-events-none" />
+                <div className="relative z-10 space-y-3 max-w-lg">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/30 text-[#D4AF37] text-[10px] font-bold tracking-wide">
+                    <Crown className="w-3 h-3" />
+                    <span>{settingsForm.heroBadge || 'EXPERIENCIA EXCLUSIVA EN POLANCO'}</span>
+                  </div>
+
+                  <h2 className="text-lg sm:text-xl font-black text-white tracking-tight leading-snug">
+                    {settingsForm.heroTitle || 'El arte del corte clásico y la barbería contemporánea.'}
+                  </h2>
+
+                  <p className="text-[11px] sm:text-xs text-slate-300 font-normal leading-relaxed">
+                    {settingsForm.heroSubtitle || settingsForm.tagline || 'Donde la elegancia y la maestría se encuentran.'}
+                  </p>
+
+                  <div className="pt-1 flex items-center gap-2">
+                    <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-bold text-xs shadow-md shadow-[#D4AF37]/20">
+                      <Scissors className="w-3.5 h-3.5 stroke-[2.5]" />
+                      <span>{settingsForm.heroButtonText || 'Reservar Cita Ahora'}</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* FORM INPUTS FOR HERO BANNER */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2 text-xs">
+              <div className="sm:col-span-2">
+                <label className="text-slate-300 font-semibold block mb-1 flex items-center gap-1.5">
+                  <Crown className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <span>Insignia / Distintivo Superior</span>
+                </label>
+                <input
+                  type="text"
+                  value={settingsForm.heroBadge ?? 'EXPERIENCIA EXCLUSIVA EN POLANCO'}
+                  onChange={(e) => setSettingsForm({ ...settingsForm, heroBadge: e.target.value })}
+                  placeholder="EXPERIENCIA EXCLUSIVA EN POLANCO"
+                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:border-[#D4AF37] transition-all"
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="text-slate-300 font-semibold block mb-1 flex items-center gap-1.5">
+                  <Type className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <span>Título Principal de Portada</span>
+                </label>
+                <input
+                  type="text"
+                  value={settingsForm.heroTitle ?? 'El arte del corte clásico y la barbería contemporánea.'}
+                  onChange={(e) => setSettingsForm({ ...settingsForm, heroTitle: e.target.value })}
+                  placeholder="El arte del corte clásico y la barbería contemporánea."
+                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:border-[#D4AF37] transition-all"
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="text-slate-300 font-semibold block mb-1 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <span>Subtítulo o Descripción de Bienvenida</span>
+                </label>
+                <textarea
+                  rows={2}
+                  value={settingsForm.heroSubtitle ?? (settingsForm.tagline || 'Donde la elegancia y la maestría se encuentran.')}
+                  onChange={(e) => setSettingsForm({ ...settingsForm, heroSubtitle: e.target.value })}
+                  placeholder="Donde la elegancia y la maestría se encuentran."
+                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:border-[#D4AF37] transition-all"
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="text-slate-300 font-semibold block mb-1 flex items-center gap-1.5">
+                  <MousePointerClick className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <span>Texto del Botón de Reserva</span>
+                </label>
+                <input
+                  type="text"
+                  value={settingsForm.heroButtonText ?? 'Reservar Cita Ahora'}
+                  onChange={(e) => setSettingsForm({ ...settingsForm, heroButtonText: e.target.value })}
+                  placeholder="Reservar Cita Ahora"
+                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:border-[#D4AF37] transition-all"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* 3. GENERAL BUSINESS DETAILS */}
           <div className="space-y-4">
             <h3 className="text-sm font-bold text-white uppercase tracking-wider">
               Información de la Barbería

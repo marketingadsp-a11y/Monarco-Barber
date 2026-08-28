@@ -169,6 +169,11 @@ export interface BusinessSettings {
   openingTime: string; // "09:00"
   closingTime: string; // "21:00"
   announcement?: string;
+  // Hero Banner Customization
+  heroBadge?: string;
+  heroTitle?: string;
+  heroSubtitle?: string;
+  heroButtonText?: string;
 }
 
 export interface Review {

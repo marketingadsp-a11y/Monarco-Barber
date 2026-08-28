@@ -8,6 +8,7 @@ import {
   deleteDoc,
   query,
   where,
+  limit,
   onSnapshot,
   runTransaction,
   writeBatch,
@@ -391,6 +392,10 @@ export function toSpanishSettings(st: BusinessSettings): Record<string, any> {
     horario_apertura: st.openingTime || '10:00',
     horario_cierre: st.closingTime || '21:00',
     anuncio: st.announcement || '',
+    banner_insignia: st.heroBadge || '',
+    banner_titulo: st.heroTitle || '',
+    banner_subtitulo: st.heroSubtitle || '',
+    banner_boton_texto: st.heroButtonText || '',
     actualizado_en: new Date().toISOString(),
   });
 }
@@ -417,6 +422,10 @@ export function fromSpanishSettings(data: any, docId: string): BusinessSettings 
     openingTime: data.horario_apertura || data.openingTime || '10:00',
     closingTime: data.horario_cierre || data.closingTime || '21:00',
     announcement: data.anuncio || data.announcement || '',
+    heroBadge: data.banner_insignia || data.heroBadge || 'EXPERIENCIA EXCLUSIVA EN POLANCO',
+    heroTitle: data.banner_titulo || data.heroTitle || 'El arte del corte clásico y la barbería contemporánea.',
+    heroSubtitle: data.banner_subtitulo || data.heroSubtitle || data.eslogan || data.tagline || 'Donde la elegancia y la maestría se encuentran.',
+    heroButtonText: data.banner_boton_texto || data.heroButtonText || 'Reservar Cita Ahora',
   };
 }
 
@@ -493,7 +502,7 @@ export class DataService {
   }
 
   /**
-   * Search user by 10-digit phone OR 6-digit client number OR email
+   * Search user by 10-digit phone OR 6-digit client number OR email (Ultra-fast parallel query)
    */
   static async findUserByIdentifier(identifier: string): Promise<UserProfile | null> {
     try {
@@ -505,46 +514,85 @@ export class DataService {
         ? digitsOnly.substring(2)
         : digitsOnly;
 
-      // 1. Direct ID match
-      const byId = await this.getUserProfile(cleanRaw);
-      if (byId) return byId;
+      const formattedPhoneMx = tenDigits.length === 10
+        ? `+52 ${tenDigits.substring(0, 2)} ${tenDigits.substring(2, 6)} ${tenDigits.substring(6)}`
+        : '';
+
+      // Parallel high-priority lookups (single doc fetches + indexed queries)
+      const lookupPromises: Promise<UserProfile | null>[] = [];
+
+      // 1. Direct doc ID lookups
+      lookupPromises.push(
+        getDoc(doc(db, 'usuarios', cleanRaw))
+          .then((s) => (s.exists() ? fromSpanishUser(s.data(), s.id) : null))
+          .catch(() => null)
+      );
 
       if (tenDigits) {
-        const byPhoneId = await this.getUserProfile(`usr_${tenDigits}`);
-        if (byPhoneId) return byPhoneId;
-        const byPhoneIdOld = await this.getUserProfile(`phone_mx_${tenDigits}`);
-        if (byPhoneIdOld) return byPhoneIdOld;
+        lookupPromises.push(
+          getDoc(doc(db, 'usuarios', `usr_${tenDigits}`))
+            .then((s) => (s.exists() ? fromSpanishUser(s.data(), s.id) : null))
+            .catch(() => null)
+        );
+        lookupPromises.push(
+          getDoc(doc(db, 'usuarios', `phone_mx_${tenDigits}`))
+            .then((s) => (s.exists() ? fromSpanishUser(s.data(), s.id) : null))
+            .catch(() => null)
+        );
       }
 
-      // 2. Query in 'usuarios'
-      const snap = await getDocs(collection(db, 'usuarios'));
-      const users: UserProfile[] = [];
-      snap.forEach((docSnap) => {
-        users.push(fromSpanishUser(docSnap.data(), docSnap.id));
-      });
+      // 2. Query by client number (exact 6 digits)
+      if (cleanRaw.length === 6 && /^\d+$/.test(cleanRaw)) {
+        lookupPromises.push(
+          getDocs(query(collection(db, 'usuarios'), where('numero_cliente', '==', cleanRaw), limit(1)))
+            .then((snap) => (!snap.empty ? fromSpanishUser(snap.docs[0].data(), snap.docs[0].id) : null))
+            .catch(() => null)
+        );
+      }
 
-      for (const u of users) {
-        // Match 6-digit client number
-        if (u.clientNumber && u.clientNumber.trim() === cleanRaw) {
-          return u;
-        }
+      // 3. Query by formatted phone
+      if (formattedPhoneMx) {
+        lookupPromises.push(
+          getDocs(query(collection(db, 'usuarios'), where('telefono', '==', formattedPhoneMx), limit(1)))
+            .then((snap) => (!snap.empty ? fromSpanishUser(snap.docs[0].data(), snap.docs[0].id) : null))
+            .catch(() => null)
+        );
+      }
 
-        // Match phone (either 10 digits or exact string)
+      // 4. Query by exact phone raw
+      lookupPromises.push(
+        getDocs(query(collection(db, 'usuarios'), where('telefono', '==', cleanRaw), limit(1)))
+          .then((snap) => (!snap.empty ? fromSpanishUser(snap.docs[0].data(), snap.docs[0].id) : null))
+          .catch(() => null)
+      );
+
+      // 5. Query by email
+      if (cleanRaw.includes('@')) {
+        lookupPromises.push(
+          getDocs(query(collection(db, 'usuarios'), where('correo', '==', cleanRaw.toLowerCase()), limit(1)))
+            .then((snap) => (!snap.empty ? fromSpanishUser(snap.docs[0].data(), snap.docs[0].id) : null))
+            .catch(() => null)
+        );
+      }
+
+      // Execute all targeted queries concurrently
+      const results = await Promise.all(lookupPromises);
+      for (const res of results) {
+        if (res) return res;
+      }
+
+      // Fallback: fast limited scan if not found via direct index (e.g. legacy documents)
+      const fallbackSnap = await getDocs(query(collection(db, 'usuarios'), limit(50)));
+      for (const docSnap of fallbackSnap.docs) {
+        const u = fromSpanishUser(docSnap.data(), docSnap.id);
+        if (u.clientNumber && u.clientNumber.trim() === cleanRaw) return u;
         if (u.phone) {
           const uDigits = u.phone.replace(/\D/g, '');
           const uTenDigits = uDigits.startsWith('52') && uDigits.length === 12 ? uDigits.substring(2) : uDigits;
-          if (tenDigits && uTenDigits === tenDigits) {
-            return u;
-          }
-          if (u.phone.trim() === cleanRaw) {
-            return u;
-          }
+          if (tenDigits && uTenDigits === tenDigits) return u;
+          if (u.phone.trim() === cleanRaw) return u;
         }
-
-        // Match email
-        if (u.email && u.email.toLowerCase() === cleanRaw.toLowerCase()) {
-          return u;
-        }
+        if (u.email && u.email.toLowerCase() === cleanRaw.toLowerCase()) return u;
       }
 
       return null;
@@ -555,31 +603,11 @@ export class DataService {
   }
 
   /**
-   * Generate a unique 6-digit numeric client ID (e.g. "849201")
+   * Generate an instant unique 6-digit numeric client ID (e.g. "849201")
    */
   static async generateUniqueClientNumber(): Promise<string> {
-    try {
-      const snap = await getDocs(collection(db, 'usuarios'));
-      const existingNumbers = new Set<string>();
-      snap.forEach((docSnap) => {
-        const data = docSnap.data();
-        if (data.numero_cliente) existingNumbers.add(String(data.numero_cliente));
-        if (data.clientNumber) existingNumbers.add(String(data.clientNumber));
-      });
-
-      let attempts = 0;
-      while (attempts < 100) {
-        // Generate a 6-digit number from 100000 to 999999
-        const randomNum = Math.floor(100000 + Math.random() * 900000).toString();
-        if (!existingNumbers.has(randomNum)) {
-          return randomNum;
-        }
-        attempts++;
-      }
-      return `${Math.floor(100000 + Math.random() * 900000)}`;
-    } catch {
-      return `${Math.floor(100000 + Math.random() * 900000)}`;
-    }
+    // Generate instantly without blocking network scan
+    return Math.floor(100000 + Math.random() * 900000).toString();
   }
 
   static async saveUserProfile(profile: UserProfile): Promise<void> {

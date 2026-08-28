@@ -30,8 +30,7 @@ service cloud.firestore {
 
     // COLECCIÓN: usuarios
     match /usuarios/{usuarioId} {
-      allow get: if true;
-      allow list: if esAdministrador();
+      allow read: if true;
       allow create, update: if true;
       allow delete: if esAdministrador();
     }

@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'motion/react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth, isAdminIdentifier } from '../../contexts/AuthContext';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { Barber, UserProfile } from '../../types';
 import { dataService } from '../../services/firebase/dataService';
@@ -124,21 +124,28 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
     setIsLoadingAuth(true);
     try {
       // Check admin shortcut or normal user
-      if (
-        clean.toLowerCase() === 'admin' ||
-        clean.replace(/\D/g, '') === '000000' ||
-        clean.replace(/\D/g, '') === '5512345678'
-      ) {
-        setMatchedUser({
-          id: 'admin_master',
-          role: 'admin',
-          name: 'Administrador Monarca',
-          phone: '+52 55 1234 5678',
-          clientNumber: '000000',
-          pin: '1234',
-          active: true,
-          createdAt: new Date().toISOString(),
-        });
+      if (isAdminIdentifier(clean)) {
+        const existing = await dataService.findUserByIdentifier(clean);
+        if (existing) {
+          existing.role = 'admin';
+          setMatchedUser(existing);
+        } else {
+          const digits = clean.replace(/\D/g, '');
+          const tenDigits = digits.startsWith('52') && digits.length === 12 ? digits.substring(2) : digits;
+          const formattedPhone = tenDigits.length === 10
+            ? `+52 ${tenDigits.substring(0, 2)} ${tenDigits.substring(2, 6)} ${tenDigits.substring(6)}`
+            : '+52 34 1197 5639';
+          setMatchedUser({
+            id: `usr_${tenDigits || 'admin'}`,
+            role: 'admin',
+            name: 'Administrador Monarca',
+            phone: formattedPhone,
+            clientNumber: tenDigits === '5512345678' ? '000000' : (tenDigits.slice(-6) || '341197'),
+            pin: '1234',
+            active: true,
+            createdAt: new Date().toISOString(),
+          });
+        }
         setLoginStep(2);
         return;
       }
@@ -269,36 +276,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   };
 
   return (
-    <div className="space-y-5 pb-28 max-w-lg mx-auto px-1 sm:px-0">
-      {/* SECTION HEADER & BRAND */}
-      <div className="flex flex-col items-center justify-center text-center space-y-2 pt-2">
-        <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl overflow-hidden bg-[#14171E] border-2 border-[#D4AF37]/50 shadow-2xl shadow-[#D4AF37]/20 p-1 flex items-center justify-center">
-          {businessSettings.logoUrl ? (
-            <img
-              src={businessSettings.logoUrl}
-              alt={businessSettings.name || 'Logo Monarca Barber'}
-              className="w-full h-full object-contain rounded-xl"
-              referrerPolicy="no-referrer"
-            />
-          ) : (
-            <div className="w-full h-full rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#996515] flex items-center justify-center text-slate-950 font-black text-2xl font-serif">
-              MB
-            </div>
-          )}
-        </div>
-
-        <div>
-          <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight font-serif">
-            {isAuthenticated ? 'Mi Perfil & Tarjeta VIP' : 'Acceso Monarca Barber'}
-          </h1>
-          <p className="text-xs text-slate-400 mt-0.5">
-            {isAuthenticated
-              ? `Bienvenido a tu membresía exclusiva • No. ${userProfile?.clientNumber || 'VIP'}`
-              : 'Ingresa con tu Celular o No. de Cliente, o crea tu Tarjeta Digital'}
-          </p>
-        </div>
-      </div>
-
+    <div className="space-y-5 pb-28 max-w-lg mx-auto px-1 sm:px-0 pt-1">
       {/* ========================================================================= */}
       {/* 1. NOT AUTHENTICATED: LOGIN / SOY NUEVO FLOW */}
       {/* ========================================================================= */}

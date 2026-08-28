@@ -6,12 +6,16 @@ export const isAdminIdentifier = (idOrPhone?: string | null): boolean => {
   if (!idOrPhone) return false;
   const clean = idOrPhone.trim().toLowerCase();
   const digits = clean.replace(/\D/g, '');
+  const tenDigits = digits.startsWith('52') && digits.length === 12 ? digits.substring(2) : digits;
   return (
     clean === 'admin' ||
     clean === 'cramonmb@gmail.com' ||
     clean === 'crmoranb@gmail.com' ||
     digits === '000000' ||
-    digits === '5512345678'
+    digits === '5512345678' ||
+    tenDigits === '5512345678' ||
+    digits === '3411975639' ||
+    tenDigits === '3411975639'
   );
 };
 
@@ -114,24 +118,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       // Check admin shortcut / master access
-      if (isAdminIdentifier(cleanIdentifier) && (cleanPin === '1234' || cleanPin === '0000' || cleanPin === '9999')) {
-        const adminProfile: UserProfile = {
-          id: 'admin_monarca_master',
-          role: 'admin',
-          name: 'Administrador Monarca',
-          phone: '+52 55 1234 5678',
-          clientNumber: '000000',
-          pin: cleanPin,
-          points: 9999,
-          membershipTier: 'VIP',
-          active: true,
-          createdAt: new Date().toISOString(),
-        };
-        await dataService.saveUserProfile(adminProfile);
-        setUserProfile(adminProfile);
-        setCurrentRole('admin');
-        saveStoredSession(adminProfile);
-        return adminProfile;
+      if (isAdminIdentifier(cleanIdentifier)) {
+        // Look up user in Firestore first
+        let user = await dataService.findUserByIdentifier(cleanIdentifier);
+        if (user) {
+          if (user.pin && user.pin !== cleanPin && cleanPin !== '1234' && cleanPin !== '0000' && cleanPin !== '9999') {
+            throw new Error('Contraseña incorrecta. Ingresa tu NIP de 4 dígitos numéricos.');
+          }
+          if (!user.pin) {
+            user.pin = cleanPin;
+          }
+          user.role = 'admin';
+          await dataService.saveUserProfile(user);
+          setUserProfile(user);
+          setCurrentRole('admin');
+          saveStoredSession(user);
+          return user;
+        } else {
+          // If not in database yet, create admin profile for this phone/identifier
+          const digits = cleanIdentifier.replace(/\D/g, '');
+          const tenDigits = digits.startsWith('52') && digits.length === 12 ? digits.substring(2) : digits;
+          const formattedPhone = tenDigits.length === 10
+            ? `+52 ${tenDigits.substring(0, 2)} ${tenDigits.substring(2, 6)} ${tenDigits.substring(6)}`
+            : '+52 34 1197 5639';
+          
+          const adminProfile: UserProfile = {
+            id: `usr_${tenDigits || '3411975639'}`,
+            role: 'admin',
+            name: 'Administrador Monarca',
+            phone: formattedPhone,
+            clientNumber: tenDigits === '5512345678' ? '000000' : (tenDigits.slice(-6) || '341197'),
+            pin: cleanPin,
+            points: 9999,
+            membershipTier: 'VIP',
+            active: true,
+            createdAt: new Date().toISOString(),
+          };
+          await dataService.saveUserProfile(adminProfile);
+          setUserProfile(adminProfile);
+          setCurrentRole('admin');
+          saveStoredSession(adminProfile);
+          return adminProfile;
+        }
       }
 
       // Look up user in Firestore

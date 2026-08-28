@@ -55,15 +55,15 @@ export const HomeView: React.FC<HomeViewProps> = ({
         <div className="relative z-10 max-w-lg space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/30 text-[#D4AF37] text-xs font-semibold tracking-wide">
             <Crown className="w-3.5 h-3.5" />
-            <span>EXPERIENCIA EXCLUSIVA EN POLANCO</span>
+            <span>{businessSettings.heroBadge || 'EXPERIENCIA EXCLUSIVA EN POLANCO'}</span>
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
-            El arte del corte clásico y la barbería contemporánea.
+            {businessSettings.heroTitle || 'El arte del corte clásico y la barbería contemporánea.'}
           </h1>
 
           <p className="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
-            {businessSettings.tagline || 'Donde la elegancia y la maestría se encuentran.'}
+            {businessSettings.heroSubtitle || businessSettings.tagline || 'Donde la elegancia y la maestría se encuentran.'}
           </p>
 
           <div className="pt-2 flex items-center gap-3">
@@ -72,7 +72,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               className="flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-bold text-xs sm:text-sm shadow-xl shadow-[#D4AF37]/25 hover:scale-[1.02] active:scale-95 transition-all"
             >
               <Scissors className="w-4 h-4 stroke-[2.5]" />
-              <span>Reservar Cita Ahora</span>
+              <span>{businessSettings.heroButtonText || 'Reservar Cita Ahora'}</span>
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
