@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Camera,
   QrCode,
   X,
   Search,
   CheckCircle2,
-  PlusCircle,
-  MinusCircle,
+  Plus,
+  Minus,
   Sparkles,
   Phone,
   User,
@@ -14,22 +14,30 @@ import {
   AlertCircle,
   RefreshCw,
   Award,
-  History,
   Scissors,
   Check,
+  ShoppingBag,
+  CreditCard,
+  Banknote,
+  Receipt,
+  Package,
+  ArrowRight,
+  Clock,
+  ChevronDown,
 } from 'lucide-react';
 import jsQR from 'jsqr';
 import confetti from 'canvas-confetti';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { dataService } from '../../services/firebase/dataService';
-import { UserProfile, Barber } from '../../types';
-import { formatCurrency, formatDateSpanish } from '../../utils/dateTime';
+import { UserProfile, Barber, Service, Product, PosSaleItem, Appointment } from '../../types';
+import { formatCurrency, formatDateSpanish, formatTime12h, getTodayDateString } from '../../utils/dateTime';
 
 interface BarberQRScannerModalProps {
   isOpen: boolean;
   onClose: () => void;
   onBookForClient?: (client: UserProfile) => void;
+  onOpenPosForClient?: (client: UserProfile) => void;
   activeBarber: Barber;
 }
 
@@ -37,9 +45,17 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
   isOpen,
   onClose,
   onBookForClient,
+  onOpenPosForClient,
   activeBarber,
 }) => {
-  const { showToast } = useBarbershop();
+  const {
+    services,
+    products,
+    appointments,
+    businessSettings,
+    recordPosSale,
+    showToast,
+  } = useBarbershop();
   const { userProfile: authUser } = useAuth();
 
   // Camera & Scanning State
@@ -58,18 +74,74 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
   const [scannedClient, setScannedClient] = useState<UserProfile | null>(null);
   const [clientVisitsCount, setClientVisitsCount] = useState<number>(0);
 
-  // Client Action Panel State
-  const [pointsActionType, setPointsActionType] = useState<'add' | 'deduct'>('add');
-  const [pointsAmount, setPointsAmount] = useState<number>(50);
-  const [pointsReason, setPointsReason] = useState<string>('Corte de cabello realizado');
+  // Unified Checkout Section State
+  const [visitsToAdd, setVisitsToAdd] = useState<number>(1); // Default 1 visit
+  const [serviceOption, setServiceOption] = useState<'booked' | 'custom' | 'none'>('booked');
+  const [selectedServiceId, setSelectedServiceId] = useState<string>('');
+  const [markAppointmentCompleted, setMarkAppointmentCompleted] = useState<boolean>(true);
+  
+  // Product cart in scanner: Map of productId -> quantity
+  const [productCart, setProductCart] = useState<Record<string, number>>({});
+  const [isProductCatalogExpanded, setIsProductCatalogExpanded] = useState<boolean>(false);
+  
+  // Points & Payment state
+  const [customPointsBonus, setCustomPointsBonus] = useState<number | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | 'transfer'>('cash');
   const [isSubmittingAction, setIsSubmittingAction] = useState<boolean>(false);
-  const [actionSuccessMessage, setActionSuccessMessage] = useState<string | null>(null);
+  const [actionSuccessData, setActionSuccessData] = useState<{
+    clientName: string;
+    totalCharged: number;
+    pointsEarned: number;
+    newTotalPoints: number;
+    newTotalVisits: number;
+  } | null>(null);
+
+  // Today string & client's appointment today if any
+  const todayStr = getTodayDateString();
+  const clientTodayAppointment: Appointment | null = useMemo(() => {
+    if (!scannedClient) return null;
+    return (
+      appointments.find(
+        (a) =>
+          a.date === todayStr &&
+          (a.clientId === scannedClient.id ||
+            a.clientPhone === scannedClient.phone ||
+            (scannedClient.name && a.clientName.toLowerCase() === scannedClient.name.toLowerCase())) &&
+          a.status !== 'cancelled' &&
+          a.status !== 'rejected'
+      ) || null
+    );
+  }, [scannedClient, appointments, todayStr]);
+
+  // When client is found, initialize checkout selections
+  useEffect(() => {
+    if (scannedClient) {
+      setVisitsToAdd(1); // Default 1 visit
+      setProductCart({});
+      setIsProductCatalogExpanded(false);
+      setCustomPointsBonus(null);
+      setActionSuccessData(null);
+      setPaymentMethod('cash');
+
+      if (clientTodayAppointment) {
+        setServiceOption('booked');
+        setSelectedServiceId(clientTodayAppointment.serviceId);
+        setMarkAppointmentCompleted(true);
+      } else {
+        // If no booking today, select the first popular service or custom
+        const defaultService = services.find((s) => s.active !== false) || services[0];
+        setServiceOption('custom');
+        setSelectedServiceId(defaultService?.id || '');
+        setMarkAppointmentCompleted(false);
+      }
+    }
+  }, [scannedClient, clientTodayAppointment, services]);
 
   // Start Camera when modal opens
   useEffect(() => {
     if (isOpen) {
       setScannedClient(null);
-      setActionSuccessMessage(null);
+      setActionSuccessData(null);
       setManualInput('');
       startCamera();
     } else {
@@ -89,7 +161,6 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
         throw new Error('La cámara no está disponible en este navegador o dispositivo.');
       }
 
-      // Stop existing stream if any
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop());
       }
@@ -108,7 +179,7 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        videoRef.current.setAttribute('playsinline', 'true'); // Required for iOS Safari
+        videoRef.current.setAttribute('playsinline', 'true');
         await videoRef.current.play();
         setCameraActive(true);
         requestScanFrame();
@@ -155,7 +226,7 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
 
       if (code && code.data) {
         handleRawScannedData(code.data);
-        return; // Pause scanning while displaying client
+        return;
       }
     }
 
@@ -167,7 +238,6 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
       setIsScanning(false);
       let searchKey = rawData.trim();
 
-      // Check if rawData is a JSON payload
       if (searchKey.startsWith('{') && searchKey.endsWith('}')) {
         try {
           const parsed = JSON.parse(searchKey);
@@ -198,7 +268,7 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
         throw new Error(`No se encontró cliente con el código "${identifier}".`);
       }
 
-      // Calculate total visits (manual visits + completed appointments in database)
+      // Calculate total visits
       const allAppointments = await new Promise<any[]>((resolve) => {
         const unsub = dataService.subscribeToAppointments('client', client.id, undefined, (apps) => {
           unsub();
@@ -212,7 +282,6 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
       setScannedClient(client);
       setClientVisitsCount(totalVisits);
 
-      // Play joyful confetti & audio feedback
       try {
         confetti({
           particleCount: 40,
@@ -242,34 +311,138 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
     lookupAndSetClient(manualInput.trim());
   };
 
-  // 1. Quick Register Visit (+1 Visit & optional +50 pts)
-  const handleRegisterVisit = async () => {
+  // Product Cart operations inside Scanner
+  const handleAddProduct = (productId: string) => {
+    setProductCart((prev) => ({
+      ...prev,
+      [productId]: (prev[productId] || 0) + 1,
+    }));
+  };
+
+  const handleRemoveProduct = (productId: string) => {
+    setProductCart((prev) => {
+      const next = { ...prev };
+      if (next[productId] > 1) {
+        next[productId] -= 1;
+      } else {
+        delete next[productId];
+      }
+      return next;
+    });
+  };
+
+  // Active products list
+  const activeProducts = products.filter((p) => p.active !== false);
+
+  // Cart products items
+  const cartItems: PosSaleItem[] = Object.entries(productCart)
+    .map(([prodId, qty]) => {
+      const product = products.find((p) => p.id === prodId);
+      if (!product) return null;
+      return {
+        productId: product.id,
+        productName: product.name,
+        price: product.price,
+        quantity: Number(qty),
+        subtotal: product.price * Number(qty),
+      };
+    })
+    .filter(Boolean) as PosSaleItem[];
+
+  const totalProductsPrice = cartItems.reduce((sum, item) => sum + item.subtotal, 0);
+
+  // Service Price & Name determination
+  const activeSelectedService = services.find((s) => s.id === selectedServiceId);
+  let servicePrice = 0;
+  let serviceName = '';
+
+  if (serviceOption === 'booked' && clientTodayAppointment) {
+    servicePrice = clientTodayAppointment.servicePriceSnapshot || activeSelectedService?.price || 0;
+    serviceName = clientTodayAppointment.serviceNameSnapshot || activeSelectedService?.name || 'Servicio Agendado';
+  } else if (serviceOption === 'custom' && activeSelectedService) {
+    servicePrice = activeSelectedService.price || 0;
+    serviceName = activeSelectedService.name;
+  }
+
+  // Total Monetary Charge
+  const totalAmountToCharge = servicePrice + totalProductsPrice;
+
+  // Points Calculation
+  // 1. Service Points (50 base points or proportional)
+  const servicePointsEarned = serviceOption !== 'none' && servicePrice > 0 ? 50 : 0;
+
+  // 2. Product Points (% configured in settings, default 1%)
+  const pointsEnabled = businessSettings.enableProductPointsReward !== undefined ? businessSettings.enableProductPointsReward : true;
+  const productPointsPercentage = businessSettings.productPointsPercentage !== undefined ? businessSettings.productPointsPercentage : 1;
+  const productPointsEarned = pointsEnabled && totalProductsPrice > 0 ? Math.floor((totalProductsPrice * productPointsPercentage) / 100) : 0;
+
+  const autoCalculatedPoints = servicePointsEarned + productPointsEarned;
+  const finalPointsToAdd = customPointsBonus !== null ? customPointsBonus : autoCalculatedPoints;
+
+  // EXECUTE UNIFIED CHECKOUT & VISIT REGISTRATION
+  const handleExecuteCheckout = async () => {
     if (!scannedClient) return;
     setIsSubmittingAction(true);
+
     try {
-      const newManualVisits = (scannedClient.manualVisits || 0) + 1;
+      const newManualVisits = (scannedClient.manualVisits || 0) + visitsToAdd;
       const currentPts = scannedClient.points || 0;
-      const bonusPts = 50;
-      const newTotalPts = currentPts + bonusPts;
+      const newTotalPts = currentPts + finalPointsToAdd;
 
-      // Update visits
-      await dataService.updateUserVisits(scannedClient.id, newManualVisits);
+      // 1. Update client's visits in Firestore
+      if (visitsToAdd > 0) {
+        await dataService.updateUserVisits(scannedClient.id, newManualVisits);
+      }
 
-      // Add points for the visit
-      await dataService.updateUserPoints(
-        scannedClient.id,
-        newTotalPts,
-        `Visita y servicio en silla de ${activeBarber.displayName} (+50 pts)`,
-        'add'
-      );
+      // 2. Update client's points in Firestore
+      if (finalPointsToAdd > 0) {
+        let reason = `Atención en silla con ${activeBarber.displayName}: `;
+        if (serviceName) reason += `${serviceName} `;
+        if (cartItems.length > 0) reason += `+ ${cartItems.length} producto(s) `;
+        reason += `(+${finalPointsToAdd} pts)`;
 
-      // Log purchase/visit record
-      await dataService.addUserPurchase(scannedClient.id, {
-        itemName: `Corte / Visita en Barbería`,
-        price: 250,
-        barberName: activeBarber.displayName,
-        notes: `Atendido por ${activeBarber.displayName}. Visita registrada vía escáner QR.`,
-      });
+        await dataService.updateUserPoints(
+          scannedClient.id,
+          newTotalPts,
+          reason,
+          'add'
+        );
+      }
+
+      // 3. Mark appointment as completed if requested
+      if (clientTodayAppointment && markAppointmentCompleted) {
+        await dataService.updateAppointmentStatus(clientTodayAppointment.id, 'completed', {
+          notes: `Cobrado y completado por ${activeBarber.displayName} vía escáner QR.`,
+        });
+      }
+
+      // 4. Record product sale in POS if products were purchased
+      if (cartItems.length > 0) {
+        await recordPosSale({
+          barberId: activeBarber.id,
+          barberName: activeBarber.displayName,
+          customerId: scannedClient.id,
+          customerName: scannedClient.name,
+          customerClientNumber: scannedClient.clientNumber,
+          customerPhone: scannedClient.phone,
+          items: cartItems,
+          total: totalProductsPrice,
+          pointsAwarded: productPointsEarned,
+          pointsPercentageUsed: productPointsPercentage,
+          paymentMethod,
+          notes: `Venta agregada durante cobro en silla por ${activeBarber.displayName}`,
+        });
+      }
+
+      // 5. Record service purchase record in user's history
+      if (servicePrice > 0) {
+        await dataService.addUserPurchase(scannedClient.id, {
+          itemName: serviceName || 'Servicio de Barbería',
+          price: servicePrice,
+          barberName: activeBarber.displayName,
+          notes: `Servicio realizado por ${activeBarber.displayName}. Pago en ${paymentMethod}.`,
+        });
+      }
 
       // Update local state
       const updatedClient: UserProfile = {
@@ -278,10 +451,22 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
         points: newTotalPts,
       };
       setScannedClient(updatedClient);
-      setClientVisitsCount((prev) => prev + 1);
+      setClientVisitsCount((prev) => prev + visitsToAdd);
 
-      setActionSuccessMessage(`¡Visita registrada con éxito! Se sumaron +50 puntos a ${scannedClient.name}.`);
-      showToast('success', 'Visita Registrada', `+1 Visita y +50 puntos para ${scannedClient.name}`);
+      setActionSuccessData({
+        clientName: scannedClient.name,
+        totalCharged: totalAmountToCharge,
+        pointsEarned: finalPointsToAdd,
+        newTotalPoints: newTotalPts,
+        newTotalVisits: clientVisitsCount + visitsToAdd,
+      });
+
+      showToast(
+        'success',
+        '✅ Cobro y Visita Registrados',
+        `$${totalAmountToCharge.toFixed(2)} cobrados • +${visitsToAdd} Visita • +${finalPointsToAdd} Pts`,
+        { playSound: true, soundType: 'success' }
+      );
 
       try {
         confetti({
@@ -294,64 +479,7 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
         // ignore
       }
     } catch (err: any) {
-      showToast('error', 'Error al registrar visita', err.message);
-    } finally {
-      setIsSubmittingAction(false);
-    }
-  };
-
-  // 2. Custom Points Adjustment (Add / Deduct)
-  const handleApplyPoints = async () => {
-    if (!scannedClient || pointsAmount <= 0) return;
-    setIsSubmittingAction(true);
-    try {
-      const currentPts = scannedClient.points || 0;
-      let newTotal = currentPts;
-      let reasonText = pointsReason.trim() || 'Ajuste de puntos en sucursal';
-
-      if (pointsActionType === 'add') {
-        newTotal = currentPts + pointsAmount;
-        reasonText = `Abono de +${pointsAmount} pts por ${activeBarber.displayName}: ${reasonText}`;
-      } else {
-        if (currentPts < pointsAmount) {
-          throw new Error(`El cliente solo cuenta con ${currentPts} puntos disponibles.`);
-        }
-        newTotal = Math.max(0, currentPts - pointsAmount);
-        reasonText = `Canje de -${pointsAmount} pts por ${activeBarber.displayName}: ${reasonText}`;
-      }
-
-      await dataService.updateUserPoints(scannedClient.id, newTotal, reasonText, pointsActionType);
-
-      const updatedClient: UserProfile = {
-        ...scannedClient,
-        points: newTotal,
-      };
-      setScannedClient(updatedClient);
-
-      setActionSuccessMessage(
-        pointsActionType === 'add'
-          ? `¡Se abonaron +${pointsAmount} puntos correctamente!`
-          : `¡Se canjearon -${pointsAmount} puntos correctamente!`
-      );
-
-      showToast(
-        'success',
-        pointsActionType === 'add' ? 'Puntos Abonados' : 'Puntos Canjeados',
-        `Nuevo balance: ${newTotal} puntos.`
-      );
-
-      try {
-        confetti({
-          particleCount: 50,
-          spread: 60,
-          origin: { y: 0.6 },
-          colors: ['#D4AF37', '#38BDF8', '#FFFFFF'],
-        });
-      } catch {
-        // ignore
-      }
-    } catch (err: any) {
-      showToast('error', 'Error con puntos', err.message);
+      showToast('error', 'Error al procesar', err.message || 'No se pudo completar el registro.');
     } finally {
       setIsSubmittingAction(false);
     }
@@ -359,8 +487,9 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
 
   const handleScanAnother = () => {
     setScannedClient(null);
-    setActionSuccessMessage(null);
+    setActionSuccessData(null);
     setManualInput('');
+    setProductCart({});
     setIsScanning(true);
     if (!cameraActive) {
       startCamera();
@@ -373,7 +502,7 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in">
-      <div className="bg-[#12151B] border border-white/15 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col my-auto max-h-[92vh]">
+      <div className="bg-[#12151B] border border-white/15 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col my-auto max-h-[94vh]">
         {/* Modal Header */}
         <div className="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between bg-gradient-to-r from-[#181D26] to-[#12151B]">
           <div className="flex items-center gap-3">
@@ -382,13 +511,13 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
             </div>
             <div>
               <h2 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
-                <span>Lector de QR Clientes</span>
+                <span>Lector QR & Cobro</span>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30">
-                  MODO BARBERO
+                  {activeBarber.displayName.split(' ')[0]}
                 </span>
               </h2>
               <p className="text-xs text-slate-400">
-                Escanea el pase VIP para registrar visitas y abonar puntos
+                Escanear cliente para cobro, servicios, productos y puntos
               </p>
             </div>
           </div>
@@ -404,10 +533,10 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
         {/* Modal Body */}
         <div className="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1 text-xs">
           {!scannedClient ? (
-            /* SCANNER & MANUAL SEARCH VIEW */
+            /* 1. CAMERA SCANNER & MANUAL SEARCH VIEW */
             <div className="space-y-4">
               {/* Camera Viewfinder */}
-              <div className="relative aspect-square max-h-[300px] w-full rounded-2xl overflow-hidden bg-black/90 border border-white/15 flex items-center justify-center shadow-inner">
+              <div className="relative aspect-square max-h-[290px] w-full rounded-2xl overflow-hidden bg-black/90 border border-white/15 flex items-center justify-center shadow-inner">
                 <video
                   ref={videoRef}
                   className="w-full h-full object-cover"
@@ -420,13 +549,10 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                 {cameraActive && (
                   <div className="absolute inset-0 pointer-events-none flex items-center justify-center p-8">
                     <div className="relative w-48 h-48 sm:w-56 sm:h-56 border-2 border-[#D4AF37] rounded-3xl shadow-[0_0_25px_rgba(212,175,55,0.4)]">
-                      {/* Corner marks */}
                       <div className="absolute top-0 left-0 w-4 h-4 border-t-4 border-l-4 border-white rounded-tl-lg" />
                       <div className="absolute top-0 right-0 w-4 h-4 border-t-4 border-r-4 border-white rounded-tr-lg" />
                       <div className="absolute bottom-0 left-0 w-4 h-4 border-b-4 border-l-4 border-white rounded-bl-lg" />
                       <div className="absolute bottom-0 right-0 w-4 h-4 border-b-4 border-r-4 border-white rounded-br-lg" />
-
-                      {/* Laser scanning line animation */}
                       <div className="absolute left-2 right-2 h-0.5 bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent animate-pulse top-1/2 -translate-y-1/2 shadow-[0_0_12px_#D4AF37]" />
                     </div>
                   </div>
@@ -452,18 +578,18 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                   </div>
                 )}
 
-                {/* Live Scanner Banner */}
+                {/* Live Scanner Indicator */}
                 {cameraActive && (
                   <div className="absolute bottom-3 inset-x-4 flex justify-center">
                     <span className="px-3 py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/10 text-slate-200 text-[11px] font-medium flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                      Apunta la cámara al código QR del cliente
+                      Apunta al código QR del cliente
                     </span>
                   </div>
                 )}
               </div>
 
-              {/* Divider with text */}
+              {/* Divider */}
               <div className="relative flex py-1 items-center">
                 <div className="flex-grow border-t border-white/10" />
                 <span className="flex-shrink mx-3 text-slate-500 text-[11px] uppercase tracking-wider font-semibold">
@@ -502,22 +628,70 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                 </div>
               </form>
             </div>
-          ) : (
-            /* CLIENT EXPEDIENTE & ACTIONS VIEW */
-            <div className="space-y-4 animate-in fade-in">
-              {/* Success Notification Banner */}
-              {actionSuccessMessage && (
-                <div className="p-3 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 flex items-center gap-2 text-xs">
-                  <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
-                  <span>{actionSuccessMessage}</span>
-                </div>
-              )}
+          ) : actionSuccessData ? (
+            /* SUCCESS CONFIRMATION RECEIPT */
+            <div className="space-y-4 text-center py-4 animate-in zoom-in-95">
+              <div className="w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-400 text-emerald-400 flex items-center justify-center mx-auto shadow-[0_0_25px_rgba(16,185,129,0.3)]">
+                <Check className="w-8 h-8 stroke-[3]" />
+              </div>
 
-              {/* Client Info Card */}
-              <div className="p-4 rounded-3xl bg-gradient-to-b from-[#1A1F29] to-[#12151B] border border-[#D4AF37]/40 shadow-xl space-y-3.5">
-                <div className="flex items-start justify-between gap-3">
+              <div>
+                <h3 className="text-lg font-bold text-white tracking-tight">
+                  ¡Cobro y Registro Exitoso!
+                </h3>
+                <p className="text-xs text-slate-300 mt-1">
+                  Atención completada para <strong className="text-[#D4AF37]">{actionSuccessData.clientName}</strong>
+                </p>
+              </div>
+
+              {/* Receipt Summary Card */}
+              <div className="p-4 rounded-2xl bg-[#181D26] border border-white/10 space-y-2 text-left">
+                <div className="flex justify-between items-center py-1 border-b border-white/5">
+                  <span className="text-slate-400">Monto Total Cobrado:</span>
+                  <strong className="text-emerald-400 text-sm font-black">
+                    {formatCurrency(actionSuccessData.totalCharged)}
+                  </strong>
+                </div>
+                <div className="flex justify-between items-center py-1 border-b border-white/5">
+                  <span className="text-slate-400">Puntos Sumados:</span>
+                  <strong className="text-[#D4AF37] font-black">
+                    +{actionSuccessData.pointsEarned} pts
+                  </strong>
+                </div>
+                <div className="flex justify-between items-center py-1 border-b border-white/5">
+                  <span className="text-slate-400">Nuevo Saldo de Puntos:</span>
+                  <span className="text-white font-bold">{actionSuccessData.newTotalPoints} pts</span>
+                </div>
+                <div className="flex justify-between items-center py-1">
+                  <span className="text-slate-400">Total Visitas Acumuladas:</span>
+                  <span className="text-teal-400 font-bold">{actionSuccessData.newTotalVisits} visitas</span>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                <button
+                  onClick={handleScanAnother}
+                  className="flex-1 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#E5B869] text-slate-950 font-bold text-xs shadow transition-all flex items-center justify-center gap-1.5"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Escanear Otro Cliente</span>
+                </button>
+                <button
+                  onClick={onClose}
+                  className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-semibold text-xs transition-all"
+                >
+                  Finalizar
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* 2. SCANNED CLIENT FICHA & UNIFIED COBRO / VISITAS / PUNTOS SECTION */
+            <div className="space-y-4 animate-in fade-in">
+              {/* FICHA CLIENTE: Datos, Puntos y Visitas Actuales */}
+              <div className="p-3.5 sm:p-4 rounded-3xl bg-gradient-to-b from-[#1A1F29] to-[#12151B] border border-[#D4AF37]/40 shadow-xl space-y-3">
+                <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-13 h-13 rounded-2xl bg-gradient-to-tr from-[#996515] to-[#D4AF37] p-0.5 shadow-lg shrink-0">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#996515] to-[#D4AF37] p-0.5 shadow-lg shrink-0">
                       {scannedClient.photoUrl ? (
                         <img
                           src={scannedClient.photoUrl}
@@ -534,17 +708,17 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
 
                     <div>
                       <div className="flex items-center gap-2">
-                        <h3 className="text-base font-black text-white">{scannedClient.name}</h3>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30">
+                        <h3 className="text-sm sm:text-base font-black text-white">{scannedClient.name}</h3>
+                        <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30">
                           {scannedClient.membershipTier || 'VIP'}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-300 font-mono mt-0.5">
-                        No. Cliente: <strong className="text-[#D4AF37]">#{scannedClient.clientNumber || 'SIN-NUMERO'}</strong>
+                      <p className="text-[11px] text-slate-300 font-mono mt-0.5">
+                        No. Cliente: <strong className="text-[#D4AF37]">#{scannedClient.clientNumber || 'SIN-NUM'}</strong>
                       </p>
-                      <p className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
+                      <p className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
                         <Phone className="w-3 h-3 text-slate-400" />
-                        <span>{scannedClient.phone || 'Sin celular'}</span>
+                        <span>{scannedClient.phone || 'Sin teléfono'}</span>
                       </p>
                     </div>
                   </div>
@@ -559,163 +733,386 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                   </button>
                 </div>
 
-                {/* Metric Badges */}
+                {/* Saldo Actual: Puntos y Visitas */}
                 <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/10 text-center">
-                  <div className="p-2.5 rounded-2xl bg-black/40 border border-white/10">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Puntos VIP</span>
-                    <span className="text-lg font-black text-[#D4AF37] mt-0.5 block flex items-center justify-center gap-1">
-                      <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <div className="p-2 rounded-2xl bg-black/40 border border-white/10">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Puntos Actuales</span>
+                    <span className="text-base font-black text-[#D4AF37] mt-0.5 block flex items-center justify-center gap-1">
+                      <Sparkles className="w-3 h-3 text-[#D4AF37]" />
                       {scannedClient.points || 0} pts
                     </span>
                   </div>
 
-                  <div className="p-2.5 rounded-2xl bg-black/40 border border-white/10">
+                  <div className="p-2 rounded-2xl bg-black/40 border border-white/10">
                     <span className="text-[10px] uppercase font-bold text-slate-400 block">Visitas Acumuladas</span>
-                    <span className="text-lg font-black text-emerald-400 mt-0.5 block flex items-center justify-center gap-1">
-                      <Award className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-base font-black text-emerald-400 mt-0.5 block flex items-center justify-center gap-1">
+                      <Award className="w-3 h-3 text-emerald-400" />
                       {clientVisitsCount} visitas
                     </span>
                   </div>
                 </div>
-
-                {scannedClient.notes && (
-                  <p className="text-[11px] text-amber-200/90 bg-amber-500/10 border border-amber-500/20 p-2 rounded-xl">
-                    <strong>Nota de Estilo:</strong> {scannedClient.notes}
-                  </p>
-                )}
               </div>
 
-              {/* ACTION 1: INSTANT VISIT REGISTRATION */}
-              <div className="p-4 rounded-3xl bg-[#181D26] border border-white/10 space-y-2.5 shadow-lg">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    <h4 className="font-bold text-white text-xs uppercase tracking-wide">
-                      1. Registrar Visita del Cliente
-                    </h4>
+              {/* UNIFIED TRANSACTION PANEL */}
+              <div className="p-4 rounded-3xl bg-[#14171E] border border-white/10 space-y-4 shadow-xl">
+                {/* 1. VISITAS A SUMAR (POR DEFECTO 1 VISITA) */}
+                <div className="flex items-center justify-between p-3 rounded-2xl bg-[#181D26] border border-white/10">
+                  <div>
+                    <span className="text-xs font-bold text-white block">Visitas a Registrar:</span>
+                    <span className="text-[11px] text-slate-400">Por defecto: 1 visita</span>
                   </div>
-                  <span className="text-[10px] text-emerald-300 font-bold bg-emerald-500/20 px-2 py-0.5 rounded-full">
-                    +1 Visita & +50 pts
-                  </span>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setVisitsToAdd(Math.max(0, visitsToAdd - 1))}
+                      className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-bold"
+                    >
+                      <Minus className="w-3.5 h-3.5" />
+                    </button>
+                    <span className="font-mono font-bold text-sm text-teal-300 min-w-[2rem] text-center">
+                      +{visitsToAdd}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setVisitsToAdd(visitsToAdd + 1)}
+                      className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-bold"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
 
-                <p className="text-[11px] text-slate-300">
-                  Registra que {scannedClient.name} se atendió hoy contigo en tu silla. Sumará 1 visita y 50 puntos de lealtad.
-                </p>
+                {/* 2. COBRO DE SERVICIO (AGENDADO U OTRO SERVICIO) */}
+                <div className="space-y-2">
+                  <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                    Servicio a Cobrar
+                  </label>
 
-                <button
-                  onClick={handleRegisterVisit}
-                  disabled={isSubmittingAction}
-                  className="w-full py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                >
-                  <Check className="w-4 h-4 stroke-[3]" />
-                  <span>{isSubmittingAction ? 'Registrando...' : 'Registrar Visita (+50 Puntos)'}</span>
-                </button>
-              </div>
+                  {/* If client had an appointment scheduled for today */}
+                  {clientTodayAppointment && (
+                    <div
+                      onClick={() => setServiceOption('booked')}
+                      className={`p-3 rounded-2xl border cursor-pointer transition-all ${
+                        serviceOption === 'booked'
+                          ? 'bg-amber-500/15 border-[#D4AF37] ring-1 ring-[#D4AF37]/50'
+                          : 'bg-[#181D26] border-white/10 hover:border-white/20'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                            serviceOption === 'booked' ? 'border-[#D4AF37] bg-[#D4AF37]' : 'border-slate-500'
+                          }`}>
+                            {serviceOption === 'booked' && <Check className="w-3 h-3 text-slate-950 stroke-[3]" />}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-bold text-white text-xs">
+                                Cita Agendada Hoy ({formatTime12h(clientTodayAppointment.startTime)})
+                              </span>
+                              <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400">
+                                AGENDADA
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-[#D4AF37] font-semibold mt-0.5">
+                              {clientTodayAppointment.serviceNameSnapshot} • {formatCurrency(clientTodayAppointment.servicePriceSnapshot || 0)}
+                            </p>
+                          </div>
+                        </div>
 
-              {/* ACTION 2: CUSTOM POINTS ADJUSTMENT */}
-              <div className="p-4 rounded-3xl bg-[#181D26] border border-white/10 space-y-3 shadow-lg">
-                <div className="flex items-center justify-between">
+                        <span className="font-black text-white text-sm">
+                          {formatCurrency(clientTodayAppointment.servicePriceSnapshot || 0)}
+                        </span>
+                      </div>
+
+                      {serviceOption === 'booked' && (
+                        <label className="flex items-center gap-2 mt-2 pt-2 border-t border-white/10 text-[11px] text-slate-300 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={markAppointmentCompleted}
+                            onChange={(e) => setMarkAppointmentCompleted(e.target.checked)}
+                            className="rounded border-white/20 text-[#D4AF37] focus:ring-[#D4AF37]"
+                          />
+                          <span>Marcar cita en agenda como cobrada / completada</span>
+                        </label>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Option: Choose another service from the catalog */}
+                  <div
+                    onClick={() => setServiceOption('custom')}
+                    className={`p-3 rounded-2xl border cursor-pointer transition-all ${
+                      serviceOption === 'custom'
+                        ? 'bg-amber-500/15 border-[#D4AF37] ring-1 ring-[#D4AF37]/50'
+                        : 'bg-[#181D26] border-white/10 hover:border-white/20'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                        serviceOption === 'custom' ? 'border-[#D4AF37] bg-[#D4AF37]' : 'border-slate-500'
+                      }`}>
+                        {serviceOption === 'custom' && <Check className="w-3 h-3 text-slate-950 stroke-[3]" />}
+                      </div>
+                      <span className="font-bold text-white text-xs">
+                        {clientTodayAppointment ? 'Cobrar otro servicio del catálogo' : 'Cobrar servicio realizado en silla'}
+                      </span>
+                    </div>
+
+                    {serviceOption === 'custom' && (
+                      <div className="mt-2.5 pt-2 border-t border-white/10" onClick={(e) => e.stopPropagation()}>
+                        <select
+                          value={selectedServiceId}
+                          onChange={(e) => setSelectedServiceId(e.target.value)}
+                          className="w-full p-2 rounded-xl bg-slate-900 border border-white/15 text-white font-medium text-xs focus:outline-none focus:border-[#D4AF37]"
+                        >
+                          {services.map((s) => (
+                            <option key={s.id} value={s.id}>
+                              {s.name} - {formatCurrency(s.price)} ({s.durationMinutes} min)
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Option: No service (products only or points only) */}
+                  <div
+                    onClick={() => setServiceOption('none')}
+                    className={`p-2.5 rounded-2xl border cursor-pointer transition-all ${
+                      serviceOption === 'none'
+                        ? 'bg-white/10 border-white/30'
+                        : 'bg-[#181D26] border-white/10 hover:border-white/20'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                        serviceOption === 'none' ? 'border-white bg-white' : 'border-slate-500'
+                      }`}>
+                        {serviceOption === 'none' && <Check className="w-3 h-3 text-slate-950 stroke-[3]" />}
+                      </div>
+                      <span className="text-slate-300 text-xs">Sin servicio (Solo registrar visita o productos)</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. VENTA DE PRODUCTOS (POS RÁPIDO O ACCESO A POS COMPLETO) */}
+                <div className="space-y-2 pt-1 border-t border-white/10">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <ShoppingBag className="w-4 h-4 text-[#D4AF37]" />
+                      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                        Productos Adicionales (POS)
+                      </span>
+                    </div>
+
+                    {onOpenPosForClient && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onClose();
+                          onOpenPosForClient(scannedClient);
+                        }}
+                        className="text-[10px] text-[#D4AF37] hover:text-[#E5B869] font-bold flex items-center gap-1 hover:underline"
+                        title="Abrir terminal de venta completa con este cliente"
+                      >
+                        <span>Abrir POS Completo</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Quick Product Selection Drawer */}
+                  <div className="space-y-2">
+                    {cartItems.length > 0 && (
+                      <div className="p-2.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-1.5">
+                        <div className="flex items-center justify-between text-[11px] font-bold text-amber-200">
+                          <span>Productos agregados ({cartItems.length}):</span>
+                          <span>{formatCurrency(totalProductsPrice)}</span>
+                        </div>
+                        {cartItems.map((item) => (
+                          <div key={item.productId} className="flex items-center justify-between text-xs text-white">
+                            <span className="truncate pr-2">{item.productName}</span>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <button
+                                onClick={() => handleRemoveProduct(item.productId)}
+                                className="w-5 h-5 rounded bg-white/10 flex items-center justify-center text-xs"
+                              >
+                                -
+                              </button>
+                              <span className="font-mono text-xs w-4 text-center">{item.quantity}</span>
+                              <button
+                                onClick={() => handleAddProduct(item.productId)}
+                                className="w-5 h-5 rounded bg-white/10 flex items-center justify-center text-xs"
+                              >
+                                +
+                              </button>
+                              <span className="font-bold text-[#D4AF37] ml-1">
+                                {formatCurrency(item.subtotal)}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => setIsProductCatalogExpanded(!isProductCatalogExpanded)}
+                      className="w-full py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-bold text-xs flex items-center justify-between transition-all"
+                    >
+                      <span className="flex items-center gap-1.5">
+                        <Package className="w-3.5 h-3.5 text-[#D4AF37]" />
+                        <span>{isProductCatalogExpanded ? 'Ocultar Catálogo' : '+ Agregar Productos a la Venta'}</span>
+                      </span>
+                      <ChevronDown className={`w-4 h-4 transition-transform ${isProductCatalogExpanded ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {/* Expandable Product Grid */}
+                    {isProductCatalogExpanded && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1 border border-white/10 rounded-2xl bg-black/40 animate-in fade-in">
+                        {activeProducts.length === 0 ? (
+                          <p className="text-slate-500 text-center col-span-2 py-3 text-xs">
+                            No hay productos registrados en el catálogo.
+                          </p>
+                        ) : (
+                          activeProducts.map((prod) => {
+                            const inCart = productCart[prod.id] || 0;
+                            return (
+                              <div
+                                key={prod.id}
+                                className="p-2 rounded-xl bg-[#181D26] border border-white/5 flex items-center justify-between gap-2"
+                              >
+                                <div className="min-w-0 flex-1">
+                                  <h5 className="font-bold text-white text-[11px] truncate">{prod.name}</h5>
+                                  <span className="text-[10px] text-[#D4AF37] font-semibold">
+                                    {formatCurrency(prod.price)}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1 shrink-0">
+                                  {inCart > 0 && (
+                                    <>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleRemoveProduct(prod.id)}
+                                        className="w-6 h-6 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-bold"
+                                      >
+                                        <Minus className="w-3 h-3" />
+                                      </button>
+                                      <span className="font-bold text-xs text-white w-4 text-center">
+                                        {inCart}
+                                      </span>
+                                    </>
+                                  )}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleAddProduct(prod.id)}
+                                    className="w-6 h-6 rounded-lg bg-[#D4AF37] hover:bg-[#E5B869] text-slate-950 flex items-center justify-center font-bold"
+                                  >
+                                    <Plus className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* 4. PUNTOS AUTOMÁTICOS CALCULADOS */}
+                <div className="p-3 rounded-2xl bg-gradient-to-r from-amber-500/10 via-[#D4AF37]/15 to-transparent border border-[#D4AF37]/30 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-[#D4AF37]" />
-                    <h4 className="font-bold text-white text-xs uppercase tracking-wide">
-                      2. Abonar o Canjear Puntos
-                    </h4>
+                    <div>
+                      <span className="font-bold text-white text-xs block">Puntos Acumulados Automáticos:</span>
+                      <span className="text-[10px] text-slate-400">
+                        {serviceOption !== 'none' ? '+50 pts servicio' : '0 pts serv'} • {productPointsEarned > 0 ? `+${productPointsEarned} pts prod (${productPointsPercentage}%)` : '0 pts prod'}
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="flex items-center p-0.5 rounded-xl bg-black/40 border border-white/10">
-                    <button
-                      type="button"
-                      onClick={() => setPointsActionType('add')}
-                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all ${
-                        pointsActionType === 'add' ? 'bg-[#D4AF37] text-slate-950' : 'text-slate-400'
-                      }`}
-                    >
-                      Abonar (+)
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPointsActionType('deduct')}
-                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all ${
-                        pointsActionType === 'deduct' ? 'bg-rose-500 text-white' : 'text-slate-400'
-                      }`}
-                    >
-                      Canjear (-)
-                    </button>
+                  <div className="text-right">
+                    <span className="text-base font-black text-[#D4AF37] block">
+                      +{finalPointsToAdd} pts
+                    </span>
                   </div>
                 </div>
 
-                {/* Quick Chips */}
-                <div className="flex flex-wrap gap-1.5">
-                  {[50, 100, 150, 200].map((amt) => (
-                    <button
-                      key={amt}
-                      type="button"
-                      onClick={() => setPointsAmount(amt)}
-                      className={`px-2.5 py-1 rounded-xl font-bold text-[11px] border transition-all ${
-                        pointsAmount === amt
-                          ? 'bg-[#D4AF37]/20 border-[#D4AF37] text-[#D4AF37]'
-                          : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
-                      }`}
-                    >
-                      {pointsActionType === 'add' ? `+${amt}` : `-${amt}`} pts
-                    </button>
-                  ))}
-                </div>
-
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="col-span-1">
-                    <label className="text-slate-400 block mb-1 text-[10px]">Cantidad</label>
-                    <input
-                      type="number"
-                      value={pointsAmount}
-                      onChange={(e) => setPointsAmount(Math.max(1, Number(e.target.value)))}
-                      className="w-full p-2 rounded-xl bg-slate-900 border border-white/15 text-white font-bold"
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    <label className="text-slate-400 block mb-1 text-[10px]">Motivo / Concepto</label>
-                    <input
-                      type="text"
-                      value={pointsReason}
-                      onChange={(e) => setPointsReason(e.target.value)}
-                      placeholder="Ej. Corte + Barba / Promo"
-                      className="w-full p-2 rounded-xl bg-slate-900 border border-white/15 text-white"
-                    />
+                {/* 5. MÉTODO DE PAGO */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                    Método de Pago
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {(['cash', 'card', 'transfer'] as const).map((m) => (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => setPaymentMethod(m)}
+                        className={`py-2 px-2 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
+                          paymentMethod === m
+                            ? 'bg-[#D4AF37] text-slate-950 border-[#D4AF37] shadow'
+                            : 'bg-white/5 border-white/10 text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        {m === 'cash' && <Banknote className="w-3.5 h-3.5" />}
+                        {m === 'card' && <CreditCard className="w-3.5 h-3.5" />}
+                        {m === 'transfer' && <Receipt className="w-3.5 h-3.5" />}
+                        <span className="capitalize">{m === 'cash' ? 'Efectivo' : m === 'card' ? 'Tarjeta' : 'Transfer'}</span>
+                      </button>
+                    ))}
                   </div>
                 </div>
 
-                <button
-                  onClick={handleApplyPoints}
-                  disabled={isSubmittingAction || pointsAmount <= 0}
-                  className={`w-full py-2.5 rounded-2xl font-bold text-xs shadow-lg transition-all flex items-center justify-center gap-1.5 disabled:opacity-50 ${
-                    pointsActionType === 'add'
-                      ? 'bg-[#D4AF37] hover:bg-[#E5B869] text-slate-950'
-                      : 'bg-rose-600 hover:bg-rose-500 text-white'
-                  }`}
-                >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>
-                    {isSubmittingAction
-                      ? 'Procesando...'
-                      : pointsActionType === 'add'
-                      ? `Abonar +${pointsAmount} Puntos`
-                      : `Canjear -${pointsAmount} Puntos`}
-                  </span>
-                </button>
+                {/* 6. TOTAL Y BOTÓN DE ACCIÓN PRINCIPAL */}
+                <div className="pt-2 border-t border-white/10 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-xs text-slate-400 block">Total a Cobrar:</span>
+                      <span className="text-xl font-black text-white">
+                        {formatCurrency(totalAmountToCharge)}
+                      </span>
+                    </div>
+
+                    <div className="text-right">
+                      <span className="text-[11px] text-teal-400 font-bold block">
+                        +{visitsToAdd} Visita(s)
+                      </span>
+                      <span className="text-xs font-bold text-[#D4AF37]">
+                        +{finalPointsToAdd} Puntos VIP
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleExecuteCheckout}
+                    disabled={isSubmittingAction}
+                    className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] hover:opacity-95 text-slate-950 font-black text-xs sm:text-sm shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 active:scale-98"
+                  >
+                    <Check className="w-4 h-4 stroke-[3]" />
+                    <span>
+                      {isSubmittingAction
+                        ? 'Registrando...'
+                        : `Cobrar ${formatCurrency(totalAmountToCharge)} y Registrar (+${visitsToAdd} Visita, +${finalPointsToAdd} Pts)`}
+                    </span>
+                  </button>
+                </div>
               </div>
 
-              {/* ACTION 3: BOOK APPOINTMENT FOR THIS CLIENT */}
+              {/* Direct Booking Option if client wants another future appointment */}
               {onBookForClient && (
                 <button
                   onClick={() => {
                     onClose();
                     onBookForClient(scannedClient);
                   }}
-                  className="w-full py-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow"
+                  className="w-full py-2.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-bold text-xs flex items-center justify-center gap-2 transition-all"
                 >
-                  <Calendar className="w-4 h-4 text-[#D4AF37]" />
-                  <span>Agendar Nueva Cita para {scannedClient.name.split(' ')[0]}</span>
+                  <Calendar className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <span>Agendar Próxima Cita para {scannedClient.name.split(' ')[0]}</span>
                 </button>
               )}
             </div>

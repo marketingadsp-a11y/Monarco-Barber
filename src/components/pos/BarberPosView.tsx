@@ -28,17 +28,24 @@ import { dataService } from '../../services/firebase/dataService';
 
 interface BarberPosViewProps {
   onOpenNewProductModal?: () => void;
+  initialCustomer?: UserProfile | null;
+  onClearInitialCustomer?: () => void;
 }
 
-export const BarberPosView: React.FC<BarberPosViewProps> = ({ onOpenNewProductModal }) => {
+export const BarberPosView: React.FC<BarberPosViewProps> = ({
+  onOpenNewProductModal,
+  initialCustomer,
+  onClearInitialCustomer,
+}) => {
   const {
     products,
     posSales,
+    barbers,
     businessSettings,
     recordPosSale,
     showToast,
   } = useBarbershop();
-  const { currentBarberId, userProfile, barbers } = useAuth();
+  const { currentBarberId, userProfile } = useAuth();
 
   // Find active barber
   const activeBarber =
@@ -65,6 +72,14 @@ export const BarberPosView: React.FC<BarberPosViewProps> = ({ onOpenNewProductMo
   const [selectedCustomer, setSelectedCustomer] = useState<UserProfile | null>(null);
   const [isLoadingCustomers, setIsLoadingCustomers] = useState(false);
 
+  // Set initial customer if passed from scanner
+  useEffect(() => {
+    if (initialCustomer) {
+      setSelectedCustomer(initialCustomer);
+      setCustomerMode('specific');
+    }
+  }, [initialCustomer]);
+
   // Payment method & notes
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | 'transfer'>('cash');
   const [saleNotes, setSaleNotes] = useState('');
@@ -75,7 +90,7 @@ export const BarberPosView: React.FC<BarberPosViewProps> = ({ onOpenNewProductMo
 
   // Subscribe to registered users for customer search
   useEffect(() => {
-    const unsub = dataService.subscribeToAllUsers((users) => {
+    const unsub = dataService.subscribeToUsers((users) => {
       // Filter clients
       const clientsOnly = users.filter((u) => u.role === 'client' || !u.role);
       setAllCustomers(clientsOnly);
@@ -141,8 +156,8 @@ export const BarberPosView: React.FC<BarberPosViewProps> = ({ onOpenNewProductMo
         productId: product.id,
         productName: product.name,
         price: product.price,
-        quantity: qty,
-        subtotal: product.price * qty,
+        quantity: Number(qty),
+        subtotal: product.price * Number(qty),
       };
     })
     .filter(Boolean) as PosSaleItem[];

@@ -80,15 +80,34 @@ export const BarberDashboardView: React.FC<BarberDashboardViewProps> = ({
     }
   }, []);
 
-  // Find logged in barber record
-  const activeBarber =
+  // Find logged in barber record with safe fallback
+  const activeBarber: Barber =
     barbers.find(
       (b) =>
         b.id === currentBarberId ||
         b.userId === userProfile?.id ||
         b.phone === userProfile?.phone ||
         b.displayName.toLowerCase() === userProfile?.name?.toLowerCase()
-    ) || barbers[0];
+    ) ||
+    barbers[0] || {
+      id: currentBarberId || 'barber_1',
+      displayName: userProfile?.name || 'Barbero Monarca',
+      firstName: (userProfile?.name || 'Barbero').split(' ')[0],
+      lastName: (userProfile?.name || '').split(' ').slice(1).join(' '),
+      email: userProfile?.email || 'barbero@monarcabarber.com',
+      phone: userProfile?.phone || '',
+      bio: 'Barbero profesional en Monarca Barber.',
+      photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+      gallery: [],
+      specialties: ['Corte Clásico', 'Barba'],
+      serviceIds: [],
+      active: true,
+      rating: 5.0,
+      reviewCount: 0,
+      experienceYears: 3,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
 
   // Tab State
   const [internalTab, setInternalTab] = useState<'home' | 'appointments' | 'services' | 'schedule' | 'profile' | 'pos' | 'products'>('home');
@@ -105,6 +124,7 @@ export const BarberDashboardView: React.FC<BarberDashboardViewProps> = ({
   const [isQrScannerOpen, setIsQrScannerOpen] = useState<boolean>(false);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState<boolean>(false);
   const [preselectedClientForBooking, setPreselectedClientForBooking] = useState<UserProfile | null>(null);
+  const [preselectedClientForPos, setPreselectedClientForPos] = useState<UserProfile | null>(null);
 
   React.useEffect(() => {
     if (externalTab === 'book') {
@@ -818,7 +838,11 @@ export const BarberDashboardView: React.FC<BarberDashboardViewProps> = ({
 
       {/* VIEW 6: BARBER POS (PUNTO DE VENTA) */}
       {currentTab === 'pos' && (
-        <BarberPosView onOpenNewProductModal={() => setCurrentTab('products')} />
+        <BarberPosView
+          initialCustomer={preselectedClientForPos}
+          onClearInitialCustomer={() => setPreselectedClientForPos(null)}
+          onOpenNewProductModal={() => setCurrentTab('products')}
+        />
       )}
 
       {/* VIEW 7: GENERAL PRODUCTS CATALOG */}
@@ -837,6 +861,12 @@ export const BarberDashboardView: React.FC<BarberDashboardViewProps> = ({
         onBookForClient={(scannedClient) => {
           setPreselectedClientForBooking(scannedClient);
           setIsBookingModalOpen(true);
+        }}
+        onOpenPosForClient={(scannedClient) => {
+          setPreselectedClientForPos(scannedClient);
+          setIsQrScannerOpen(false);
+          if (onCloseExternalScanner) onCloseExternalScanner();
+          setCurrentTab('pos');
         }}
       />
 
