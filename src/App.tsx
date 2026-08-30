@@ -75,7 +75,12 @@ const MainAppContent: React.FC = () => {
         {currentRole === 'admin' ? (
           <AdminDashboardView />
         ) : currentRole === 'barber' ? (
-          <BarberDashboardView />
+          <BarberDashboardView
+            externalTab={activeTab === 'book' ? 'appointments' : activeTab}
+            onNavigateTab={(tab) => setActiveTab(tab as TabType)}
+            isExternalScannerOpen={isQrModalOpen}
+            onCloseExternalScanner={() => setIsQrModalOpen(false)}
+          />
         ) : (
           /* Client Views */
           <>
@@ -139,12 +144,14 @@ const MainAppContent: React.FC = () => {
         userRole={currentRole}
       />
 
-      {/* Instant Client VIP Pass & QR Modal */}
-      <ClientQRModal
-        isOpen={isQrModalOpen}
-        onClose={() => setIsQrModalOpen(false)}
-        userProfile={userProfile}
-      />
+      {/* Instant Client VIP Pass & QR Modal (Only for Clients) */}
+      {currentRole === 'client' && (
+        <ClientQRModal
+          isOpen={isQrModalOpen}
+          onClose={() => setIsQrModalOpen(false)}
+          userProfile={userProfile}
+        />
+      )}
 
       {/* Floating Spatial Bottom Navigation Bar */}
       <BottomTabBar 

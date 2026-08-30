@@ -141,6 +141,22 @@ export function isTimeSlotInPast(dateStr: string, timeStr: string, minNoticeMinu
 }
 
 /**
+ * Calculate minutes remaining until appointment start
+ */
+export function getMinutesUntilAppointment(dateStr: string, timeStr: string): number {
+  if (!dateStr || !timeStr) return Infinity;
+  try {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    const apptDate = new Date(year, month - 1, day, hours, minutes, 0);
+    const now = new Date();
+    return (apptDate.getTime() - now.getTime()) / (1000 * 60);
+  } catch {
+    return Infinity;
+  }
+}
+
+/**
  * Format currency with symbol
  */
 export function formatCurrency(amount: number, currency = 'MXN', symbol = '$'): string {

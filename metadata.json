@@ -1,6 +1,6 @@
 {
   "name": "MONARCA BARBER",
   "description": "Aplicación móvil premium de citas, agenda y administración para barbería con Spatial UI 2026, autenticación y gestión multi-rol.",
-  "requestFramePermissions": [],
+  "requestFramePermissions": ["camera"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

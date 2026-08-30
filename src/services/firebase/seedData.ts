@@ -236,4 +236,14 @@ export const SEED_BUSINESS_SETTINGS: BusinessSettings = {
   openingTime: '10:00',
   closingTime: '21:00',
   announcement: 'Bebidas de cortesía en cortes VIP: Café espresso o whisky premium.',
+  notificationSettings: {
+    barberNewBookingToast: true,
+    barberNewBookingSound: true,
+    barberBrowserPush: true,
+    clientBookingConfirmation: true,
+    clientReminder24h: true,
+    clientReminder2h: true,
+    clientBrowserPush: true,
+    enableAudioChime: true,
+  },
 };

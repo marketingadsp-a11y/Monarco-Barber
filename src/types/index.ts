@@ -8,6 +8,23 @@ export type AppointmentStatus =
   | 'no_show'
   | 'rejected';
 
+export interface UserPointHistoryItem {
+  id: string;
+  amount: number;
+  reason: string;
+  date: string;
+  type: 'add' | 'deduct' | 'set';
+}
+
+export interface UserPurchaseItem {
+  id: string;
+  itemName: string;
+  price: number;
+  date: string;
+  barberName?: string;
+  notes?: string;
+}
+
 export interface UserProfile {
   id: string;
   role: UserRole;
@@ -17,10 +34,15 @@ export interface UserProfile {
   clientNumber?: string; // Unique 6-digit numeric client ID, e.g. "849201"
   pin?: string; // 4-digit numeric password
   points?: number;
+  manualVisits?: number; // Visitas añadidas o ajustadas manualmente
+  notes?: string; // Notas de estilo, corte o preferencias del cliente
+  birthday?: string; // Fecha de cumpleaños (YYYY-MM-DD o DD/MM)
   membershipTier?: 'VIP' | 'Gold' | 'Black' | 'Classic';
   qrCodeData?: string;
   photoUrl?: string;
   favoriteBarberIds?: string[];
+  pointsHistory?: UserPointHistoryItem[];
+  purchases?: UserPurchaseItem[];
   active: boolean;
   createdAt: string;
   updatedAt?: string;
@@ -148,6 +170,17 @@ export interface ScheduleException {
   reason?: string;
 }
 
+export interface NotificationSettings {
+  barberNewBookingToast: boolean; // Notificar al barbero en tiempo real con toast cuando un cliente reserva
+  barberNewBookingSound: boolean; // Reproducir chime de audio al recibir nueva cita
+  barberBrowserPush: boolean; // Enviar notificación de navegador (Chrome/Safari) al barbero
+  clientBookingConfirmation: boolean; // Confirmación inmediata al cliente al agendar
+  clientReminder24h: boolean; // Recordatorio 1 día (24 horas) antes de la cita
+  clientReminder2h: boolean; // Recordatorio 2 horas antes de la cita
+  clientBrowserPush: boolean; // Notificaciones push de navegador para clientes
+  enableAudioChime: boolean; // Efectos de sonido elegantes activos
+}
+
 export interface BusinessSettings {
   id: string;
   name: string;
@@ -174,6 +207,8 @@ export interface BusinessSettings {
   heroTitle?: string;
   heroSubtitle?: string;
   heroButtonText?: string;
+  // Notification Engine Settings
+  notificationSettings?: NotificationSettings;
 }
 
 export interface Review {

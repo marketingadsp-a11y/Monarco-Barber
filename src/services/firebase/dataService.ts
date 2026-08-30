@@ -25,6 +25,8 @@ import {
   UserProfile,
   AppointmentStatus,
   UserRole,
+  UserPointHistoryItem,
+  UserPurchaseItem,
 } from '../../types';
 import {
   SEED_BARBERS,
@@ -79,11 +81,16 @@ export function toSpanishUser(profile: UserProfile): Record<string, any> {
     telefono: profile.phone || '',
     numero_cliente: profile.clientNumber || '',
     pin: profile.pin || '',
-    puntos: profile.points || 0,
+    puntos: profile.points !== undefined ? profile.points : 100,
+    visitas_manuales: profile.manualVisits !== undefined ? profile.manualVisits : 0,
+    notas: profile.notes || '',
+    cumpleanos: profile.birthday || '',
     nivel_membresia: profile.membershipTier || 'VIP',
     qr_datos: profile.qrCodeData || profile.clientNumber || '',
     foto_url: extractCleanUrl(profile.photoUrl),
     barberos_favoritos: profile.favoriteBarberIds || [],
+    historial_puntos: Array.isArray(profile.pointsHistory) ? profile.pointsHistory : [],
+    compras: Array.isArray(profile.purchases) ? profile.purchases : [],
     activo: profile.active !== undefined ? profile.active : true,
     creado_en: profile.createdAt || new Date().toISOString(),
     actualizado_en: profile.updatedAt || new Date().toISOString(),
@@ -109,10 +116,15 @@ export function fromSpanishUser(data: any, docId: string): UserProfile {
     clientNumber: data.numero_cliente || data.clientNumber || '',
     pin: data.pin || data.codigo_acceso || '',
     points: data.puntos !== undefined ? Number(data.puntos) : 100,
+    manualVisits: data.visitas_manuales !== undefined ? Number(data.visitas_manuales) : 0,
+    notes: data.notas || data.notes || '',
+    birthday: data.cumpleanos || data.birthday || '',
     membershipTier: data.nivel_membresia || data.membershipTier || 'VIP',
     qrCodeData: data.qr_datos || data.qrCodeData || data.numero_cliente || '',
     photoUrl: data.foto_url || data.photoUrl || '',
     favoriteBarberIds: data.barberos_favoritos || data.favoriteBarberIds || [],
+    pointsHistory: Array.isArray(data.historial_puntos) ? data.historial_puntos : [],
+    purchases: Array.isArray(data.compras) ? data.compras : [],
     active: data.activo !== undefined ? data.activo : (data.active !== undefined ? data.active : true),
     createdAt: data.creado_en || data.createdAt || new Date().toISOString(),
     updatedAt: data.actualizado_en || data.updatedAt || undefined,
@@ -396,11 +408,22 @@ export function toSpanishSettings(st: BusinessSettings): Record<string, any> {
     banner_titulo: st.heroTitle || '',
     banner_subtitulo: st.heroSubtitle || '',
     banner_boton_texto: st.heroButtonText || '',
+    configuracion_notificaciones: st.notificationSettings ? {
+      notificar_barbero_toast: st.notificationSettings.barberNewBookingToast ?? true,
+      notificar_barbero_sonido: st.notificationSettings.barberNewBookingSound ?? true,
+      notificar_barbero_push: st.notificationSettings.barberBrowserPush ?? true,
+      confirmacion_cliente_reserva: st.notificationSettings.clientBookingConfirmation ?? true,
+      recordatorio_cliente_24h: st.notificationSettings.clientReminder24h ?? true,
+      recordatorio_cliente_2h: st.notificationSettings.clientReminder2h ?? true,
+      notificaciones_navegador_cliente: st.notificationSettings.clientBrowserPush ?? true,
+      habilitar_chime_audio: st.notificationSettings.enableAudioChime ?? true,
+    } : null,
     actualizado_en: new Date().toISOString(),
   });
 }
 
 export function fromSpanishSettings(data: any, docId: string): BusinessSettings {
+  const notifRaw = data.configuracion_notificaciones || data.notificationSettings || {};
   return {
     id: data.id || docId || 'principal',
     name: data.nombre || data.name || 'MONARCA BARBER',
@@ -426,6 +449,16 @@ export function fromSpanishSettings(data: any, docId: string): BusinessSettings 
     heroTitle: data.banner_titulo || data.heroTitle || 'El arte del corte clásico y la barbería contemporánea.',
     heroSubtitle: data.banner_subtitulo || data.heroSubtitle || data.eslogan || data.tagline || 'Donde la elegancia y la maestría se encuentran.',
     heroButtonText: data.banner_boton_texto || data.heroButtonText || 'Reservar Cita Ahora',
+    notificationSettings: {
+      barberNewBookingToast: notifRaw.notificar_barbero_toast !== undefined ? Boolean(notifRaw.notificar_barbero_toast) : (notifRaw.barberNewBookingToast !== undefined ? Boolean(notifRaw.barberNewBookingToast) : true),
+      barberNewBookingSound: notifRaw.notificar_barbero_sonido !== undefined ? Boolean(notifRaw.notificar_barbero_sonido) : (notifRaw.barberNewBookingSound !== undefined ? Boolean(notifRaw.barberNewBookingSound) : true),
+      barberBrowserPush: notifRaw.notificar_barbero_push !== undefined ? Boolean(notifRaw.notificar_barbero_push) : (notifRaw.barberBrowserPush !== undefined ? Boolean(notifRaw.barberBrowserPush) : true),
+      clientBookingConfirmation: notifRaw.confirmacion_cliente_reserva !== undefined ? Boolean(notifRaw.confirmacion_cliente_reserva) : (notifRaw.clientBookingConfirmation !== undefined ? Boolean(notifRaw.clientBookingConfirmation) : true),
+      clientReminder24h: notifRaw.recordatorio_cliente_24h !== undefined ? Boolean(notifRaw.recordatorio_cliente_24h) : (notifRaw.clientReminder24h !== undefined ? Boolean(notifRaw.clientReminder24h) : true),
+      clientReminder2h: notifRaw.recordatorio_cliente_2h !== undefined ? Boolean(notifRaw.recordatorio_cliente_2h) : (notifRaw.clientReminder2h !== undefined ? Boolean(notifRaw.clientReminder2h) : true),
+      clientBrowserPush: notifRaw.notificaciones_navegador_cliente !== undefined ? Boolean(notifRaw.notificaciones_navegador_cliente) : (notifRaw.clientBrowserPush !== undefined ? Boolean(notifRaw.clientBrowserPush) : true),
+      enableAudioChime: notifRaw.habilitar_chime_audio !== undefined ? Boolean(notifRaw.habilitar_chime_audio) : (notifRaw.enableAudioChime !== undefined ? Boolean(notifRaw.enableAudioChime) : true),
+    },
   };
 }
 
@@ -608,6 +641,206 @@ export class DataService {
   static async generateUniqueClientNumber(): Promise<string> {
     // Generate instantly without blocking network scan
     return Math.floor(100000 + Math.random() * 900000).toString();
+  }
+
+  static subscribeToUsers(callback: (users: UserProfile[]) => void): () => void {
+    const q = collection(db, 'usuarios');
+    return onSnapshot(
+      q,
+      (snapshot) => {
+        const users: UserProfile[] = [];
+        snapshot.forEach((docSnap) => {
+          users.push(fromSpanishUser(docSnap.data(), docSnap.id));
+        });
+        // Sort by creation date or name
+        users.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+        callback(users);
+      },
+      (error) => {
+        console.warn('Error subscribing to usuarios:', error);
+      }
+    );
+  }
+
+  static async getAllUsers(): Promise<UserProfile[]> {
+    try {
+      const snap = await getDocs(collection(db, 'usuarios'));
+      const users: UserProfile[] = [];
+      snap.forEach((docSnap) => {
+        users.push(fromSpanishUser(docSnap.data(), docSnap.id));
+      });
+      return users;
+    } catch (error) {
+      console.warn('Error getting all users:', error);
+      return [];
+    }
+  }
+
+  static async updateUserRole(userId: string, newRole: UserRole): Promise<void> {
+    try {
+      const roleMap: Record<UserRole, string> = {
+        client: 'cliente',
+        barber: 'barbero',
+        admin: 'administrador',
+      };
+      const userRef = doc(db, 'usuarios', userId);
+      await updateDoc(userRef, {
+        rol: roleMap[newRole],
+        actualizado_en: new Date().toISOString(),
+      });
+
+      // If promoted to barber, check if barber record exists or auto-create one
+      if (newRole === 'barber') {
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          const u = fromSpanishUser(userSnap.data(), userSnap.id);
+          const barbersSnap = await getDocs(query(collection(db, 'barberos'), where('usuario_id', '==', userId)));
+          if (barbersSnap.empty) {
+            const newBarberId = `barber_${userId.substring(0, 8)}_${Date.now().toString(36)}`;
+            const newBarber: Barber = {
+              id: newBarberId,
+              userId: userId,
+              displayName: u.name,
+              firstName: u.name.split(' ')[0] || u.name,
+              lastName: u.name.split(' ').slice(1).join(' ') || '',
+              email: u.email || '',
+              phone: u.phone || '',
+              bio: 'Barbero profesional en Monarca Barber.',
+              photoUrl: u.photoUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+              gallery: [],
+              specialties: ['Corte Clásico', 'Barba'],
+              serviceIds: [],
+              active: true,
+              rating: 5.0,
+              reviewCount: 0,
+              experienceYears: 3,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            };
+            await setDoc(doc(db, 'barberos', newBarberId), toSpanishBarber(newBarber));
+          } else {
+            // Activate existing barber record
+            const barberDoc = barbersSnap.docs[0];
+            await updateDoc(doc(db, 'barberos', barberDoc.id), { activo: true, actualizado_en: new Date().toISOString() });
+          }
+        }
+      }
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `usuarios/${userId}`);
+    }
+  }
+
+  static async updateUserPoints(
+    userId: string,
+    newPoints: number,
+    reason: string = 'Ajuste manual por administración',
+    type: 'add' | 'deduct' | 'set' = 'set'
+  ): Promise<void> {
+    try {
+      const userRef = doc(db, 'usuarios', userId);
+      const userSnap = await getDoc(userRef);
+      if (!userSnap.exists()) return;
+      const u = fromSpanishUser(userSnap.data(), userSnap.id);
+      
+      const historyItem: UserPointHistoryItem = {
+        id: `pts_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+        amount: newPoints - (u.points || 0),
+        reason: reason,
+        date: new Date().toISOString(),
+        type: type,
+      };
+
+      const nextHistory = [historyItem, ...(u.pointsHistory || [])].slice(0, 50);
+
+      await updateDoc(userRef, {
+        puntos: Math.max(0, newPoints),
+        historial_puntos: nextHistory,
+        actualizado_en: new Date().toISOString(),
+      });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `usuarios/${userId}`);
+    }
+  }
+
+  static async updateUserVisits(userId: string, newManualVisits: number): Promise<void> {
+    try {
+      const userRef = doc(db, 'usuarios', userId);
+      await updateDoc(userRef, {
+        visitas_manuales: Math.max(0, newManualVisits),
+        actualizado_en: new Date().toISOString(),
+      });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `usuarios/${userId}`);
+    }
+  }
+
+  static async updateUserFullProfile(userId: string, profileData: Partial<UserProfile>): Promise<void> {
+    try {
+      const userRef = doc(db, 'usuarios', userId);
+      const updatePayload: Record<string, any> = {
+        actualizado_en: new Date().toISOString(),
+      };
+
+      if (profileData.name !== undefined) updatePayload.nombre = profileData.name;
+      if (profileData.phone !== undefined) updatePayload.telefono = profileData.phone;
+      if (profileData.email !== undefined) updatePayload.correo = profileData.email;
+      if (profileData.clientNumber !== undefined) updatePayload.numero_cliente = profileData.clientNumber;
+      if (profileData.pin !== undefined) updatePayload.pin = profileData.pin;
+      if (profileData.membershipTier !== undefined) updatePayload.nivel_membresia = profileData.membershipTier;
+      if (profileData.notes !== undefined) updatePayload.notas = profileData.notes;
+      if (profileData.birthday !== undefined) updatePayload.cumpleanos = profileData.birthday;
+      if (profileData.points !== undefined) updatePayload.puntos = Number(profileData.points);
+      if (profileData.manualVisits !== undefined) updatePayload.visitas_manuales = Number(profileData.manualVisits);
+      if (profileData.photoUrl !== undefined) updatePayload.foto_url = extractCleanUrl(profileData.photoUrl);
+      if (profileData.active !== undefined) updatePayload.activo = profileData.active;
+      if (profileData.role !== undefined) {
+        const roleMap: Record<UserRole, string> = {
+          client: 'cliente',
+          barber: 'barbero',
+          admin: 'administrador',
+        };
+        updatePayload.rol = roleMap[profileData.role];
+      }
+
+      await updateDoc(userRef, removeUndefinedFields(updatePayload));
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `usuarios/${userId}`);
+    }
+  }
+
+  static async addUserPurchase(userId: string, purchase: Omit<UserPurchaseItem, 'id' | 'date'>): Promise<void> {
+    try {
+      const userRef = doc(db, 'usuarios', userId);
+      const userSnap = await getDoc(userRef);
+      if (!userSnap.exists()) return;
+      const u = fromSpanishUser(userSnap.data(), userSnap.id);
+
+      const newPurchase: UserPurchaseItem = {
+        id: `pur_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+        itemName: purchase.itemName,
+        price: purchase.price,
+        barberName: purchase.barberName,
+        notes: purchase.notes,
+        date: new Date().toISOString(),
+      };
+
+      const nextPurchases = [newPurchase, ...(u.purchases || [])];
+
+      await updateDoc(userRef, {
+        compras: nextPurchases,
+        actualizado_en: new Date().toISOString(),
+      });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `usuarios/${userId}`);
+    }
+  }
+
+  static async deleteUserProfile(userId: string): Promise<void> {
+    try {
+      await deleteDoc(doc(db, 'usuarios', userId));
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, `usuarios/${userId}`);
+    }
   }
 
   static async saveUserProfile(profile: UserProfile): Promise<void> {

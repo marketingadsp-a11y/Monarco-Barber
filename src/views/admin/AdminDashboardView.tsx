@@ -29,12 +29,24 @@ import {
   MousePointerClick,
   RotateCcw,
   ChevronRight,
+  Bell,
+  BellRing,
+  Volume2,
+  VolumeX,
+  Smartphone,
+  Monitor,
+  CheckCircle,
+  Info,
+  Radio,
+  Send,
 } from 'lucide-react';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { Barber, Service, Appointment, BusinessSettings } from '../../types';
+import { Barber, Service, Appointment, BusinessSettings, NotificationSettings } from '../../types';
 import { formatCurrency, formatDateSpanish, formatTime12h, getTodayDateString } from '../../utils/dateTime';
 import { imageService } from '../../services/imgbb/imageService';
+import { AdminUsersSection } from '../../components/admin/AdminUsersSection';
+import { getBrowserNotificationPermission, isBrowserNotificationSupported } from '../../services/notificationService';
 
 export const AdminDashboardView: React.FC = () => {
   const { logout } = useAuth();
@@ -43,6 +55,7 @@ export const AdminDashboardView: React.FC = () => {
     barbers,
     appointments,
     businessSettings,
+    notificationSettings,
     saveService,
     deleteService,
     toggleServiceActive,
@@ -50,10 +63,21 @@ export const AdminDashboardView: React.FC = () => {
     toggleBarberActive,
     updateAppointmentStatus,
     saveSettings,
+    updateNotificationSettings,
+    requestBrowserNotifications,
+    testNotification,
     showToast,
   } = useBarbershop();
 
-  const [activeSection, setActiveSection] = useState<'overview' | 'appointments' | 'barbers' | 'services' | 'settings'>('overview');
+  const [activeSection, setActiveSection] = useState<'overview' | 'users' | 'appointments' | 'barbers' | 'services' | 'notifications' | 'settings'>('overview');
+  const [browserPermission, setBrowserPermission] = useState<NotificationPermission>('default');
+  const [isSavingNotifications, setIsSavingNotifications] = useState(false);
+
+  useEffect(() => {
+    if (isBrowserNotificationSupported()) {
+      setBrowserPermission(getBrowserNotificationPermission());
+    }
+  }, []);
 
   // Service Edit/Create Modal State
   const [editingService, setEditingService] = useState<Partial<Service> | null>(null);
@@ -225,6 +249,15 @@ export const AdminDashboardView: React.FC = () => {
             Métricas
           </button>
           <button
+            onClick={() => setActiveSection('users')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+              activeSection === 'users' ? 'bg-[#D4AF37] text-slate-950 shadow' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Users className="w-3.5 h-3.5" />
+            <span>Usuarios</span>
+          </button>
+          <button
             onClick={() => setActiveSection('appointments')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
               activeSection === 'appointments' ? 'bg-[#D4AF37] text-slate-950 shadow' : 'text-slate-400 hover:text-white'
@@ -247,6 +280,15 @@ export const AdminDashboardView: React.FC = () => {
             }`}
           >
             Barberos ({barbers.length})
+          </button>
+          <button
+            onClick={() => setActiveSection('notifications')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+              activeSection === 'notifications' ? 'bg-[#D4AF37] text-slate-950 shadow' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Bell className="w-3.5 h-3.5" />
+            <span>Notificaciones</span>
           </button>
           <button
             onClick={() => setActiveSection('settings')}
@@ -300,7 +342,37 @@ export const AdminDashboardView: React.FC = () => {
               <span className="text-[11px] text-slate-500 mt-1 block">Tratamientos activos</span>
             </div>
           </div>
+
+          {/* Quick Access to Users Banner */}
+          <div
+            onClick={() => setActiveSection('users')}
+            className="p-4 rounded-2xl bg-gradient-to-r from-[#181D27] via-[#141720] to-[#101217] border border-[#D4AF37]/30 hover:border-[#D4AF37] p-5 cursor-pointer shadow-xl transition-all duration-150 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 group"
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-[#D4AF37]/15 border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37] group-hover:scale-105 transition-transform">
+                <Users className="w-6 h-6" />
+              </div>
+              <div>
+                <h4 className="font-bold text-white text-sm group-hover:text-[#D4AF37] transition-colors">
+                  Directorio y Expedientes de Clientes
+                </h4>
+                <p className="text-xs text-slate-400">
+                  Ver usuarios registrados, consultar QR, modificar puntos, ajustar visitas o asignar roles de barbero/admin.
+                </p>
+              </div>
+            </div>
+
+            <button className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#D4AF37] text-slate-950 font-bold text-xs shadow-md group-hover:bg-[#E5B869] transition-colors self-end sm:self-auto">
+              <span>Abrir Directorio</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
+      )}
+
+      {/* SECTION: USERS MANAGEMENT */}
+      {activeSection === 'users' && (
+        <AdminUsersSection appointments={appointments} />
       )}
 
       {/* SECTION: APPOINTMENTS LIST */}
@@ -766,6 +838,391 @@ export const AdminDashboardView: React.FC = () => {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* SECTION: NOTIFICATIONS & REMINDERS CONTROL CENTER */}
+      {activeSection === 'notifications' && (
+        <div className="rounded-3xl bg-[#14171E] border border-white/10 p-5 space-y-6 shadow-2xl">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-[#1E232F] via-[#161922] to-[#12141A] border border-[#D4AF37]/30">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shadow-lg">
+                <BellRing className="w-6 h-6 animate-pulse" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-base font-bold text-white tracking-tight">
+                    Centro de Notificaciones & Recordatorios
+                  </h2>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    Tiempo Real
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Controla las alertas de nuevas citas para barberos y recordatorios automáticos (24h y 2h antes) para clientes.
+                </p>
+              </div>
+            </div>
+
+            {/* Browser Permission Status Badge & Action */}
+            <div className="flex flex-wrap items-center gap-2">
+              <div className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 ${
+                browserPermission === 'granted'
+                  ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
+                  : browserPermission === 'denied'
+                  ? 'bg-rose-500/15 border-rose-500/30 text-rose-300'
+                  : 'bg-amber-500/15 border-amber-500/30 text-amber-300'
+              }`}>
+                <Radio className="w-3 h-3" />
+                <span>
+                  {browserPermission === 'granted'
+                    ? 'Navegador Autorizado'
+                    : browserPermission === 'denied'
+                    ? 'Navegador Bloqueado'
+                    : 'Permiso Pendiente'}
+                </span>
+              </div>
+
+              {browserPermission !== 'granted' && (
+                <button
+                  onClick={async () => {
+                    const result = await requestBrowserNotifications();
+                    setBrowserPermission(result);
+                  }}
+                  className="px-3.5 py-1.5 rounded-xl bg-[#D4AF37] hover:bg-[#E5B869] text-slate-950 text-xs font-bold transition-all shadow-md flex items-center gap-1.5"
+                >
+                  <Smartphone className="w-3.5 h-3.5" />
+                  <span>Activar Permisos</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            {/* 1. NOTIFICACIONES PARA BARBEROS */}
+            <div className="p-5 rounded-2xl bg-black/40 border border-white/10 space-y-4">
+              <div className="flex items-center justify-between pb-2 border-b border-white/10">
+                <div className="flex items-center gap-2.5">
+                  <Scissors className="w-4 h-4 text-[#D4AF37]" />
+                  <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                    Panel del Barbero (En Vivo)
+                  </h3>
+                </div>
+                <span className="text-[10px] text-slate-400 font-medium">Alertas de Agenda</span>
+              </div>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Cuando un cliente reserva un corte o servicio directamente en la agenda del barbero:
+              </p>
+
+              <div className="space-y-3 pt-1">
+                {/* Toggle: Toast en pantalla */}
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                  <div className="pr-3">
+                    <span className="text-xs font-bold text-white block">Mensaje Toast en Pantalla</span>
+                    <span className="text-[11px] text-slate-400 block">
+                      Aviso emergente instantáneo con nombre del cliente, servicio y hora
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      updateNotificationSettings({
+                        barberNewBookingToast: !notificationSettings.barberNewBookingToast,
+                      })
+                    }
+                    className={`shrink-0 transition-colors ${
+                      notificationSettings.barberNewBookingToast ? 'text-[#D4AF37]' : 'text-slate-600'
+                    }`}
+                  >
+                    {notificationSettings.barberNewBookingToast ? (
+                      <ToggleRight className="w-8 h-8" />
+                    ) : (
+                      <ToggleLeft className="w-8 h-8" />
+                    )}
+                  </button>
+                </div>
+
+                {/* Toggle: Sonido de alerta */}
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                  <div className="pr-3">
+                    <span className="text-xs font-bold text-white block">Sonido / Chime de Notificación</span>
+                    <span className="text-[11px] text-slate-400 block">
+                      Tono sonoro elegante compatible con Chrome y Safari
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      updateNotificationSettings({
+                        barberNewBookingSound: !notificationSettings.barberNewBookingSound,
+                      })
+                    }
+                    className={`shrink-0 transition-colors ${
+                      notificationSettings.barberNewBookingSound ? 'text-[#D4AF37]' : 'text-slate-600'
+                    }`}
+                  >
+                    {notificationSettings.barberNewBookingSound ? (
+                      <ToggleRight className="w-8 h-8" />
+                    ) : (
+                      <ToggleLeft className="w-8 h-8" />
+                    )}
+                  </button>
+                </div>
+
+                {/* Toggle: Push de navegador */}
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                  <div className="pr-3">
+                    <span className="text-xs font-bold text-white block">Notificación de Navegador (Push)</span>
+                    <span className="text-[11px] text-slate-400 block">
+                      Aviso de escritorio o smartphone cuando la pestaña esté minimizada
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      updateNotificationSettings({
+                        barberBrowserPush: !notificationSettings.barberBrowserPush,
+                      })
+                    }
+                    className={`shrink-0 transition-colors ${
+                      notificationSettings.barberBrowserPush ? 'text-[#D4AF37]' : 'text-slate-600'
+                    }`}
+                  >
+                    {notificationSettings.barberBrowserPush ? (
+                      <ToggleRight className="w-8 h-8" />
+                    ) : (
+                      <ToggleLeft className="w-8 h-8" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Botón de prueba para Barbero */}
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => testNotification('barber_new_booking')}
+                  className="w-full py-2.5 rounded-xl bg-[#D4AF37]/15 hover:bg-[#D4AF37]/25 text-[#D4AF37] border border-[#D4AF37]/30 text-xs font-bold flex items-center justify-center gap-2 transition-all"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  <span>Probar Notificación de Nueva Cita (Barbero)</span>
+                </button>
+              </div>
+            </div>
+
+            {/* 2. NOTIFICACIONES Y RECORDATORIOS PARA CLIENTES */}
+            <div className="p-5 rounded-2xl bg-black/40 border border-white/10 space-y-4">
+              <div className="flex items-center justify-between pb-2 border-b border-white/10">
+                <div className="flex items-center gap-2.5">
+                  <Users className="w-4 h-4 text-emerald-400" />
+                  <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                    Panel del Cliente (Recordatorios)
+                  </h3>
+                </div>
+                <span className="text-[10px] text-slate-400 font-medium">Experiencia VIP</span>
+              </div>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Recordatorios automatizados para evitar inasistencias y confirmar citas:
+              </p>
+
+              <div className="space-y-3 pt-1">
+                {/* Toggle: Confirmación instantánea */}
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                  <div className="pr-3">
+                    <span className="text-xs font-bold text-white block">Confirmación al Reservar</span>
+                    <span className="text-[11px] text-slate-400 block">
+                      Toast y notificación al momento en que el cliente confirma su cita
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      updateNotificationSettings({
+                        clientBookingConfirmation: !notificationSettings.clientBookingConfirmation,
+                      })
+                    }
+                    className={`shrink-0 transition-colors ${
+                      notificationSettings.clientBookingConfirmation ? 'text-emerald-400' : 'text-slate-600'
+                    }`}
+                  >
+                    {notificationSettings.clientBookingConfirmation ? (
+                      <ToggleRight className="w-8 h-8" />
+                    ) : (
+                      <ToggleLeft className="w-8 h-8" />
+                    )}
+                  </button>
+                </div>
+
+                {/* Toggle: Recordatorio 1 día antes */}
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                  <div className="pr-3">
+                    <span className="text-xs font-bold text-white block">Recordatorio 1 Día Antes (24 Horas)</span>
+                    <span className="text-[11px] text-slate-400 block">
+                      Aviso automático previo al día de la cita con los datos de su barbero
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      updateNotificationSettings({
+                        clientReminder24h: !notificationSettings.clientReminder24h,
+                      })
+                    }
+                    className={`shrink-0 transition-colors ${
+                      notificationSettings.clientReminder24h ? 'text-emerald-400' : 'text-slate-600'
+                    }`}
+                  >
+                    {notificationSettings.clientReminder24h ? (
+                      <ToggleRight className="w-8 h-8" />
+                    ) : (
+                      <ToggleLeft className="w-8 h-8" />
+                    )}
+                  </button>
+                </div>
+
+                {/* Toggle: Recordatorio 2 horas antes */}
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                  <div className="pr-3">
+                    <span className="text-xs font-bold text-white block">Recordatorio 2 Horas Antes</span>
+                    <span className="text-[11px] text-slate-400 block">
+                      Aviso prioritario el mismo día para preparar su llegada a la barbería
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      updateNotificationSettings({
+                        clientReminder2h: !notificationSettings.clientReminder2h,
+                      })
+                    }
+                    className={`shrink-0 transition-colors ${
+                      notificationSettings.clientReminder2h ? 'text-emerald-400' : 'text-slate-600'
+                    }`}
+                  >
+                    {notificationSettings.clientReminder2h ? (
+                      <ToggleRight className="w-8 h-8" />
+                    ) : (
+                      <ToggleLeft className="w-8 h-8" />
+                    )}
+                  </button>
+                </div>
+
+                {/* Toggle: Push de navegador para clientes */}
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                  <div className="pr-3">
+                    <span className="text-xs font-bold text-white block">Notificación de Navegador para Clientes</span>
+                    <span className="text-[11px] text-slate-400 block">
+                      Habilitar alertas de sistema para clientes en Chrome, Safari y PWA
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      updateNotificationSettings({
+                        clientBrowserPush: !notificationSettings.clientBrowserPush,
+                      })
+                    }
+                    className={`shrink-0 transition-colors ${
+                      notificationSettings.clientBrowserPush ? 'text-emerald-400' : 'text-slate-600'
+                    }`}
+                  >
+                    {notificationSettings.clientBrowserPush ? (
+                      <ToggleRight className="w-8 h-8" />
+                    ) : (
+                      <ToggleLeft className="w-8 h-8" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Botones de prueba para Cliente */}
+              <div className="grid grid-cols-2 gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => testNotification('client_reminder_24h')}
+                  className="py-2.5 px-2 rounded-xl bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border border-blue-500/30 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all text-center"
+                >
+                  <Calendar className="w-3.5 h-3.5 shrink-0" />
+                  <span>Probar 1 Día Antes</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => testNotification('client_reminder_2h')}
+                  className="py-2.5 px-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all text-center"
+                >
+                  <Clock className="w-3.5 h-3.5 shrink-0" />
+                  <span>Probar 2 Horas Antes</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* 3. AJUSTES GLOBALES DE AUDIO Y COMPATIBILIDAD */}
+          <div className="p-5 rounded-2xl bg-gradient-to-b from-[#181D26] to-[#12151B] border border-white/10 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <Volume2 className="w-4 h-4 text-[#D4AF37]" />
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                  Motor de Audio & Compatibilidad Multidispositivo
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  updateNotificationSettings({
+                    enableAudioChime: !notificationSettings.enableAudioChime,
+                  })
+                }
+                className={`transition-colors ${
+                  notificationSettings.enableAudioChime ? 'text-[#D4AF37]' : 'text-slate-600'
+                }`}
+              >
+                {notificationSettings.enableAudioChime ? (
+                  <ToggleRight className="w-8 h-8" />
+                ) : (
+                  <ToggleLeft className="w-8 h-8" />
+                )}
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div className="p-3.5 rounded-xl bg-black/30 border border-white/5">
+                <span className="text-slate-300 font-bold block flex items-center gap-1.5">
+                  <Monitor className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  Google Chrome (PC / Mac / Android)
+                </span>
+                <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                  Soporta síntesis Web Audio y notificaciones nativas de sistema en primer y segundo plano.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-black/30 border border-white/5">
+                <span className="text-slate-300 font-bold block flex items-center gap-1.5">
+                  <Smartphone className="w-3.5 h-3.5 text-blue-400" />
+                  Apple Safari (iOS & macOS)
+                </span>
+                <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                  El motor sintetiza audio tras la primera interacción y envía push nativo en macOS e iOS 16.4+.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-black/30 border border-white/5 flex flex-col justify-between">
+                <div>
+                  <span className="text-slate-300 font-bold block">Prueba Rápida de Chime</span>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Escucha el tono armónico de Monarca</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => testNotification('sound_only')}
+                  className="mt-2 py-1.5 px-3 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[11px] font-semibold flex items-center justify-center gap-1.5 transition-colors"
+                >
+                  <Volume2 className="w-3 h-3" />
+                  <span>Reproducir Sonido</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
