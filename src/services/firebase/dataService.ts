@@ -27,11 +27,15 @@ import {
   UserRole,
   UserPointHistoryItem,
   UserPurchaseItem,
+  Product,
+  PosSale,
+  PosSaleItem,
 } from '../../types';
 import {
   SEED_BARBERS,
   SEED_CATEGORIES,
   SEED_SERVICES,
+  SEED_PRODUCTS,
   SEED_BUSINESS_SETTINGS,
   DEFAULT_WEEKLY_SCHEDULE,
 } from './seedData';
@@ -381,7 +385,92 @@ export function fromSpanishBlockedSlot(data: any, docId: string): BlockedSlot {
   };
 }
 
-// 8. CONFIGURACION DEL NEGOCIO
+// 8. PRODUCTOS A LA VENTA
+export function toSpanishProduct(prod: Product): Record<string, any> {
+  return removeUndefinedFields({
+    id: prod.id,
+    nombre: prod.name || '',
+    descripcion: prod.description || '',
+    precio: Number(prod.price) || 0,
+    existencias: prod.stock !== undefined ? Number(prod.stock) : 99,
+    activo: prod.active !== undefined ? prod.active : true,
+    creado_por_tipo: prod.createdByType === 'barber' ? 'barbero' : 'administrador',
+    creado_por_barbero_id: prod.createdByBarberId || null,
+    creado_por_barbero_nombre: prod.createdByBarberName || null,
+    creado_en: prod.createdAt || new Date().toISOString(),
+    actualizado_en: prod.updatedAt || new Date().toISOString(),
+  });
+}
+
+export function fromSpanishProduct(data: any, docId: string): Product {
+  return {
+    id: data.id || docId,
+    name: data.nombre || data.name || 'Producto',
+    description: data.descripcion || data.description || '',
+    price: Number(data.precio !== undefined ? data.precio : data.price) || 0,
+    stock: data.existencias !== undefined ? Number(data.existencias) : (data.stock !== undefined ? Number(data.stock) : 99),
+    active: data.activo !== undefined ? data.activo : (data.active !== undefined ? data.active : true),
+    createdByType: (data.creado_por_tipo === 'barbero' || data.createdByType === 'barber') ? 'barber' : 'admin',
+    createdByBarberId: data.creado_por_barbero_id || data.createdByBarberId || undefined,
+    createdByBarberName: data.creado_por_barbero_nombre || data.createdByBarberName || undefined,
+    createdAt: data.creado_en || data.createdAt || new Date().toISOString(),
+    updatedAt: data.actualizado_en || data.updatedAt || new Date().toISOString(),
+  };
+}
+
+// 9. VENTAS POS (PUNTO DE VENTA)
+export function toSpanishPosSale(sale: PosSale): Record<string, any> {
+  return removeUndefinedFields({
+    id: sale.id,
+    barbero_id: sale.barberId,
+    barbero_nombre: sale.barberName,
+    cliente_id: sale.customerId || null,
+    cliente_nombre: sale.customerName || 'Público en General',
+    cliente_numero: sale.customerClientNumber || null,
+    cliente_telefono: sale.customerPhone || null,
+    articulos: (sale.items || []).map((it) => ({
+      producto_id: it.productId,
+      nombre: it.productName,
+      precio: Number(it.price) || 0,
+      cantidad: Number(it.quantity) || 1,
+      subtotal: Number(it.subtotal) || 0,
+    })),
+    total: Number(sale.total) || 0,
+    puntos_otorgados: Number(sale.pointsAwarded) || 0,
+    porcentaje_puntos_usado: Number(sale.pointsPercentageUsed) || 1,
+    metodo_pago: sale.paymentMethod || 'cash',
+    notas: sale.notes || '',
+    creado_en: sale.createdAt || new Date().toISOString(),
+  });
+}
+
+export function fromSpanishPosSale(data: any, docId: string): PosSale {
+  const articulosRaw = data.articulos || data.items || [];
+  return {
+    id: data.id || docId,
+    barberId: data.barbero_id || data.barberId || '',
+    barberName: data.barbero_nombre || data.barberName || 'Barbero',
+    customerId: data.cliente_id || data.customerId || undefined,
+    customerName: data.cliente_nombre || data.customerName || 'Público en General',
+    customerClientNumber: data.cliente_numero || data.customerClientNumber || undefined,
+    customerPhone: data.cliente_telefono || data.customerPhone || undefined,
+    items: articulosRaw.map((it: any) => ({
+      productId: it.producto_id || it.productId || '',
+      productName: it.nombre || it.productName || it.name || 'Producto',
+      price: Number(it.precio !== undefined ? it.precio : it.price) || 0,
+      quantity: Number(it.cantidad !== undefined ? it.cantidad : it.quantity) || 1,
+      subtotal: Number(it.subtotal !== undefined ? it.subtotal : (Number(it.precio || 0) * Number(it.cantidad || 1))) || 0,
+    })),
+    total: Number(data.total) || 0,
+    pointsAwarded: Number(data.puntos_otorgados !== undefined ? data.puntos_otorgados : data.pointsAwarded) || 0,
+    pointsPercentageUsed: Number(data.porcentaje_puntos_usado !== undefined ? data.porcentaje_puntos_usado : data.pointsPercentageUsed) || 1,
+    paymentMethod: data.metodo_pago || data.paymentMethod || 'cash',
+    notes: data.notas || data.notes || '',
+    createdAt: data.creado_en || data.createdAt || new Date().toISOString(),
+  };
+}
+
+// 10. CONFIGURACION DEL NEGOCIO
 export function toSpanishSettings(st: BusinessSettings): Record<string, any> {
   return removeUndefinedFields({
     id: st.id || 'principal',
@@ -408,6 +497,8 @@ export function toSpanishSettings(st: BusinessSettings): Record<string, any> {
     banner_titulo: st.heroTitle || '',
     banner_subtitulo: st.heroSubtitle || '',
     banner_boton_texto: st.heroButtonText || '',
+    recompensa_puntos_productos: st.enableProductPointsReward !== undefined ? st.enableProductPointsReward : true,
+    porcentaje_puntos_productos: Number(st.productPointsPercentage !== undefined ? st.productPointsPercentage : 1),
     configuracion_notificaciones: st.notificationSettings ? {
       notificar_barbero_toast: st.notificationSettings.barberNewBookingToast ?? true,
       notificar_barbero_sonido: st.notificationSettings.barberNewBookingSound ?? true,
@@ -449,6 +540,8 @@ export function fromSpanishSettings(data: any, docId: string): BusinessSettings 
     heroTitle: data.banner_titulo || data.heroTitle || 'El arte del corte clásico y la barbería contemporánea.',
     heroSubtitle: data.banner_subtitulo || data.heroSubtitle || data.eslogan || data.tagline || 'Donde la elegancia y la maestría se encuentran.',
     heroButtonText: data.banner_boton_texto || data.heroButtonText || 'Reservar Cita Ahora',
+    enableProductPointsReward: data.recompensa_puntos_productos !== undefined ? Boolean(data.recompensa_puntos_productos) : (data.enableProductPointsReward !== undefined ? Boolean(data.enableProductPointsReward) : true),
+    productPointsPercentage: Number(data.porcentaje_puntos_productos !== undefined ? data.porcentaje_puntos_productos : (data.productPointsPercentage !== undefined ? data.productPointsPercentage : 1)),
     notificationSettings: {
       barberNewBookingToast: notifRaw.notificar_barbero_toast !== undefined ? Boolean(notifRaw.notificar_barbero_toast) : (notifRaw.barberNewBookingToast !== undefined ? Boolean(notifRaw.barberNewBookingToast) : true),
       barberNewBookingSound: notifRaw.notificar_barbero_sonido !== undefined ? Boolean(notifRaw.notificar_barbero_sonido) : (notifRaw.barberNewBookingSound !== undefined ? Boolean(notifRaw.barberNewBookingSound) : true),
@@ -497,11 +590,26 @@ export class DataService {
           }));
         }
 
-        // 4. Configuración del Negocio
+        // 4. Productos a la venta
+        for (const prod of SEED_PRODUCTS) {
+          batch.set(doc(db, 'productos', prod.id), toSpanishProduct(prod));
+        }
+
+        // 5. Configuración del Negocio
         batch.set(doc(db, 'configuracion_negocio', 'principal'), toSpanishSettings(SEED_BUSINESS_SETTINGS));
 
         await batch.commit();
         console.log('Carga inicial en español completada exitosamente.');
+      } else {
+        // Asegurar que existan productos si la colección productos está vacía
+        const productsSnap = await getDocs(collection(db, 'productos'));
+        if (productsSnap.empty) {
+          const prodBatch = writeBatch(db);
+          for (const prod of SEED_PRODUCTS) {
+            prodBatch.set(doc(db, 'productos', prod.id), toSpanishProduct(prod));
+          }
+          await prodBatch.commit();
+        }
       }
     } catch (error) {
       console.warn('Verificación o carga inicial de datos completada/omitida:', error);
@@ -942,6 +1050,19 @@ export class DataService {
     }
   }
 
+  static async deleteBarber(barberId: string): Promise<void> {
+    try {
+      await deleteDoc(doc(db, 'barberos', barberId));
+      try {
+        await deleteDoc(doc(db, 'horarios_barberos', barberId));
+      } catch (err) {
+        console.warn('Could not delete schedule for barber:', err);
+      }
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, `barberos/${barberId}`);
+    }
+  }
+
   // ==================== SERVICIOS ====================
 
   static subscribeToServices(callback: (services: Service[]) => void): () => void {
@@ -1238,6 +1359,156 @@ export class DataService {
       await deleteDoc(doc(db, 'bloqueos_horarios', slotId));
     } catch (error) {
       handleFirestoreError(error, OperationType.DELETE, `bloqueos_horarios/${slotId}`);
+    }
+  }
+
+  // ==================== PRODUCTOS A LA VENTA ====================
+
+  static subscribeToProducts(callback: (products: Product[]) => void): () => void {
+    return onSnapshot(
+      collection(db, 'productos'),
+      (snapshot) => {
+        const prods: Product[] = [];
+        snapshot.forEach((docSnap) => {
+          prods.push(fromSpanishProduct(docSnap.data(), docSnap.id));
+        });
+        prods.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+        callback(prods);
+      },
+      (error) => {
+        handleFirestoreError(error, OperationType.LIST, 'productos');
+      }
+    );
+  }
+
+  static async saveProduct(product: Partial<Product> & { id?: string }): Promise<string> {
+    try {
+      const prodId = product.id || `prod_${Date.now()}`;
+      const now = new Date().toISOString();
+      const prodData: Product = {
+        id: prodId,
+        name: (product.name || 'Producto').trim(),
+        description: (product.description || '').trim(),
+        price: Number(product.price) || 0,
+        stock: product.stock !== undefined ? Number(product.stock) : 99,
+        active: product.active !== undefined ? product.active : true,
+        createdByType: product.createdByType || 'admin',
+        createdByBarberId: product.createdByBarberId,
+        createdByBarberName: product.createdByBarberName,
+        createdAt: product.createdAt || now,
+        updatedAt: now,
+      };
+
+      await setDoc(doc(db, 'productos', prodId), toSpanishProduct(prodData), { merge: true });
+      return prodId;
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, `productos/${product.id}`);
+    }
+  }
+
+  static async deleteProduct(productId: string): Promise<void> {
+    try {
+      await deleteDoc(doc(db, 'productos', productId));
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, `productos/${productId}`);
+    }
+  }
+
+  static async toggleProductActive(productId: string, active: boolean): Promise<void> {
+    try {
+      await updateDoc(doc(db, 'productos', productId), {
+        activo: active,
+        actualizado_en: new Date().toISOString(),
+      });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `productos/${productId}`);
+    }
+  }
+
+  // ==================== PUNTO DE VENTA (POS) ====================
+
+  static subscribeToPosSales(callback: (sales: PosSale[]) => void): () => void {
+    return onSnapshot(
+      collection(db, 'ventas_pos'),
+      (snapshot) => {
+        const sales: PosSale[] = [];
+        snapshot.forEach((docSnap) => {
+          sales.push(fromSpanishPosSale(docSnap.data(), docSnap.id));
+        });
+        sales.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        callback(sales);
+      },
+      (error) => {
+        handleFirestoreError(error, OperationType.LIST, 'ventas_pos');
+      }
+    );
+  }
+
+  static async recordPosSale(saleData: Omit<PosSale, 'id' | 'createdAt'>): Promise<PosSale> {
+    try {
+      const saleId = `pos_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+      const now = new Date().toISOString();
+
+      const fullSale: PosSale = {
+        ...saleData,
+        id: saleId,
+        createdAt: now,
+      };
+
+      // 1. Guardar la venta en Firestore
+      await setDoc(doc(db, 'ventas_pos', saleId), toSpanishPosSale(fullSale));
+
+      // 2. Si es para un cliente registrado y tiene puntos otorgados
+      if (saleData.customerId && saleData.pointsAwarded > 0) {
+        try {
+          const userRef = doc(db, 'usuarios', saleData.customerId);
+          const userSnap = await getDoc(userRef);
+          if (userSnap.exists()) {
+            const user = fromSpanishUser(userSnap.data(), userSnap.id);
+            const currentPoints = user.points || 0;
+            const newPoints = currentPoints + saleData.pointsAwarded;
+
+            const itemsSummary = (saleData.items || [])
+              .map((it) => `${it.quantity}x ${it.productName}`)
+              .join(', ');
+
+            const historyItem: UserPointHistoryItem = {
+              id: `pts_pos_${Date.now()}`,
+              amount: saleData.pointsAwarded,
+              reason: `Compra en POS (${saleData.pointsPercentageUsed}%): ${itemsSummary}`,
+              date: now,
+              type: 'add',
+            };
+
+            const nextHistory = [historyItem, ...(user.pointsHistory || [])].slice(0, 50);
+
+            // Registrar también como compra del cliente
+            const newPurchase: UserPurchaseItem = {
+              id: `pur_pos_${Date.now()}`,
+              itemName: `Productos POS: ${itemsSummary}`,
+              price: saleData.total,
+              barberName: saleData.barberName,
+              notes: `Venta POS #${saleId.slice(-6)} (+${saleData.pointsAwarded} pts)`,
+              date: now,
+            };
+            const nextPurchases = [newPurchase, ...(user.purchases || [])];
+
+            await updateDoc(userRef, {
+              puntos: newPoints,
+              historial_puntos: nextHistory,
+              compras: nextPurchases,
+              actualizado_en: now,
+            });
+          }
+        } catch (clientErr) {
+          console.warn('Could not update customer points for POS sale:', clientErr);
+        }
+      }
+
+      return fullSale;
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, 'ventas_pos');
+      throw error;
     }
   }
 

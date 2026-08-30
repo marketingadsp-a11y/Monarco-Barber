@@ -39,6 +39,7 @@ import {
   Info,
   Radio,
   Send,
+  Package,
 } from 'lucide-react';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -46,6 +47,7 @@ import { Barber, Service, Appointment, BusinessSettings, NotificationSettings } 
 import { formatCurrency, formatDateSpanish, formatTime12h, getTodayDateString } from '../../utils/dateTime';
 import { imageService } from '../../services/imgbb/imageService';
 import { AdminUsersSection } from '../../components/admin/AdminUsersSection';
+import { AdminProductsSection } from '../../components/products/AdminProductsSection';
 import { getBrowserNotificationPermission, isBrowserNotificationSupported } from '../../services/notificationService';
 
 export const AdminDashboardView: React.FC = () => {
@@ -53,6 +55,7 @@ export const AdminDashboardView: React.FC = () => {
   const {
     services,
     barbers,
+    products,
     appointments,
     businessSettings,
     notificationSettings,
@@ -60,6 +63,7 @@ export const AdminDashboardView: React.FC = () => {
     deleteService,
     toggleServiceActive,
     saveBarber,
+    deleteBarber,
     toggleBarberActive,
     updateAppointmentStatus,
     saveSettings,
@@ -69,7 +73,7 @@ export const AdminDashboardView: React.FC = () => {
     showToast,
   } = useBarbershop();
 
-  const [activeSection, setActiveSection] = useState<'overview' | 'users' | 'appointments' | 'barbers' | 'services' | 'notifications' | 'settings'>('overview');
+  const [activeSection, setActiveSection] = useState<'overview' | 'users' | 'appointments' | 'barbers' | 'services' | 'products' | 'notifications' | 'settings'>('overview');
   const [browserPermission, setBrowserPermission] = useState<NotificationPermission>('default');
   const [isSavingNotifications, setIsSavingNotifications] = useState(false);
 
@@ -195,6 +199,16 @@ export const AdminDashboardView: React.FC = () => {
     }
   };
 
+  const handleDeleteBarberSubmit = async (barberId: string, barberName: string) => {
+    if (confirm(`¿Estás seguro de eliminar al barbero "${barberName}" del equipo? Esta acción no se puede deshacer.`)) {
+      try {
+        await deleteBarber(barberId);
+      } catch (err: any) {
+        showToast('error', 'Error al eliminar barbero', err.message);
+      }
+    }
+  };
+
   const handleSaveSettingsSubmit = async () => {
     setIsSavingSettings(true);
     try {
@@ -280,6 +294,15 @@ export const AdminDashboardView: React.FC = () => {
             }`}
           >
             Barberos ({barbers.length})
+          </button>
+          <button
+            onClick={() => setActiveSection('products')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+              activeSection === 'products' ? 'bg-[#D4AF37] text-slate-950 shadow' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Package className="w-3.5 h-3.5" />
+            <span>Productos & POS</span>
           </button>
           <button
             onClick={() => setActiveSection('notifications')}
@@ -759,15 +782,24 @@ export const AdminDashboardView: React.FC = () => {
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={() => toggleBarberActive(barber.id, !barber.active)}
-                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300"
+                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 transition-all"
+                    title={barber.active ? 'Desactivar barbero' : 'Activar barbero'}
                   >
                     {barber.active ? <ToggleRight className="w-5 h-5 text-emerald-400" /> : <ToggleLeft className="w-5 h-5 text-slate-500" />}
                   </button>
                   <button
                     onClick={() => setEditingBarber(barber)}
-                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300"
+                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-all"
+                    title="Editar datos del barbero"
                   >
                     <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteBarberSubmit(barber.id, barber.displayName)}
+                    className="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 transition-all"
+                    title="Eliminar barbero del equipo"
+                  >
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               </div>
@@ -839,6 +871,11 @@ export const AdminDashboardView: React.FC = () => {
             </div>
           )}
         </div>
+      )}
+
+      {/* SECTION: PRODUCTS & POS MANAGEMENT */}
+      {activeSection === 'products' && (
+        <AdminProductsSection />
       )}
 
       {/* SECTION: NOTIFICATIONS & REMINDERS CONTROL CENTER */}

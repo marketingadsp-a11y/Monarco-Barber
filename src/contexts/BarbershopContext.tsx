@@ -8,6 +8,8 @@ import {
   BusinessSettings,
   AppointmentStatus,
   NotificationSettings,
+  Product,
+  PosSale,
 } from '../types';
 import { dataService } from '../services/firebase/dataService';
 import { SEED_BUSINESS_SETTINGS } from '../services/firebase/seedData';
@@ -35,6 +37,8 @@ export interface ToastMessage {
 interface BarbershopContextType {
   services: Service[];
   barbers: Barber[];
+  products: Product[];
+  posSales: PosSale[];
   appointments: Appointment[];
   schedules: Record<string, BarberSchedule>;
   blockedSlots: BlockedSlot[];
@@ -58,10 +62,16 @@ interface BarbershopContextType {
     options?: { notes?: string; cancelledBy?: 'client' | 'barber' | 'admin'; cancelReason?: string }
   ) => Promise<void>;
   saveBarber: (barber: Partial<Barber> & { id?: string }) => Promise<string>;
+  deleteBarber: (barberId: string) => Promise<void>;
   toggleBarberActive: (barberId: string, active: boolean) => Promise<void>;
   saveService: (service: Partial<Service> & { id?: string }) => Promise<string>;
   deleteService: (serviceId: string) => Promise<void>;
   toggleServiceActive: (serviceId: string, active: boolean) => Promise<void>;
+  saveProduct: (product: Partial<Product> & { id?: string }) => Promise<string>;
+  deleteProduct: (productId: string) => Promise<void>;
+  toggleProductActive: (productId: string, active: boolean) => Promise<void>;
+  recordPosSale: (saleData: Omit<PosSale, 'id' | 'createdAt'>) => Promise<PosSale>;
+  updateProductPointsSettings: (enabled: boolean, percentage: number) => Promise<void>;
   saveBarberSchedule: (barberId: string, schedule: BarberSchedule) => Promise<void>;
   addBlockedSlot: (slot: Omit<BlockedSlot, 'id' | 'createdAt'>) => Promise<string>;
   deleteBlockedSlot: (slotId: string) => Promise<void>;
@@ -78,6 +88,8 @@ export const BarbershopProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const [services, setServices] = useState<Service[]>([]);
   const [barbers, setBarbers] = useState<Barber[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [posSales, setPosSales] = useState<PosSale[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [schedules, setSchedules] = useState<Record<string, BarberSchedule>>({});
   const [blockedSlots, setBlockedSlots] = useState<BlockedSlot[]>([]);
@@ -145,6 +157,14 @@ export const BarbershopProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       if (isMounted) setBusinessSettings(settings);
     });
 
+    const unsubProducts = dataService.subscribeToProducts((prods) => {
+      if (isMounted) setProducts(prods);
+    });
+
+    const unsubPosSales = dataService.subscribeToPosSales((sales) => {
+      if (isMounted) setPosSales(sales);
+    });
+
     setIsLoading(false);
 
     return () => {
@@ -154,6 +174,8 @@ export const BarbershopProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       unsubSchedules();
       unsubBlocked();
       unsubSettings();
+      unsubProducts();
+      unsubPosSales();
     };
   }, []);
 
@@ -384,12 +406,83 @@ export const BarbershopProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   };
 
+  const deleteBarber = async (barberId: string) => {
+    try {
+      await dataService.deleteBarber(barberId);
+      showToast('info', 'Barbero Eliminado', 'El barbero ha sido removido del equipo.');
+    } catch (error: any) {
+      showToast('error', 'Error al eliminar barbero', error.message || 'No se pudo eliminar el barbero.');
+      throw error;
+    }
+  };
+
   const toggleBarberActive = async (barberId: string, active: boolean) => {
     try {
       await dataService.toggleBarberActive(barberId, active);
       showToast('info', 'Estado Modificado', `Barbero ${active ? 'activado' : 'desactivado'}.`);
     } catch (error: any) {
       showToast('error', 'Error', error.message);
+    }
+  };
+
+  const saveProduct = async (product: Partial<Product> & { id?: string }) => {
+    try {
+      const id = await dataService.saveProduct(product);
+      showToast('success', 'Producto Guardado', 'El producto está disponible en el inventario.');
+      return id;
+    } catch (error: any) {
+      showToast('error', 'Error al guardar producto', error.message || 'No se pudo guardar el producto.');
+      throw error;
+    }
+  };
+
+  const deleteProduct = async (productId: string) => {
+    try {
+      await dataService.deleteProduct(productId);
+      showToast('info', 'Producto Eliminado', 'El producto ha sido eliminado del catálogo.');
+    } catch (error: any) {
+      showToast('error', 'Error al eliminar producto', error.message || 'No se pudo eliminar el producto.');
+      throw error;
+    }
+  };
+
+  const toggleProductActive = async (productId: string, active: boolean) => {
+    try {
+      await dataService.toggleProductActive(productId, active);
+      showToast('info', 'Estado Modificado', `Producto ${active ? 'activado' : 'desactivado'}.`);
+    } catch (error: any) {
+      showToast('error', 'Error', error.message);
+    }
+  };
+
+  const recordPosSale = async (saleData: Omit<PosSale, 'id' | 'createdAt'>): Promise<PosSale> => {
+    try {
+      const sale = await dataService.recordPosSale(saleData);
+      const pointsMsg = sale.pointsAwarded > 0 ? ` (+${sale.pointsAwarded} pts para ${sale.customerName})` : '';
+      showToast(
+        'success',
+        '🛍️ Venta Realizada con Éxito',
+        `Cobro completado por $${sale.total.toFixed(2)}${pointsMsg}`,
+        { playSound: true, soundType: 'success' }
+      );
+      return sale;
+    } catch (error: any) {
+      showToast('error', 'Error en la Venta POS', error.message || 'No se pudo registrar la venta.');
+      throw error;
+    }
+  };
+
+  const updateProductPointsSettings = async (enabled: boolean, percentage: number) => {
+    try {
+      await saveSettings({
+        ...businessSettings,
+        enableProductPointsReward: enabled,
+        productPointsPercentage: percentage,
+      });
+      showToast('success', 'Puntos de Productos Actualizados', `Recompensa del ${percentage}% ${enabled ? 'activada' : 'desactivada'}.`);
+    } catch (error: any) {
+      showToast('error', 'Error al actualizar configuración de puntos', error.message);
+      throw error;
     }
   };
 
@@ -547,6 +640,8 @@ export const BarbershopProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       value={{
         services,
         barbers,
+        products,
+        posSales,
         appointments,
         schedules,
         blockedSlots,
@@ -561,10 +656,16 @@ export const BarbershopProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         rescheduleAppointment,
         updateAppointmentStatus,
         saveBarber,
+        deleteBarber,
         toggleBarberActive,
         saveService,
         deleteService,
         toggleServiceActive,
+        saveProduct,
+        deleteProduct,
+        toggleProductActive,
+        recordPosSale,
+        updateProductPointsSettings,
         saveBarberSchedule,
         addBlockedSlot,
         deleteBlockedSlot,

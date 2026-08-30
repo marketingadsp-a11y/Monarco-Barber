@@ -21,6 +21,8 @@ import {
   ScanLine,
   Bell,
   Volume2,
+  Package,
+  ShoppingBag,
 } from 'lucide-react';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -35,6 +37,8 @@ import { BarberQRScannerModal } from '../../components/barber/BarberQRScannerMod
 import { BarberBookAppointmentModal } from '../../components/barber/BarberBookAppointmentModal';
 import { BarberMyAppointmentsView } from './BarberMyAppointmentsView';
 import { BarberProfileView } from './BarberProfileView';
+import { BarberPosView } from '../../components/pos/BarberPosView';
+import { BarberProductsSection } from '../../components/products/BarberProductsSection';
 import { getBrowserNotificationPermission, isBrowserNotificationSupported } from '../../services/notificationService';
 
 interface BarberDashboardViewProps {
@@ -87,7 +91,7 @@ export const BarberDashboardView: React.FC<BarberDashboardViewProps> = ({
     ) || barbers[0];
 
   // Tab State
-  const [internalTab, setInternalTab] = useState<'home' | 'appointments' | 'services' | 'schedule' | 'profile'>('home');
+  const [internalTab, setInternalTab] = useState<'home' | 'appointments' | 'services' | 'schedule' | 'profile' | 'pos' | 'products'>('home');
   const currentTab = (externalTab as any) || internalTab;
 
   const setCurrentTab = (tab: any) => {
@@ -241,15 +245,28 @@ export const BarberDashboardView: React.FC<BarberDashboardViewProps> = ({
           </div>
         </div>
 
-        {/* Action Buttons: Scanner & Booking */}
-        <div className="flex items-center gap-2 w-full sm:w-auto">
+        {/* Action Buttons: Scanner, POS & Booking */}
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <button
             onClick={() => setIsQrScannerOpen(true)}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-b from-[#222834] to-[#141820] hover:from-[#2a3240] hover:to-[#1a1f2a] border border-[#D4AF37]/50 text-white font-bold text-xs shadow-lg hover:scale-105 active:scale-95 transition-all"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-2xl bg-gradient-to-b from-[#222834] to-[#141820] hover:from-[#2a3240] hover:to-[#1a1f2a] border border-[#D4AF37]/50 text-white font-bold text-xs shadow-lg hover:scale-105 active:scale-95 transition-all"
             title="Escanear QR de cliente"
           >
             <ScanLine className="w-4 h-4 text-[#D4AF37]" />
             <span>Lector QR</span>
+          </button>
+
+          <button
+            onClick={() => setCurrentTab('pos')}
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-2xl border text-xs font-bold shadow-lg hover:scale-105 active:scale-95 transition-all ${
+              currentTab === 'pos'
+                ? 'bg-amber-500 text-slate-950 border-amber-400 font-extrabold'
+                : 'bg-white/5 border-amber-500/30 text-amber-300 hover:bg-amber-500/10'
+            }`}
+            title="Abrir terminal de punto de venta POS"
+          >
+            <ShoppingBag className="w-4 h-4 text-[#D4AF37]" />
+            <span>Punto de Venta POS</span>
           </button>
 
           <button
@@ -287,6 +304,28 @@ export const BarberDashboardView: React.FC<BarberDashboardViewProps> = ({
           }`}
         >
           Mis Citas ({barberAppointments.length})
+        </button>
+        <button
+          onClick={() => setCurrentTab('pos')}
+          className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+            currentTab === 'pos'
+              ? 'bg-[#D4AF37] text-slate-950 shadow'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <ShoppingBag className="w-3.5 h-3.5" />
+          <span>Mi POS</span>
+        </button>
+        <button
+          onClick={() => setCurrentTab('products')}
+          className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+            currentTab === 'products'
+              ? 'bg-[#D4AF37] text-slate-950 shadow'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <Package className="w-3.5 h-3.5" />
+          <span>Catálogo Productos</span>
         </button>
         <button
           onClick={() => setCurrentTab('profile')}
@@ -775,6 +814,16 @@ export const BarberDashboardView: React.FC<BarberDashboardViewProps> = ({
             )}
           </div>
         </div>
+      )}
+
+      {/* VIEW 6: BARBER POS (PUNTO DE VENTA) */}
+      {currentTab === 'pos' && (
+        <BarberPosView onOpenNewProductModal={() => setCurrentTab('products')} />
+      )}
+
+      {/* VIEW 7: GENERAL PRODUCTS CATALOG */}
+      {currentTab === 'products' && (
+        <BarberProductsSection onGoToPos={() => setCurrentTab('pos')} />
       )}
 
       {/* QR SCANNER MODAL */}

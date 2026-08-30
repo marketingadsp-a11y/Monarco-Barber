@@ -4,6 +4,7 @@ import {
   ServiceCategory,
   BusinessSettings,
   WeeklySchedule,
+  Product,
 } from '../../types';
 
 export const DEFAULT_WEEKLY_SCHEDULE: WeeklySchedule = {
@@ -215,6 +216,54 @@ export const SEED_BARBERS: Barber[] = [
   },
 ];
 
+export const SEED_PRODUCTS: Product[] = [
+  {
+    id: 'prod_pomada_matte',
+    name: 'Pomada Matte Monarca Classic',
+    description: 'Fijación media-fuerte sin brillo, acabado natural y aroma amaderado con notas de bergamota.',
+    price: 320,
+    active: true,
+    createdByType: 'admin',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'prod_aceite_barba',
+    name: 'Aceite Esencial para Barba y Bigote',
+    description: 'Fórmula hidratante con aceite de argán, jojoba y cedro. Suaviza la barba y cuida la piel.',
+    price: 280,
+    active: true,
+    createdByType: 'admin',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'prod_shampoo_bergamota',
+    name: 'Shampoo Anticaída con Bergamota',
+    description: 'Estimulante capilar con extracto puro de bergamota mexicana y mentol refrescante.',
+    price: 250,
+    active: true,
+    createdByType: 'admin',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'prod_cera_texturizadora',
+    name: 'Cera Texturizadora en Polvo',
+    description: 'Aporta volumen inmediato en la raíz y fijación flexible para peinados modernos.',
+    price: 310,
+    active: true,
+    createdByType: 'admin',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'prod_aftershave_balsamo',
+    name: 'Bálsamo Aftershave Hidratante',
+    description: 'Alivia la irritación del afeitado, cierra poros y refresca con aloe vera y hamamelis.',
+    price: 260,
+    active: true,
+    createdByType: 'admin',
+    createdAt: new Date().toISOString(),
+  },
+];
+
 export const SEED_BUSINESS_SETTINGS: BusinessSettings = {
   id: 'main',
   name: 'MONARCA BARBER',
@@ -246,4 +295,6 @@ export const SEED_BUSINESS_SETTINGS: BusinessSettings = {
     clientBrowserPush: true,
     enableAudioChime: true,
   },
+  enableProductPointsReward: true,
+  productPointsPercentage: 1,
 };

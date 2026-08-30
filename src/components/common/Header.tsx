@@ -26,38 +26,23 @@ export const Header: React.FC<HeaderProps> = ({ onOpenProfile, onOpenQr }) => {
       }}
     >
       <div className="max-w-6xl mx-auto flex items-center justify-between gap-2">
-        {/* Brand Logo & Name */}
-        <div className="flex items-center gap-2.5 sm:gap-3 cursor-pointer min-w-0 flex-1 sm:flex-initial" onClick={onOpenProfile}>
+        {/* Brand Logo (Solo logotipo sin fondos ni contornos) */}
+        <div className="flex items-center cursor-pointer shrink-0" onClick={onOpenProfile}>
           {businessSettings.logoUrl ? (
-            <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden bg-[#12151B] border border-[#D4AF37]/40 shadow-lg shadow-[#D4AF37]/15 p-0.5 shrink-0">
-              <img
-                src={businessSettings.logoUrl}
-                alt={businessSettings.name || 'Monarca Barber'}
-                className="w-full h-full object-contain rounded-[10px]"
-                referrerPolicy="no-referrer"
-              />
-            </div>
+            <img
+              src={businessSettings.logoUrl}
+              alt={businessSettings.name || 'Monarca Barber'}
+              className="h-10 sm:h-12 w-auto max-w-[180px] sm:max-w-[240px] object-contain select-none transition-transform hover:scale-105"
+              referrerPolicy="no-referrer"
+            />
           ) : (
-            <div className="relative flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#996515] p-[1px] shadow-lg shadow-[#D4AF37]/15 shrink-0">
-              <div className="w-full h-full bg-[#12151B] rounded-[11px] flex items-center justify-center">
-                <Crown className="w-5 h-5 text-[#D4AF37]" />
-              </div>
+            <div className="flex items-center gap-2">
+              <Crown className="w-6 h-6 text-[#D4AF37]" />
+              <span className="font-serif font-black tracking-wider text-base text-white">
+                {businessSettings.name || 'MONARCA BARBER'}
+              </span>
             </div>
           )}
-
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5">
-              <span className="font-serif font-black tracking-wider text-sm sm:text-base text-white truncate">
-                {businessSettings.name || 'MONARCA'}
-              </span>
-              <span className="text-[9px] sm:text-[10px] font-semibold tracking-widest uppercase bg-[#D4AF37]/20 text-[#D4AF37] px-1 sm:px-1.5 py-0.5 rounded border border-[#D4AF37]/30 shrink-0">
-                BARBER
-              </span>
-            </div>
-            <p className="text-[10px] sm:text-[11px] text-slate-400 font-medium truncate max-w-[140px] xs:max-w-[200px] sm:max-w-xs">
-              {businessSettings.address.split(',')[0]}
-            </p>
-          </div>
         </div>
 
         {/* Right Actions: Role Badge (if Admin/Barber), WhatsApp Direct, User Avatar & Logout */}

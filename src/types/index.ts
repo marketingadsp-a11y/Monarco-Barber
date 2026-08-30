@@ -170,6 +170,45 @@ export interface ScheduleException {
   reason?: string;
 }
 
+export interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  stock?: number;
+  active: boolean;
+  createdByType?: 'admin' | 'barber';
+  createdByBarberId?: string;
+  createdByBarberName?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface PosSaleItem {
+  productId: string;
+  productName: string;
+  price: number;
+  quantity: number;
+  subtotal: number;
+}
+
+export interface PosSale {
+  id: string;
+  barberId: string;
+  barberName: string;
+  customerId?: string; // ID del cliente si es cliente registrado, o undefined para público general
+  customerName: string; // "Público en General" o Nombre del cliente
+  customerClientNumber?: string;
+  customerPhone?: string;
+  items: PosSaleItem[];
+  total: number;
+  pointsAwarded: number;
+  pointsPercentageUsed: number;
+  paymentMethod?: 'cash' | 'card' | 'transfer' | 'other';
+  notes?: string;
+  createdAt: string;
+}
+
 export interface NotificationSettings {
   barberNewBookingToast: boolean; // Notificar al barbero en tiempo real con toast cuando un cliente reserva
   barberNewBookingSound: boolean; // Reproducir chime de audio al recibir nueva cita
@@ -209,6 +248,9 @@ export interface BusinessSettings {
   heroButtonText?: string;
   // Notification Engine Settings
   notificationSettings?: NotificationSettings;
+  // Product POS Loyalty Points
+  enableProductPointsReward?: boolean; // Habilita o deshabilita la suma de puntos en venta de productos (default: true)
+  productPointsPercentage?: number; // Porcentaje de puntos al comprar producto (default: 1%)
 }
 
 export interface Review {
