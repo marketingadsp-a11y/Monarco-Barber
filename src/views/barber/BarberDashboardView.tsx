@@ -430,52 +430,6 @@ export const BarberDashboardView: React.FC<BarberDashboardViewProps> = ({
             </div>
           </div>
 
-          {/* Quick Shortcuts Banner */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div
-              onClick={() => setIsQrScannerOpen(true)}
-              className="p-4 rounded-2xl bg-gradient-to-br from-[#181D26] to-[#12151B] border border-[#D4AF37]/40 hover:border-[#D4AF37] cursor-pointer shadow-lg transition-all flex items-center justify-between group"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-[#D4AF37]/20 text-[#D4AF37] flex items-center justify-center">
-                  <ScanLine className="w-6 h-6 stroke-[2.4]" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-white text-sm group-hover:text-[#D4AF37] transition-colors">
-                    Lector de Códigos QR
-                  </h3>
-                  <p className="text-slate-400 text-xs">
-                    Escanea el pase del cliente para registrar visita y sumar puntos
-                  </p>
-                </div>
-              </div>
-              <span className="text-xs font-bold text-[#D4AF37] shrink-0">Abrir &rarr;</span>
-            </div>
-
-            <div
-              onClick={() => {
-                setPreselectedClientForBooking(null);
-                setIsBookingModalOpen(true);
-              }}
-              className="p-4 rounded-2xl bg-gradient-to-br from-[#181D26] to-[#12151B] border border-white/15 hover:border-[#D4AF37] cursor-pointer shadow-lg transition-all flex items-center justify-between group"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-[#D4AF37] text-slate-950 flex items-center justify-center">
-                  <Plus className="w-6 h-6 stroke-[3]" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-white text-sm group-hover:text-[#D4AF37] transition-colors">
-                    Agendar en Mi Silla
-                  </h3>
-                  <p className="text-slate-400 text-xs">
-                    Programa un servicio para un cliente con tu disponibilidad
-                  </p>
-                </div>
-              </div>
-              <span className="text-xs font-bold text-[#D4AF37] shrink-0">Agendar &rarr;</span>
-            </div>
-          </div>
-
           {/* Today's Appointments List */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">

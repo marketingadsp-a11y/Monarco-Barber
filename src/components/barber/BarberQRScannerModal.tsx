@@ -708,84 +708,186 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
               </div>
             </div>
           ) : (
-            /* 2. SCANNED CLIENT FICHA & UNIFIED COBRO / VISITAS / PUNTOS SECTION */
-            <div className="space-y-4 animate-in fade-in">
-              {/* FICHA CLIENTE: Datos, Puntos y Visitas Actuales */}
-              <div className="p-3.5 sm:p-4 rounded-3xl bg-gradient-to-b from-[#1A1F29] to-[#12151B] border border-[#D4AF37]/40 shadow-xl space-y-3">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#996515] to-[#D4AF37] p-0.5 shadow-lg shrink-0">
-                      {scannedClient.photoUrl ? (
-                        <img
-                          src={scannedClient.photoUrl}
-                          alt={scannedClient.name}
-                          className="w-full h-full rounded-[14px] object-cover"
-                          referrerPolicy="no-referrer"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-[#14171E] rounded-[14px] flex items-center justify-center text-[#D4AF37] font-black text-base">
-                          {scannedClient.name.charAt(0).toUpperCase()}
-                        </div>
+            /* 2. REDESIGNED ULTRA-CLEAN & FUNCTIONAL CLIENT CHECKOUT PANEL */
+            <div className="space-y-3.5 animate-in fade-in">
+              {/* COMPACT CLIENT HEADER */}
+              <div className="p-3 rounded-2xl bg-[#161B24] border border-[#D4AF37]/30 flex items-center justify-between gap-3 shadow-md">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-[#996515] to-[#D4AF37] p-0.5 shrink-0 shadow">
+                    {scannedClient.photoUrl ? (
+                      <img
+                        src={scannedClient.photoUrl}
+                        alt={scannedClient.name}
+                        className="w-full h-full rounded-[10px] object-cover"
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-[#14171E] rounded-[10px] flex items-center justify-center text-[#D4AF37] font-black text-sm">
+                        {scannedClient.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <h3 className="font-bold text-white text-sm truncate">{scannedClient.name}</h3>
+                      <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30 shrink-0">
+                        {scannedClient.membershipTier || 'VIP'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
+                      <span className="text-[#D4AF37] font-mono font-semibold">#{scannedClient.clientNumber || 'VIP'}</span>
+                      {scannedClient.phone && (
+                        <>
+                          <span>•</span>
+                          <span className="truncate">{scannedClient.phone}</span>
+                        </>
                       )}
                     </div>
+                  </div>
+                </div>
 
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-sm sm:text-base font-black text-white">{scannedClient.name}</h3>
-                        <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30">
-                          {scannedClient.membershipTier || 'VIP'}
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-slate-300 font-mono mt-0.5">
-                        No. Cliente: <strong className="text-[#D4AF37]">#{scannedClient.clientNumber || 'SIN-NUM'}</strong>
-                      </p>
-                      <p className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
-                        <Phone className="w-3 h-3 text-slate-400" />
-                        <span>{scannedClient.phone || 'Sin teléfono'}</span>
-                      </p>
+                {/* Badges + Change Client Button */}
+                <div className="flex items-center gap-2 shrink-0">
+                  <div className="text-right">
+                    <div className="text-[10px] font-bold text-[#D4AF37] flex items-center justify-end gap-1">
+                      <Sparkles className="w-3 h-3 text-[#D4AF37]" />
+                      <span>{scannedClient.points || 0} pts</span>
+                    </div>
+                    <div className="text-[10px] font-bold text-emerald-400 flex items-center justify-end gap-1">
+                      <Award className="w-3 h-3 text-emerald-400" />
+                      <span>{clientVisitsCount} vis.</span>
                     </div>
                   </div>
 
                   <button
                     onClick={handleScanAnother}
-                    className="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 text-[11px] font-bold flex items-center gap-1 transition-all shrink-0"
+                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
                     title="Escanear otro cliente"
                   >
-                    <RefreshCw className="w-3 h-3" />
-                    <span>Otro</span>
+                    <RefreshCw className="w-3.5 h-3.5" />
                   </button>
-                </div>
-
-                {/* Saldo Actual: Puntos y Visitas */}
-                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/10 text-center">
-                  <div className="p-2 rounded-2xl bg-black/40 border border-white/10">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Puntos Actuales</span>
-                    <span className="text-base font-black text-[#D4AF37] mt-0.5 block flex items-center justify-center gap-1">
-                      <Sparkles className="w-3 h-3 text-[#D4AF37]" />
-                      {scannedClient.points || 0} pts
-                    </span>
-                  </div>
-
-                  <div className="p-2 rounded-2xl bg-black/40 border border-white/10">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Visitas Acumuladas</span>
-                    <span className="text-base font-black text-emerald-400 mt-0.5 block flex items-center justify-center gap-1">
-                      <Award className="w-3 h-3 text-emerald-400" />
-                      {clientVisitsCount} visitas
-                    </span>
-                  </div>
                 </div>
               </div>
 
-              {/* UNIFIED TRANSACTION PANEL */}
-              <div className="p-4 rounded-3xl bg-[#14171E] border border-white/10 space-y-4 shadow-xl">
-                {/* 1. VISITAS A SUMAR (POR DEFECTO 1 VISITA) */}
-                <div className="flex items-center justify-between p-3 rounded-2xl bg-[#181D26] border border-white/10">
-                  <div>
-                    <span className="text-xs font-bold text-white block">Visitas a Registrar:</span>
-                    <span className="text-[11px] text-slate-400">Por defecto: 1 visita</span>
-                  </div>
+              {/* 1. SERVICIO REALIZADO */}
+              <div className="p-3.5 rounded-2xl bg-[#14171E] border border-white/10 space-y-2.5">
+                <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
+                  1. Servicio Realizado
+                </label>
 
-                  <div className="flex items-center gap-2">
+                {clientTodayAppointment ? (
+                  <div className="space-y-2">
+                    <div
+                      onClick={() => setServiceOption('booked')}
+                      className={`p-2.5 rounded-xl border cursor-pointer flex items-center justify-between transition-all ${
+                        serviceOption === 'booked'
+                          ? 'bg-[#D4AF37]/10 border-[#D4AF37] ring-1 ring-[#D4AF37]/40'
+                          : 'bg-white/5 border-white/10 text-slate-400'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                          serviceOption === 'booked' ? 'border-[#D4AF37] bg-[#D4AF37]' : 'border-slate-500'
+                        }`}>
+                          {serviceOption === 'booked' && <Check className="w-2.5 h-2.5 text-slate-950 stroke-[3]" />}
+                        </div>
+                        <div className="min-w-0">
+                          <span className="font-bold text-white text-xs block truncate">
+                            Cita Agendada: {clientTodayAppointment.serviceNameSnapshot}
+                          </span>
+                          <span className="text-[10px] text-emerald-400 font-semibold">
+                            Hoy {formatTime12h(clientTodayAppointment.startTime)}
+                          </span>
+                        </div>
+                      </div>
+                      <span className="font-black text-[#D4AF37] text-xs shrink-0">
+                        {formatCurrency(clientTodayAppointment.servicePriceSnapshot || 0)}
+                      </span>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setServiceOption('custom')}
+                        className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-semibold border transition-all ${
+                          serviceOption === 'custom'
+                            ? 'bg-[#D4AF37]/15 border-[#D4AF37] text-white font-bold'
+                            : 'bg-white/5 border-white/10 text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        Otro Servicio
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setServiceOption('none')}
+                        className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-semibold border transition-all ${
+                          serviceOption === 'none'
+                            ? 'bg-white/15 border-white/30 text-white font-bold'
+                            : 'bg-white/5 border-white/10 text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        Sin Servicio
+                      </button>
+                    </div>
+
+                    {serviceOption === 'custom' && (
+                      <select
+                        value={selectedServiceId}
+                        onChange={(e) => setSelectedServiceId(e.target.value)}
+                        className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/15 text-white font-medium text-xs focus:outline-none focus:border-[#D4AF37]"
+                      >
+                        {services.map((s) => (
+                          <option key={s.id} value={s.id}>
+                            {s.name} - {formatCurrency(s.price)}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+
+                    {serviceOption === 'booked' && (
+                      <label className="flex items-center gap-2 pt-1 text-[11px] text-slate-300 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={markAppointmentCompleted}
+                          onChange={(e) => setMarkAppointmentCompleted(e.target.checked)}
+                          className="rounded border-white/20 text-[#D4AF37] focus:ring-[#D4AF37]"
+                        />
+                        <span>Marcar cita en agenda como completada</span>
+                      </label>
+                    )}
+                  </div>
+                ) : (
+                  <select
+                    value={serviceOption === 'none' ? 'none' : selectedServiceId}
+                    onChange={(e) => {
+                      if (e.target.value === 'none') {
+                        setServiceOption('none');
+                      } else {
+                        setServiceOption('custom');
+                        setSelectedServiceId(e.target.value);
+                      }
+                    }}
+                    className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/15 text-white font-medium text-xs focus:outline-none focus:border-[#D4AF37]"
+                  >
+                    <option value="none">-- Sin servicio (Solo registrar visita o productos) --</option>
+                    {services.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name} - {formatCurrency(s.price)}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              {/* 2. VISITAS & PRODUCTOS COMPACT ROW */}
+              <div className="grid grid-cols-2 gap-2.5">
+                {/* VISITA COUNTER */}
+                <div className="p-3 rounded-2xl bg-[#14171E] border border-white/10 flex flex-col justify-between">
+                  <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
+                    Visitas a Sumar
+                  </span>
+                  <div className="flex items-center justify-between mt-2">
                     <button
                       type="button"
                       onClick={() => setVisitsToAdd(Math.max(0, visitsToAdd - 1))}
@@ -793,8 +895,8 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                     >
                       <Minus className="w-3.5 h-3.5" />
                     </button>
-                    <span className="font-mono font-bold text-sm text-teal-300 min-w-[2rem] text-center">
-                      +{visitsToAdd}
+                    <span className="font-mono font-bold text-sm text-emerald-400">
+                      +{visitsToAdd} Visita
                     </span>
                     <button
                       type="button"
@@ -806,130 +908,39 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                   </div>
                 </div>
 
-                {/* 2. COBRO DE SERVICIO (AGENDADO U OTRO SERVICIO) */}
-                <div className="space-y-2">
-                  <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                    Servicio a Cobrar
-                  </label>
-
-                  {/* If client had an appointment scheduled for today */}
-                  {clientTodayAppointment && (
-                    <div
-                      onClick={() => setServiceOption('booked')}
-                      className={`p-3 rounded-2xl border cursor-pointer transition-all ${
-                        serviceOption === 'booked'
-                          ? 'bg-amber-500/15 border-[#D4AF37] ring-1 ring-[#D4AF37]/50'
-                          : 'bg-[#181D26] border-white/10 hover:border-white/20'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                            serviceOption === 'booked' ? 'border-[#D4AF37] bg-[#D4AF37]' : 'border-slate-500'
-                          }`}>
-                            {serviceOption === 'booked' && <Check className="w-3 h-3 text-slate-950 stroke-[3]" />}
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-1.5">
-                              <span className="font-bold text-white text-xs">
-                                Cita Agendada Hoy ({formatTime12h(clientTodayAppointment.startTime)})
-                              </span>
-                              <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400">
-                                AGENDADA
-                              </span>
-                            </div>
-                            <p className="text-[11px] text-[#D4AF37] font-semibold mt-0.5">
-                              {clientTodayAppointment.serviceNameSnapshot} • {formatCurrency(clientTodayAppointment.servicePriceSnapshot || 0)}
-                            </p>
-                          </div>
-                        </div>
-
-                        <span className="font-black text-white text-sm">
-                          {formatCurrency(clientTodayAppointment.servicePriceSnapshot || 0)}
-                        </span>
-                      </div>
-
-                      {serviceOption === 'booked' && (
-                        <label className="flex items-center gap-2 mt-2 pt-2 border-t border-white/10 text-[11px] text-slate-300 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={markAppointmentCompleted}
-                            onChange={(e) => setMarkAppointmentCompleted(e.target.checked)}
-                            className="rounded border-white/20 text-[#D4AF37] focus:ring-[#D4AF37]"
-                          />
-                          <span>Marcar cita en agenda como cobrada / completada</span>
-                        </label>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Option: Choose another service from the catalog */}
-                  <div
-                    onClick={() => setServiceOption('custom')}
-                    className={`p-3 rounded-2xl border cursor-pointer transition-all ${
-                      serviceOption === 'custom'
-                        ? 'bg-amber-500/15 border-[#D4AF37] ring-1 ring-[#D4AF37]/50'
-                        : 'bg-[#181D26] border-white/10 hover:border-white/20'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                        serviceOption === 'custom' ? 'border-[#D4AF37] bg-[#D4AF37]' : 'border-slate-500'
-                      }`}>
-                        {serviceOption === 'custom' && <Check className="w-3 h-3 text-slate-950 stroke-[3]" />}
-                      </div>
-                      <span className="font-bold text-white text-xs">
-                        {clientTodayAppointment ? 'Cobrar otro servicio del catálogo' : 'Cobrar servicio realizado en silla'}
+                {/* PRODUCTOS TOGGLE BUTTON */}
+                <div className="p-3 rounded-2xl bg-[#14171E] border border-white/10 flex flex-col justify-between">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider">
+                      Productos
+                    </span>
+                    {totalProductsPrice > 0 && (
+                      <span className="text-[11px] font-black text-[#D4AF37]">
+                        {formatCurrency(totalProductsPrice)}
                       </span>
-                    </div>
-
-                    {serviceOption === 'custom' && (
-                      <div className="mt-2.5 pt-2 border-t border-white/10" onClick={(e) => e.stopPropagation()}>
-                        <select
-                          value={selectedServiceId}
-                          onChange={(e) => setSelectedServiceId(e.target.value)}
-                          className="w-full p-2 rounded-xl bg-slate-900 border border-white/15 text-white font-medium text-xs focus:outline-none focus:border-[#D4AF37]"
-                        >
-                          {services.map((s) => (
-                            <option key={s.id} value={s.id}>
-                              {s.name} - {formatCurrency(s.price)} ({s.durationMinutes} min)
-                            </option>
-                          ))}
-                        </select>
-                      </div>
                     )}
                   </div>
-
-                  {/* Option: No service (products only or points only) */}
-                  <div
-                    onClick={() => setServiceOption('none')}
-                    className={`p-2.5 rounded-2xl border cursor-pointer transition-all ${
-                      serviceOption === 'none'
-                        ? 'bg-white/10 border-white/30'
-                        : 'bg-[#181D26] border-white/10 hover:border-white/20'
+                  <button
+                    type="button"
+                    onClick={() => setIsProductCatalogExpanded(!isProductCatalogExpanded)}
+                    className={`mt-2 py-1.5 px-2 rounded-xl border text-[11px] font-bold flex items-center justify-center gap-1 transition-all ${
+                      cartItems.length > 0 || isProductCatalogExpanded
+                        ? 'bg-[#D4AF37] text-slate-950 border-[#D4AF37]'
+                        : 'bg-white/5 border-white/10 text-slate-300 hover:text-white'
                     }`}
                   >
-                    <div className="flex items-center gap-2">
-                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                        serviceOption === 'none' ? 'border-white bg-white' : 'border-slate-500'
-                      }`}>
-                        {serviceOption === 'none' && <Check className="w-3 h-3 text-slate-950 stroke-[3]" />}
-                      </div>
-                      <span className="text-slate-300 text-xs">Sin servicio (Solo registrar visita o productos)</span>
-                    </div>
-                  </div>
+                    <Package className="w-3 h-3" />
+                    <span>{cartItems.length > 0 ? `${cartItems.length} prod.` : '+ Agregar'}</span>
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isProductCatalogExpanded ? 'rotate-180' : ''}`} />
+                  </button>
                 </div>
+              </div>
 
-                {/* 3. VENTA DE PRODUCTOS (POS RÁPIDO O ACCESO A POS COMPLETO) */}
-                <div className="space-y-2 pt-1 border-t border-white/10">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5">
-                      <ShoppingBag className="w-4 h-4 text-[#D4AF37]" />
-                      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                        Productos Adicionales (POS)
-                      </span>
-                    </div>
-
+              {/* EXPANDABLE PRODUCTS MINI-CATALOG */}
+              {isProductCatalogExpanded && (
+                <div className="p-3 rounded-2xl bg-[#101318] border border-[#D4AF37]/30 space-y-2 animate-in fade-in">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-slate-300">Seleccionar Productos:</span>
                     {onOpenPosForClient && (
                       <button
                         type="button"
@@ -937,214 +948,147 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                           onClose();
                           onOpenPosForClient(scannedClient);
                         }}
-                        className="text-[10px] text-[#D4AF37] hover:text-[#E5B869] font-bold flex items-center gap-1 hover:underline"
-                        title="Abrir terminal de venta completa con este cliente"
+                        className="text-[10px] text-[#D4AF37] font-bold hover:underline flex items-center gap-1"
                       >
-                        <span>Abrir POS Completo</span>
-                        <ArrowRight className="w-3 h-3" />
+                        <span>Abrir POS</span>
+                        <ArrowRight className="w-2.5 h-2.5" />
                       </button>
                     )}
                   </div>
 
-                  {/* Quick Product Selection Drawer */}
-                  <div className="space-y-2">
-                    {cartItems.length > 0 && (
-                      <div className="p-2.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-1.5">
-                        <div className="flex items-center justify-between text-[11px] font-bold text-amber-200">
-                          <span>Productos agregados ({cartItems.length}):</span>
-                          <span>{formatCurrency(totalProductsPrice)}</span>
-                        </div>
-                        {cartItems.map((item) => (
-                          <div key={item.productId} className="flex items-center justify-between text-xs text-white">
-                            <span className="truncate pr-2">{item.productName}</span>
-                            <div className="flex items-center gap-1.5 shrink-0">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-44 overflow-y-auto pr-1">
+                    {activeProducts.length === 0 ? (
+                      <p className="text-slate-500 text-center col-span-2 py-2 text-xs">
+                        No hay productos disponibles.
+                      </p>
+                    ) : (
+                      activeProducts.map((prod) => {
+                        const inCart = productCart[prod.id] || 0;
+                        const imgUrl = getProductImage(prod);
+                        return (
+                          <div
+                            key={prod.id}
+                            className={`p-2 rounded-xl border flex items-center justify-between gap-2 transition-all ${
+                              inCart > 0 ? 'bg-[#181D26] border-[#D4AF37]' : 'bg-[#14171E] border-white/5'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                              <img
+                                src={imgUrl}
+                                alt={prod.name}
+                                className="w-8 h-8 rounded-lg object-cover shrink-0 border border-white/10 bg-slate-900"
+                                referrerPolicy="no-referrer"
+                              />
+                              <div className="min-w-0 flex-1">
+                                <h5 className="font-bold text-white text-[11px] truncate">{prod.name}</h5>
+                                <span className="text-[10px] text-[#D4AF37] font-semibold">
+                                  {formatCurrency(prod.price)}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0">
+                              {inCart > 0 && (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveProduct(prod.id)}
+                                    className="w-5 h-5 rounded bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-bold text-xs"
+                                  >
+                                    -
+                                  </button>
+                                  <span className="font-bold text-xs text-white w-3.5 text-center">
+                                    {inCart}
+                                  </span>
+                                </>
+                              )}
                               <button
-                                onClick={() => handleRemoveProduct(item.productId)}
-                                className="w-5 h-5 rounded bg-white/10 flex items-center justify-center text-xs"
-                              >
-                                -
-                              </button>
-                              <span className="font-mono text-xs w-4 text-center">{item.quantity}</span>
-                              <button
-                                onClick={() => handleAddProduct(item.productId)}
-                                className="w-5 h-5 rounded bg-white/10 flex items-center justify-center text-xs"
+                                type="button"
+                                onClick={() => handleAddProduct(prod.id)}
+                                className="w-5 h-5 rounded bg-[#D4AF37] text-slate-950 flex items-center justify-center font-bold text-xs"
                               >
                                 +
                               </button>
-                              <span className="font-bold text-[#D4AF37] ml-1">
-                                {formatCurrency(item.subtotal)}
-                              </span>
                             </div>
                           </div>
-                        ))}
-                      </div>
+                        );
+                      })
                     )}
+                  </div>
+                </div>
+              )}
 
+              {/* 3. MÉTODO DE PAGO */}
+              <div className="p-3 rounded-2xl bg-[#14171E] border border-white/10 space-y-2">
+                <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
+                  2. Método de Pago
+                </span>
+                <div className="grid grid-cols-3 gap-2">
+                  {(['cash', 'card', 'transfer'] as const).map((m) => (
                     <button
+                      key={m}
                       type="button"
-                      onClick={() => setIsProductCatalogExpanded(!isProductCatalogExpanded)}
-                      className="w-full py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-bold text-xs flex items-center justify-between transition-all"
+                      onClick={() => setPaymentMethod(m)}
+                      className={`py-2 px-2 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
+                        paymentMethod === m
+                          ? 'bg-[#D4AF37] text-slate-950 border-[#D4AF37] shadow'
+                          : 'bg-white/5 border-white/10 text-slate-400 hover:text-white'
+                      }`}
                     >
-                      <span className="flex items-center gap-1.5">
-                        <Package className="w-3.5 h-3.5 text-[#D4AF37]" />
-                        <span>{isProductCatalogExpanded ? 'Ocultar Catálogo' : '+ Agregar Productos a la Venta'}</span>
-                      </span>
-                      <ChevronDown className={`w-4 h-4 transition-transform ${isProductCatalogExpanded ? 'rotate-180' : ''}`} />
+                      {m === 'cash' && <Banknote className="w-3.5 h-3.5" />}
+                      {m === 'card' && <CreditCard className="w-3.5 h-3.5" />}
+                      {m === 'transfer' && <Receipt className="w-3.5 h-3.5" />}
+                      <span>{m === 'cash' ? 'Efectivo' : m === 'card' ? 'Tarjeta' : 'Transfer'}</span>
                     </button>
-
-                    {/* Expandable Product Grid */}
-                    {isProductCatalogExpanded && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1 border border-white/10 rounded-2xl bg-black/40 animate-in fade-in">
-                        {activeProducts.length === 0 ? (
-                          <p className="text-slate-500 text-center col-span-2 py-3 text-xs">
-                            No hay productos registrados en el catálogo.
-                          </p>
-                        ) : (
-                          activeProducts.map((prod) => {
-                            const inCart = productCart[prod.id] || 0;
-                            const imgUrl = getProductImage(prod);
-                            return (
-                              <div
-                                key={prod.id}
-                                className="p-2 rounded-xl bg-[#181D26] border border-white/5 flex items-center justify-between gap-2"
-                              >
-                                <div className="flex items-center gap-2 min-w-0 flex-1">
-                                  <img
-                                    src={imgUrl}
-                                    alt={prod.name}
-                                    className="w-9 h-9 rounded-lg object-cover shrink-0 border border-white/10 bg-slate-900"
-                                    referrerPolicy="no-referrer"
-                                  />
-                                  <div className="min-w-0 flex-1">
-                                    <h5 className="font-bold text-white text-[11px] truncate">{prod.name}</h5>
-                                    <span className="text-[10px] text-[#D4AF37] font-semibold">
-                                      {formatCurrency(prod.price)}
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-1 shrink-0">
-                                  {inCart > 0 && (
-                                    <>
-                                      <button
-                                        type="button"
-                                        onClick={() => handleRemoveProduct(prod.id)}
-                                        className="w-6 h-6 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-bold"
-                                      >
-                                        <Minus className="w-3 h-3" />
-                                      </button>
-                                      <span className="font-bold text-xs text-white w-4 text-center">
-                                        {inCart}
-                                      </span>
-                                    </>
-                                  )}
-                                  <button
-                                    type="button"
-                                    onClick={() => handleAddProduct(prod.id)}
-                                    className="w-6 h-6 rounded-lg bg-[#D4AF37] hover:bg-[#E5B869] text-slate-950 flex items-center justify-center font-bold"
-                                  >
-                                    <Plus className="w-3 h-3" />
-                                  </button>
-                                </div>
-                              </div>
-                            );
-                          })
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* 4. PUNTOS AUTOMÁTICOS CALCULADOS */}
-                <div className="p-3 rounded-2xl bg-gradient-to-r from-amber-500/10 via-[#D4AF37]/15 to-transparent border border-[#D4AF37]/30 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-[#D4AF37]" />
-                    <div>
-                      <span className="font-bold text-white text-xs block">Puntos Acumulados Automáticos:</span>
-                      <span className="text-[10px] text-slate-400">
-                        {serviceOption !== 'none' ? '+50 pts servicio' : '0 pts serv'} • {productPointsEarned > 0 ? `+${productPointsEarned} pts prod (${productPointsPercentage}%)` : '0 pts prod'}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="text-right">
-                    <span className="text-base font-black text-[#D4AF37] block">
-                      +{finalPointsToAdd} pts
-                    </span>
-                  </div>
-                </div>
-
-                {/* 5. MÉTODO DE PAGO */}
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                    Método de Pago
-                  </label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {(['cash', 'card', 'transfer'] as const).map((m) => (
-                      <button
-                        key={m}
-                        type="button"
-                        onClick={() => setPaymentMethod(m)}
-                        className={`py-2 px-2 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
-                          paymentMethod === m
-                            ? 'bg-[#D4AF37] text-slate-950 border-[#D4AF37] shadow'
-                            : 'bg-white/5 border-white/10 text-slate-400 hover:text-white'
-                        }`}
-                      >
-                        {m === 'cash' && <Banknote className="w-3.5 h-3.5" />}
-                        {m === 'card' && <CreditCard className="w-3.5 h-3.5" />}
-                        {m === 'transfer' && <Receipt className="w-3.5 h-3.5" />}
-                        <span className="capitalize">{m === 'cash' ? 'Efectivo' : m === 'card' ? 'Tarjeta' : 'Transfer'}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* 6. TOTAL Y BOTÓN DE ACCIÓN PRINCIPAL */}
-                <div className="pt-2 border-t border-white/10 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-xs text-slate-400 block">Total a Cobrar:</span>
-                      <span className="text-xl font-black text-white">
-                        {formatCurrency(totalAmountToCharge)}
-                      </span>
-                    </div>
-
-                    <div className="text-right">
-                      <span className="text-[11px] text-teal-400 font-bold block">
-                        +{visitsToAdd} Visita(s)
-                      </span>
-                      <span className="text-xs font-bold text-[#D4AF37]">
-                        +{finalPointsToAdd} Puntos VIP
-                      </span>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={handleExecuteCheckout}
-                    disabled={isSubmittingAction}
-                    className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] hover:opacity-95 text-slate-950 font-black text-xs sm:text-sm shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 active:scale-98"
-                  >
-                    <Check className="w-4 h-4 stroke-[3]" />
-                    <span>
-                      {isSubmittingAction
-                        ? 'Registrando...'
-                        : `Cobrar ${formatCurrency(totalAmountToCharge)} y Registrar (+${visitsToAdd} Visita, +${finalPointsToAdd} Pts)`}
-                    </span>
-                  </button>
+                  ))}
                 </div>
               </div>
 
-              {/* Direct Booking Option if client wants another future appointment */}
+              {/* 4. TOTAL & ACTION BUTTON */}
+              <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#181D26] to-[#12151B] border border-white/15 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-[11px] text-slate-400 block">Total a Cobrar:</span>
+                    <span className="text-xl font-black text-white">
+                      {formatCurrency(totalAmountToCharge)}
+                    </span>
+                  </div>
+
+                  <div className="text-right">
+                    <span className="text-xs font-black text-[#D4AF37] flex items-center justify-end gap-1">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      +{finalPointsToAdd} pts
+                    </span>
+                    <span className="text-[10px] text-emerald-400 font-semibold block">
+                      +{visitsToAdd} Visita al cliente
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleExecuteCheckout}
+                  disabled={isSubmittingAction}
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] hover:opacity-95 text-slate-950 font-black text-xs sm:text-sm shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 active:scale-98"
+                >
+                  <Check className="w-4 h-4 stroke-[3]" />
+                  <span>
+                    {isSubmittingAction
+                      ? 'Procesando...'
+                      : `Cobrar ${formatCurrency(totalAmountToCharge)} y Registrar (+${visitsToAdd} Visita, +${finalPointsToAdd} Pts)`}
+                  </span>
+                </button>
+              </div>
+
+              {/* AGENDAR PRÓXIMA CITA DIRECTA */}
               {onBookForClient && (
                 <button
                   onClick={() => {
                     onClose();
                     onBookForClient(scannedClient);
                   }}
-                  className="w-full py-2.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-bold text-xs flex items-center justify-center gap-2 transition-all"
+                  className="w-full py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-400 hover:text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-all"
                 >
-                  <Calendar className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span>Agendar Próxima Cita para {scannedClient.name.split(' ')[0]}</span>
+                  <Calendar className="w-3 h-3 text-[#D4AF37]" />
+                  <span>Agendar Próxima Cita</span>
                 </button>
               )}
             </div>
