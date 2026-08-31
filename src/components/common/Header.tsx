@@ -19,12 +19,22 @@ export const Header: React.FC<HeaderProps> = ({ onOpenProfile, onOpenQr }) => {
   };
 
   return (
-    <header 
-      className="sticky top-0 z-40 w-full bg-[#0D0F12]/90 backdrop-blur-xl border-b border-white/10 px-3 sm:px-4 pb-3 transition-all"
-      style={{
-        paddingTop: 'max(env(safe-area-inset-top, 0px), 0.75rem)',
-      }}
-    >
+    <div className="sticky top-0 z-40 w-full flex flex-col">
+      {/* Header superior vacío, aproximadamente 30% del tamaño del header principal */}
+      <div 
+        className="w-full bg-[#07080A]/95 backdrop-blur-md border-b border-white/5" 
+        style={{
+          height: '22px',
+          paddingTop: 'env(safe-area-inset-top, 0px)',
+        }}
+      />
+
+      <header 
+        className="w-full bg-[#0D0F12]/90 backdrop-blur-xl border-b border-white/10 px-3 sm:px-4 pb-3 transition-all"
+        style={{
+          paddingTop: '0.75rem',
+        }}
+      >
       <div className="max-w-6xl mx-auto flex items-center justify-between gap-2">
         {/* Brand Logo (Solo logotipo sin fondos ni contornos) */}
         <div className="flex items-center cursor-pointer shrink-0" onClick={onOpenProfile}>
@@ -118,5 +128,6 @@ export const Header: React.FC<HeaderProps> = ({ onOpenProfile, onOpenQr }) => {
         </div>
       </div>
     </header>
+    </div>
   );
 };
