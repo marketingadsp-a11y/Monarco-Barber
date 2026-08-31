@@ -38,38 +38,102 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
   return (
     <div className="space-y-6 pb-24">
-      {/* SPATIAL HERO BANNER */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1B202B] via-[#14171F] to-[#0D0F13] border border-white/15 p-6 sm:p-8 shadow-2xl">
-        {/* Glow ambient background circles */}
-        <div className="absolute -top-16 -right-16 w-60 h-60 bg-[#D4AF37]/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-16 -left-16 w-60 h-60 bg-[#996515]/10 rounded-full blur-3xl pointer-events-none" />
+      {/* SPATIAL HERO BANNER (Conditional & Custom Elements) */}
+      {businessSettings.showHeroSection !== false && (
+        <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1B202B] via-[#14171F] to-[#0D0F13] border border-white/15 p-6 sm:p-8 shadow-2xl">
+          {/* Glow ambient background circles */}
+          <div className="absolute -top-16 -right-16 w-60 h-60 bg-[#D4AF37]/15 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-16 -left-16 w-60 h-60 bg-[#996515]/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 max-w-lg space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/30 text-[#D4AF37] text-xs font-semibold tracking-wide">
-            <Crown className="w-3.5 h-3.5" />
-            <span>{businessSettings.heroBadge || 'EXPERIENCIA EXCLUSIVA EN POLANCO'}</span>
-          </div>
+          {/* Logo-only centered hero banner */}
+          {businessSettings.heroShowLogo &&
+          businessSettings.heroShowBadge === false &&
+          businessSettings.heroShowTitle === false &&
+          businessSettings.heroShowSubtitle === false &&
+          businessSettings.heroShowButton === false ? (
+            <div className="relative z-10 flex flex-col items-center justify-center py-4 text-center">
+              {businessSettings.logoUrl ? (
+                <img
+                  src={businessSettings.logoUrl}
+                  alt={businessSettings.name || 'Monarca Barber'}
+                  className="h-20 sm:h-28 w-auto max-w-[280px] object-contain drop-shadow-2xl animate-fade-in"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <div className="flex items-center gap-3 text-[#D4AF37]">
+                  <Crown className="w-10 h-10" />
+                  <span className="text-2xl sm:text-3xl font-black text-white tracking-widest">
+                    {businessSettings.name || 'MONARCA BARBER'}
+                  </span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="relative z-10 max-w-lg space-y-4">
+              {/* Optional Hero Logo inside standard content layout */}
+              {businessSettings.heroShowLogo && (
+                <div className="pb-1">
+                  {businessSettings.logoUrl ? (
+                    <img
+                      src={businessSettings.logoUrl}
+                      alt={businessSettings.name || 'Logo'}
+                      className="h-12 sm:h-14 w-auto max-w-[220px] object-contain drop-shadow-md"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <div className="flex items-center gap-2 text-[#D4AF37]">
+                      <Crown className="w-6 h-6" />
+                      <span className="text-lg font-black text-white tracking-wider">
+                        {businessSettings.name || 'MONARCA BARBER'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
 
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
-            {businessSettings.heroTitle || 'El arte del corte clásico y la barbería contemporánea.'}
-          </h1>
+              {/* Insignia / Badge */}
+              {businessSettings.heroShowBadge !== false && (
+                <div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/30 text-[#D4AF37] text-xs font-semibold tracking-wide">
+                    <Crown className="w-3.5 h-3.5" />
+                    <span>{businessSettings.heroBadge || 'EXPERIENCIA EXCLUSIVA EN POLANCO'}</span>
+                  </div>
+                </div>
+              )}
 
-          <p className="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
-            {businessSettings.heroSubtitle || businessSettings.tagline || 'Donde la elegancia y la maestría se encuentran.'}
-          </p>
+              {/* Title */}
+              {businessSettings.heroShowTitle !== false && (
+                <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
+                  {businessSettings.heroTitle || 'El arte del corte clásico y la barbería contemporánea.'}
+                </h1>
+              )}
 
-          <div className="pt-2 flex items-center gap-3">
-            <button
-              onClick={() => onStartBooking()}
-              className="flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-bold text-xs sm:text-sm shadow-xl shadow-[#D4AF37]/25 hover:scale-[1.02] active:scale-95 transition-all"
-            >
-              <Scissors className="w-4 h-4 stroke-[2.5]" />
-              <span>{businessSettings.heroButtonText || 'Reservar Cita Ahora'}</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </section>
+              {/* Subtitle */}
+              {businessSettings.heroShowSubtitle !== false && (
+                <p className="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
+                  {businessSettings.heroSubtitle ||
+                    businessSettings.tagline ||
+                    'Donde la elegancia y la maestría se encuentran.'}
+                </p>
+              )}
+
+              {/* Booking Button */}
+              {businessSettings.heroShowButton !== false && (
+                <div className="pt-2 flex items-center gap-3">
+                  <button
+                    onClick={() => onStartBooking()}
+                    className="flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-bold text-xs sm:text-sm shadow-xl shadow-[#D4AF37]/25 hover:scale-[1.02] active:scale-95 transition-all"
+                  >
+                    <Scissors className="w-4 h-4 stroke-[2.5]" />
+                    <span>{businessSettings.heroButtonText || 'Reservar Cita Ahora'}</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </section>
+      )}
 
       {/* NEXT UPCOMING APPOINTMENT ALERT (If exists) */}
       {nextAppointment && (

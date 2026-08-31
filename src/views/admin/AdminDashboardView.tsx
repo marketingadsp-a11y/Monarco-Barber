@@ -40,6 +40,8 @@ import {
   Radio,
   Send,
   Package,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -1390,125 +1392,497 @@ export const AdminDashboardView: React.FC = () => {
           </div>
 
           {/* 2. BANNER DE INICIO / HERO MODULE EDITOR */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-b from-[#181D27] to-[#12151C] border border-[#D4AF37]/30 space-y-4 shadow-xl">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <Layout className="w-4 h-4 text-[#D4AF37]" />
-                <h3 className="text-sm font-bold text-white uppercase tracking-wider">
-                  Módulo de Inicio / Banner Principal (Hero)
-                </h3>
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-b from-[#181D27] to-[#12151C] border border-[#D4AF37]/30 space-y-5 shadow-xl">
+            {/* Header with Master Toggle */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
+                  <Layout className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                    Módulo de Inicio / Banner Principal (Hero)
+                  </h3>
+                  <p className="text-[11px] text-slate-400">
+                    Controla la visibilidad y cada elemento independiente del banner de bienvenida.
+                  </p>
+                </div>
               </div>
-              <button
-                type="button"
-                onClick={() =>
-                  setSettingsForm((prev) => ({
-                    ...prev,
-                    heroBadge: 'EXPERIENCIA EXCLUSIVA EN POLANCO',
-                    heroTitle: 'El arte del corte clásico y la barbería contemporánea.',
-                    heroSubtitle: 'Donde la elegancia y la maestría se encuentran.',
-                    heroButtonText: 'Reservar Cita Ahora',
-                  }))
-                }
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-[11px] font-semibold transition-all self-start sm:self-auto"
-                title="Restaurar textos predeterminados"
-              >
-                <RotateCcw className="w-3 h-3 text-[#D4AF37]" />
-                <span>Restaurar Predeterminados</span>
-              </button>
+
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <span className="text-[11px] font-bold text-slate-300 block">
+                    {settingsForm.showHeroSection !== false ? 'Módulo Activo' : 'Módulo Desactivado'}
+                  </span>
+                  <span className="text-[10px] text-slate-500 block">
+                    {settingsForm.showHeroSection !== false ? 'Visible en Inicio' : 'Oculto en Inicio'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSettingsForm((prev) => ({
+                      ...prev,
+                      showHeroSection: prev.showHeroSection !== undefined ? !prev.showHeroSection : false,
+                    }))
+                  }
+                  className={`transition-colors ${
+                    settingsForm.showHeroSection !== false ? 'text-[#D4AF37]' : 'text-slate-600'
+                  }`}
+                  title="Activar o desactivar todo el banner principal de inicio"
+                >
+                  {settingsForm.showHeroSection !== false ? (
+                    <ToggleRight className="w-9 h-9" />
+                  ) : (
+                    <ToggleLeft className="w-9 h-9" />
+                  )}
+                </button>
+              </div>
             </div>
-            
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Personaliza los textos y llamados a la acción del banner superior que ven todos los clientes al entrar a la aplicación.
-            </p>
+
+            {/* Quick Layout Presets Bar */}
+            <div className="p-3.5 rounded-2xl bg-black/40 border border-white/10 space-y-2">
+              <span className="text-[11px] font-bold text-[#D4AF37] uppercase tracking-wider block">
+                Plantillas Rápidas de Configuración:
+              </span>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSettingsForm((prev) => ({
+                      ...prev,
+                      showHeroSection: true,
+                      heroShowLogo: true,
+                      heroShowBadge: false,
+                      heroShowTitle: false,
+                      heroShowSubtitle: false,
+                      heroShowButton: false,
+                    }))
+                  }
+                  className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-[#D4AF37]/15 hover:border-[#D4AF37]/40 border border-white/10 text-white text-xs font-semibold flex items-center gap-1.5 transition-all"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <span>Solo Logotipo</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSettingsForm((prev) => ({
+                      ...prev,
+                      showHeroSection: true,
+                      heroShowLogo: true,
+                      heroShowBadge: false,
+                      heroShowTitle: false,
+                      heroShowSubtitle: false,
+                      heroShowButton: true,
+                    }))
+                  }
+                  className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-[#D4AF37]/15 hover:border-[#D4AF37]/40 border border-white/10 text-white text-xs font-semibold flex items-center gap-1.5 transition-all"
+                >
+                  <MousePointerClick className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <span>Logotipo + Botón</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSettingsForm((prev) => ({
+                      ...prev,
+                      showHeroSection: true,
+                      heroShowLogo: false,
+                      heroShowBadge: true,
+                      heroShowTitle: true,
+                      heroShowSubtitle: true,
+                      heroShowButton: true,
+                    }))
+                  }
+                  className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-[#D4AF37]/15 hover:border-[#D4AF37]/40 border border-white/10 text-white text-xs font-semibold flex items-center gap-1.5 transition-all"
+                >
+                  <Type className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <span>Estándar Editorial (Textos + Botón)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSettingsForm((prev) => ({
+                      ...prev,
+                      showHeroSection: true,
+                      heroShowLogo: true,
+                      heroShowBadge: true,
+                      heroShowTitle: true,
+                      heroShowSubtitle: true,
+                      heroShowButton: true,
+                    }))
+                  }
+                  className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-[#D4AF37]/15 hover:border-[#D4AF37]/40 border border-white/10 text-white text-xs font-semibold flex items-center gap-1.5 transition-all"
+                >
+                  <Crown className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <span>Todo Incluido (Logo + Textos + Botón)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSettingsForm((prev) => ({
+                      ...prev,
+                      showHeroSection: true,
+                      heroShowLogo: false,
+                      heroShowBadge: true,
+                      heroShowTitle: true,
+                      heroShowSubtitle: true,
+                      heroShowButton: true,
+                      heroBadge: 'EXPERIENCIA EXCLUSIVA EN POLANCO',
+                      heroTitle: 'El arte del corte clásico y la barbería contemporánea.',
+                      heroSubtitle: 'Donde la elegancia y la maestría se encuentran.',
+                      heroButtonText: 'Reservar Cita Ahora',
+                    }))
+                  }
+                  className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition-all ml-auto"
+                >
+                  <RotateCcw className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <span>Restaurar Predeterminados</span>
+                </button>
+              </div>
+            </div>
 
             {/* LIVE PREVIEW OF THE HERO BANNER */}
             <div className="space-y-1.5 pt-1">
               <span className="text-[11px] font-bold text-[#D4AF37] uppercase tracking-wider block">
                 Vista Previa en Tiempo Real:
               </span>
-              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1B202B] via-[#14171F] to-[#0D0F13] border border-white/15 p-5 shadow-lg">
-                <div className="absolute -top-12 -right-12 w-40 h-40 bg-[#D4AF37]/15 rounded-full blur-2xl pointer-events-none" />
-                <div className="relative z-10 space-y-3 max-w-lg">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/30 text-[#D4AF37] text-[10px] font-bold tracking-wide">
-                    <Crown className="w-3 h-3" />
-                    <span>{settingsForm.heroBadge || 'EXPERIENCIA EXCLUSIVA EN POLANCO'}</span>
-                  </div>
 
-                  <h2 className="text-lg sm:text-xl font-black text-white tracking-tight leading-snug">
-                    {settingsForm.heroTitle || 'El arte del corte clásico y la barbería contemporánea.'}
-                  </h2>
-
-                  <p className="text-[11px] sm:text-xs text-slate-300 font-normal leading-relaxed">
-                    {settingsForm.heroSubtitle || settingsForm.tagline || 'Donde la elegancia y la maestría se encuentran.'}
+              {settingsForm.showHeroSection === false ? (
+                <div className="p-6 rounded-2xl bg-black/40 border-2 border-dashed border-white/15 text-center space-y-2">
+                  <EyeOff className="w-7 h-7 text-slate-500 mx-auto" />
+                  <p className="text-xs font-bold text-slate-400">
+                    El módulo Hero está actualmente DESHABILITADO
                   </p>
-
-                  <div className="pt-1 flex items-center gap-2">
-                    <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-bold text-xs shadow-md shadow-[#D4AF37]/20">
-                      <Scissors className="w-3.5 h-3.5 stroke-[2.5]" />
-                      <span>{settingsForm.heroButtonText || 'Reservar Cita Ahora'}</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </div>
-                  </div>
+                  <p className="text-[11px] text-slate-500 max-w-sm mx-auto">
+                    Los clientes no verán este banner en la pantalla de inicio; entrarán directo a las citas y servicios destacados.
+                  </p>
                 </div>
-              </div>
+              ) : (
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1B202B] via-[#14171F] to-[#0D0F13] border border-white/15 p-5 sm:p-6 shadow-lg">
+                  <div className="absolute -top-12 -right-12 w-40 h-40 bg-[#D4AF37]/15 rounded-full blur-2xl pointer-events-none" />
+                  <div className="absolute -bottom-12 -left-12 w-40 h-40 bg-[#996515]/10 rounded-full blur-2xl pointer-events-none" />
+
+                  {/* Logo-only centered preview */}
+                  {settingsForm.heroShowLogo &&
+                  settingsForm.heroShowBadge === false &&
+                  settingsForm.heroShowTitle === false &&
+                  settingsForm.heroShowSubtitle === false &&
+                  settingsForm.heroShowButton === false ? (
+                    <div className="relative z-10 flex flex-col items-center justify-center py-4 text-center">
+                      {settingsForm.logoUrl ? (
+                        <img
+                          src={settingsForm.logoUrl}
+                          alt={settingsForm.name || 'Logo'}
+                          className="h-16 sm:h-20 w-auto max-w-[240px] object-contain drop-shadow-2xl"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <div className="flex items-center gap-2 text-[#D4AF37]">
+                          <Crown className="w-8 h-8" />
+                          <span className="text-xl font-black text-white tracking-widest">
+                            {settingsForm.name || 'MONARCA BARBER'}
+                          </span>
+                        </div>
+                      )}
+                      <span className="text-[10px] text-[#D4AF37] font-semibold mt-2 tracking-wide uppercase">
+                        Modo Solo Logotipo Activo
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="relative z-10 space-y-3 max-w-lg">
+                      {/* Logo Preview inside content */}
+                      {settingsForm.heroShowLogo && (
+                        <div>
+                          {settingsForm.logoUrl ? (
+                            <img
+                              src={settingsForm.logoUrl}
+                              alt="Logo"
+                              className="h-10 sm:h-12 w-auto max-w-[180px] object-contain drop-shadow-md"
+                              referrerPolicy="no-referrer"
+                            />
+                          ) : (
+                            <div className="flex items-center gap-2 text-[#D4AF37]">
+                              <Crown className="w-5 h-5" />
+                              <span className="text-base font-black text-white tracking-wider">
+                                {settingsForm.name || 'MONARCA BARBER'}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Badge Preview */}
+                      {settingsForm.heroShowBadge !== false && (
+                        <div>
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/30 text-[#D4AF37] text-[10px] font-bold tracking-wide">
+                            <Crown className="w-3 h-3" />
+                            <span>{settingsForm.heroBadge || 'EXPERIENCIA EXCLUSIVA EN POLANCO'}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Title Preview */}
+                      {settingsForm.heroShowTitle !== false && (
+                        <h2 className="text-lg sm:text-xl font-black text-white tracking-tight leading-snug">
+                          {settingsForm.heroTitle || 'El arte del corte clásico y la barbería contemporánea.'}
+                        </h2>
+                      )}
+
+                      {/* Subtitle Preview */}
+                      {settingsForm.heroShowSubtitle !== false && (
+                        <p className="text-[11px] sm:text-xs text-slate-300 font-normal leading-relaxed">
+                          {settingsForm.heroSubtitle ||
+                            settingsForm.tagline ||
+                            'Donde la elegancia y la maestría se encuentran.'}
+                        </p>
+                      )}
+
+                      {/* Button Preview */}
+                      {settingsForm.heroShowButton !== false && (
+                        <div className="pt-1 flex items-center gap-2">
+                          <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-bold text-xs shadow-md shadow-[#D4AF37]/20">
+                            <Scissors className="w-3.5 h-3.5 stroke-[2.5]" />
+                            <span>{settingsForm.heroButtonText || 'Reservar Cita Ahora'}</span>
+                            <ChevronRight className="w-3.5 h-3.5" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
-            {/* FORM INPUTS FOR HERO BANNER */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2 text-xs">
-              <div className="sm:col-span-2">
-                <label className="text-slate-300 font-semibold block mb-1 flex items-center gap-1.5">
-                  <Crown className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span>Insignia / Distintivo Superior</span>
-                </label>
-                <input
-                  type="text"
-                  value={settingsForm.heroBadge ?? 'EXPERIENCIA EXCLUSIVA EN POLANCO'}
-                  onChange={(e) => setSettingsForm({ ...settingsForm, heroBadge: e.target.value })}
-                  placeholder="EXPERIENCIA EXCLUSIVA EN POLANCO"
-                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:border-[#D4AF37] transition-all"
-                />
+            {/* GRANULAR TOGGLES & INPUTS FOR EACH ELEMENT */}
+            <div className="space-y-3 pt-2">
+              <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
+                Personalización Elemento por Elemento:
+              </span>
+
+              {/* 1. LOGO TOGGLE */}
+              <div className="p-3.5 rounded-2xl bg-black/30 border border-white/10 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-[#D4AF37]" />
+                    <div>
+                      <span className="text-xs font-bold text-white block">Logotipo en el Banner</span>
+                      <span className="text-[11px] text-slate-400 block">
+                        Muestra el logotipo oficial de tu barbería dentro del banner de portada.
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSettingsForm((prev) => ({
+                        ...prev,
+                        heroShowLogo: !prev.heroShowLogo,
+                      }))
+                    }
+                    className={`transition-colors ${
+                      settingsForm.heroShowLogo ? 'text-[#D4AF37]' : 'text-slate-600'
+                    }`}
+                  >
+                    {settingsForm.heroShowLogo ? (
+                      <ToggleRight className="w-8 h-8" />
+                    ) : (
+                      <ToggleLeft className="w-8 h-8" />
+                    )}
+                  </button>
+                </div>
               </div>
 
-              <div className="sm:col-span-2">
-                <label className="text-slate-300 font-semibold block mb-1 flex items-center gap-1.5">
-                  <Type className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span>Título Principal de Portada</span>
-                </label>
-                <input
-                  type="text"
-                  value={settingsForm.heroTitle ?? 'El arte del corte clásico y la barbería contemporánea.'}
-                  onChange={(e) => setSettingsForm({ ...settingsForm, heroTitle: e.target.value })}
-                  placeholder="El arte del corte clásico y la barbería contemporánea."
-                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:border-[#D4AF37] transition-all"
-                />
+              {/* 2. BADGE TOGGLE & INPUT */}
+              <div className="p-3.5 rounded-2xl bg-black/30 border border-white/10 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Crown className="w-4 h-4 text-[#D4AF37]" />
+                    <div>
+                      <span className="text-xs font-bold text-white block">Insignia / Distintivo Superior</span>
+                      <span className="text-[11px] text-slate-400 block">
+                        Cápsula dorada pequeña con icono de corona arriba del título.
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSettingsForm((prev) => ({
+                        ...prev,
+                        heroShowBadge: prev.heroShowBadge !== undefined ? !prev.heroShowBadge : false,
+                      }))
+                    }
+                    className={`transition-colors ${
+                      settingsForm.heroShowBadge !== false ? 'text-[#D4AF37]' : 'text-slate-600'
+                    }`}
+                  >
+                    {settingsForm.heroShowBadge !== false ? (
+                      <ToggleRight className="w-8 h-8" />
+                    ) : (
+                      <ToggleLeft className="w-8 h-8" />
+                    )}
+                  </button>
+                </div>
+
+                {settingsForm.heroShowBadge !== false && (
+                  <div>
+                    <label className="text-[11px] text-slate-400 block mb-1">Texto de la Insignia:</label>
+                    <input
+                      type="text"
+                      value={settingsForm.heroBadge ?? 'EXPERIENCIA EXCLUSIVA EN POLANCO'}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, heroBadge: e.target.value })}
+                      placeholder="EXPERIENCIA EXCLUSIVA EN POLANCO"
+                      className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:border-[#D4AF37] transition-all"
+                    />
+                  </div>
+                )}
               </div>
 
-              <div className="sm:col-span-2">
-                <label className="text-slate-300 font-semibold block mb-1 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span>Subtítulo o Descripción de Bienvenida</span>
-                </label>
-                <textarea
-                  rows={2}
-                  value={settingsForm.heroSubtitle ?? (settingsForm.tagline || 'Donde la elegancia y la maestría se encuentran.')}
-                  onChange={(e) => setSettingsForm({ ...settingsForm, heroSubtitle: e.target.value })}
-                  placeholder="Donde la elegancia y la maestría se encuentran."
-                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:border-[#D4AF37] transition-all"
-                />
+              {/* 3. TITLE TOGGLE & INPUT */}
+              <div className="p-3.5 rounded-2xl bg-black/30 border border-white/10 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Type className="w-4 h-4 text-[#D4AF37]" />
+                    <div>
+                      <span className="text-xs font-bold text-white block">Título Principal de Portada</span>
+                      <span className="text-[11px] text-slate-400 block">
+                        Encabezado tipográfico de mayor impacto en la portada.
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSettingsForm((prev) => ({
+                        ...prev,
+                        heroShowTitle: prev.heroShowTitle !== undefined ? !prev.heroShowTitle : false,
+                      }))
+                    }
+                    className={`transition-colors ${
+                      settingsForm.heroShowTitle !== false ? 'text-[#D4AF37]' : 'text-slate-600'
+                    }`}
+                  >
+                    {settingsForm.heroShowTitle !== false ? (
+                      <ToggleRight className="w-8 h-8" />
+                    ) : (
+                      <ToggleLeft className="w-8 h-8" />
+                    )}
+                  </button>
+                </div>
+
+                {settingsForm.heroShowTitle !== false && (
+                  <div>
+                    <label className="text-[11px] text-slate-400 block mb-1">Texto del Título:</label>
+                    <input
+                      type="text"
+                      value={settingsForm.heroTitle ?? 'El arte del corte clásico y la barbería contemporánea.'}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, heroTitle: e.target.value })}
+                      placeholder="El arte del corte clásico y la barbería contemporánea."
+                      className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:border-[#D4AF37] transition-all"
+                    />
+                  </div>
+                )}
               </div>
 
-              <div className="sm:col-span-2">
-                <label className="text-slate-300 font-semibold block mb-1 flex items-center gap-1.5">
-                  <MousePointerClick className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span>Texto del Botón de Reserva</span>
-                </label>
-                <input
-                  type="text"
-                  value={settingsForm.heroButtonText ?? 'Reservar Cita Ahora'}
-                  onChange={(e) => setSettingsForm({ ...settingsForm, heroButtonText: e.target.value })}
-                  placeholder="Reservar Cita Ahora"
-                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:border-[#D4AF37] transition-all"
-                />
+              {/* 4. SUBTITLE TOGGLE & INPUT */}
+              <div className="p-3.5 rounded-2xl bg-black/30 border border-white/10 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-[#D4AF37]" />
+                    <div>
+                      <span className="text-xs font-bold text-white block">Subtítulo o Descripción</span>
+                      <span className="text-[11px] text-slate-400 block">
+                        Párrafo complementario que describe la propuesta de valor.
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSettingsForm((prev) => ({
+                        ...prev,
+                        heroShowSubtitle: prev.heroShowSubtitle !== undefined ? !prev.heroShowSubtitle : false,
+                      }))
+                    }
+                    className={`transition-colors ${
+                      settingsForm.heroShowSubtitle !== false ? 'text-[#D4AF37]' : 'text-slate-600'
+                    }`}
+                  >
+                    {settingsForm.heroShowSubtitle !== false ? (
+                      <ToggleRight className="w-8 h-8" />
+                    ) : (
+                      <ToggleLeft className="w-8 h-8" />
+                    )}
+                  </button>
+                </div>
+
+                {settingsForm.heroShowSubtitle !== false && (
+                  <div>
+                    <label className="text-[11px] text-slate-400 block mb-1">Texto del Subtítulo:</label>
+                    <textarea
+                      rows={2}
+                      value={
+                        settingsForm.heroSubtitle ??
+                        (settingsForm.tagline || 'Donde la elegancia y la maestría se encuentran.')
+                      }
+                      onChange={(e) => setSettingsForm({ ...settingsForm, heroSubtitle: e.target.value })}
+                      placeholder="Donde la elegancia y la maestría se encuentran."
+                      className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:border-[#D4AF37] transition-all"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* 5. BUTTON TOGGLE & INPUT */}
+              <div className="p-3.5 rounded-2xl bg-black/30 border border-white/10 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <MousePointerClick className="w-4 h-4 text-[#D4AF37]" />
+                    <div>
+                      <span className="text-xs font-bold text-white block">Botón de Reserva de Cita</span>
+                      <span className="text-[11px] text-slate-400 block">
+                        Llamado a la acción que abre de inmediato el flujo de agendamiento.
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSettingsForm((prev) => ({
+                        ...prev,
+                        heroShowButton: prev.heroShowButton !== undefined ? !prev.heroShowButton : false,
+                      }))
+                    }
+                    className={`transition-colors ${
+                      settingsForm.heroShowButton !== false ? 'text-[#D4AF37]' : 'text-slate-600'
+                    }`}
+                  >
+                    {settingsForm.heroShowButton !== false ? (
+                      <ToggleRight className="w-8 h-8" />
+                    ) : (
+                      <ToggleLeft className="w-8 h-8" />
+                    )}
+                  </button>
+                </div>
+
+                {settingsForm.heroShowButton !== false && (
+                  <div>
+                    <label className="text-[11px] text-slate-400 block mb-1">Texto del Botón:</label>
+                    <input
+                      type="text"
+                      value={settingsForm.heroButtonText ?? 'Reservar Cita Ahora'}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, heroButtonText: e.target.value })}
+                      placeholder="Reservar Cita Ahora"
+                      className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:border-[#D4AF37] transition-all"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>

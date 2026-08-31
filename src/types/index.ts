@@ -243,7 +243,13 @@ export interface BusinessSettings {
   openingTime: string; // "09:00"
   closingTime: string; // "21:00"
   announcement?: string;
-  // Hero Banner Customization
+  // Hero Banner Customization & Component Toggles
+  showHeroSection?: boolean; // Habilitar o deshabilitar todo el módulo de Hero Banner
+  heroShowLogo?: boolean; // Mostrar logotipo en el banner hero
+  heroShowBadge?: boolean; // Mostrar insignia / distintivo superior
+  heroShowTitle?: boolean; // Mostrar título principal
+  heroShowSubtitle?: boolean; // Mostrar subtítulo
+  heroShowButton?: boolean; // Mostrar botón de reserva
   heroBadge?: string;
   heroTitle?: string;
   heroSubtitle?: string;
