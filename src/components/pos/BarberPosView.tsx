@@ -98,11 +98,44 @@ export const BarberPosView: React.FC<BarberPosViewProps> = ({
     return () => unsub();
   }, []);
 
+  // Category filter
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+
+  // Helper to retrieve high-res barbershop product images with smart contextual fallbacks
+  const getProductImage = (prod: Product) => {
+    if (prod.imageUrl) return prod.imageUrl;
+    const name = prod.name.toLowerCase();
+    const desc = (prod.description || '').toLowerCase();
+    const cat = (prod.category || '').toLowerCase();
+    if (name.includes('pomada') || name.includes('matte') || desc.includes('fijación') || cat.includes('fijación')) {
+      return 'https://images.unsplash.com/photo-1597854710119-a5a8fc004a66?auto=format&fit=crop&w=400&q=80';
+    }
+    if (name.includes('aceite') || name.includes('barba') || desc.includes('barba') || cat.includes('barba')) {
+      return 'https://images.unsplash.com/photo-1621607512214-68297480165e?auto=format&fit=crop&w=400&q=80';
+    }
+    if (name.includes('shampoo') || name.includes('capilar') || name.includes('anticaída') || cat.includes('capilar')) {
+      return 'https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=400&q=80';
+    }
+    if (name.includes('cera') || name.includes('polvo') || name.includes('texturiz')) {
+      return 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=400&q=80';
+    }
+    if (name.includes('aftershave') || name.includes('balsamo') || name.includes('bálsamo') || name.includes('afeitado') || cat.includes('afeitado')) {
+      return 'https://images.unsplash.com/photo-1512290900672-1f4a47146522?auto=format&fit=crop&w=400&q=80';
+    }
+    return 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=400&q=80';
+  };
+
   // Filtered products (only active)
   const activeProducts = products.filter((p) => p.active !== false);
+
+  // Available categories
+  const categories = ['all', ...Array.from(new Set(activeProducts.map((p) => p.category).filter(Boolean))) as string[]];
+
   const filteredProducts = activeProducts.filter((p) => {
+    const matchesCat = selectedCategory === 'all' || p.category === selectedCategory;
     const q = productSearch.toLowerCase();
-    return p.name.toLowerCase().includes(q) || (p.description && p.description.toLowerCase().includes(q));
+    const matchesSearch = p.name.toLowerCase().includes(q) || (p.description && p.description.toLowerCase().includes(q));
+    return matchesCat && matchesSearch;
   });
 
   // Filtered customer list for selection
@@ -275,20 +308,42 @@ export const BarberPosView: React.FC<BarberPosViewProps> = ({
       {activeTab === 'pos' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
           {/* LEFT COLUMN: PRODUCTS CATALOG SELECTION (7 COLS) */}
-          <div className="lg:col-span-7 space-y-4">
-            {/* Search */}
-            <div className="relative">
-              <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={productSearch}
-                onChange={(e) => setProductSearch(e.target.value)}
-                placeholder="Buscar productos a vender..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-[#14171E] border border-white/10 text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-[#D4AF37]"
-              />
+          <div className="lg:col-span-7 space-y-3">
+            {/* Search & Category Pills */}
+            <div className="space-y-2">
+              <div className="relative">
+                <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={productSearch}
+                  onChange={(e) => setProductSearch(e.target.value)}
+                  placeholder="Buscar producto por nombre..."
+                  className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-[#14171E] border border-white/10 text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-[#D4AF37]"
+                />
+              </div>
+
+              {/* Category pills for fast mobile filtering */}
+              {categories.length > 2 && (
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
+                  {categories.map((cat) => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`px-3 py-1 rounded-xl font-bold whitespace-nowrap transition-all text-[11px] ${
+                        selectedCategory === cat
+                          ? 'bg-[#D4AF37] text-slate-950 shadow'
+                          : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      {cat === 'all' ? 'Todos' : cat}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* Products Grid */}
+            {/* Products Grid (2 COLUMNS COMPACT FOR MOBILE) */}
             {filteredProducts.length === 0 ? (
               <div className="rounded-3xl bg-[#14171E] border border-white/10 p-8 text-center text-slate-400 space-y-3">
                 <Package className="w-10 h-10 mx-auto text-slate-600 mb-2" />
@@ -306,32 +361,53 @@ export const BarberPosView: React.FC<BarberPosViewProps> = ({
                 )}
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[580px] overflow-y-auto pr-1">
+              <div className="grid grid-cols-2 gap-2 sm:gap-3 max-h-[580px] overflow-y-auto pr-1">
                 {filteredProducts.map((prod) => {
                   const inCartQty = cart[prod.id] || 0;
+                  const imgUrl = getProductImage(prod);
                   return (
                     <div
                       key={prod.id}
                       onClick={() => addToCart(prod.id)}
                       className={`group cursor-pointer rounded-2xl bg-[#14171E] border ${
-                        inCartQty > 0 ? 'border-[#D4AF37] ring-1 ring-[#D4AF37]/50' : 'border-white/10'
-                      } p-3.5 flex flex-col justify-between gap-3 shadow-md hover:border-[#D4AF37] hover:scale-[1.01] active:scale-[0.99] transition-all relative overflow-hidden`}
+                        inCartQty > 0 ? 'border-[#D4AF37] ring-1 ring-[#D4AF37]/50 bg-[#161B24]' : 'border-white/10'
+                      } p-2 sm:p-2.5 flex flex-col justify-between gap-2 shadow-md hover:border-[#D4AF37] hover:scale-[1.01] active:scale-[0.97] transition-all relative overflow-hidden`}
                     >
-                      {inCartQty > 0 && (
-                        <div className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-[#D4AF37] text-slate-950 font-extrabold text-xs flex items-center justify-center shadow">
-                          {inCartQty}
-                        </div>
-                      )}
+                      {/* Product Image Box */}
+                      <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-slate-900 border border-white/5">
+                        <img
+                          src={imgUrl}
+                          alt={prod.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                          referrerPolicy="no-referrer"
+                        />
+                        {/* Cart Badge */}
+                        {inCartQty > 0 && (
+                          <div className="absolute top-1.5 right-1.5 px-2 py-0.5 rounded-full bg-[#D4AF37] text-slate-950 font-black text-[10px] sm:text-xs flex items-center justify-center shadow-lg border border-white/20">
+                            {inCartQty} en orden
+                          </div>
+                        )}
+                        {/* Category tag */}
+                        {prod.category && (
+                          <div className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded-md bg-black/60 backdrop-blur-sm text-[9px] font-semibold text-slate-300">
+                            {prod.category}
+                          </div>
+                        )}
+                      </div>
 
-                      <div className="space-y-1">
-                        <h4 className="font-bold text-white text-xs pr-6 line-clamp-1">{prod.name}</h4>
-                        <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
-                          {prod.description || 'Producto premium Monarca Barber'}
+                      {/* Product Title & Info */}
+                      <div className="space-y-0.5 min-w-0 flex-1">
+                        <h4 className="font-bold text-white text-xs line-clamp-2 leading-tight group-hover:text-[#D4AF37] transition-colors">
+                          {prod.name}
+                        </h4>
+                        <p className="text-[10px] text-slate-400 line-clamp-1">
+                          {prod.description || 'Monarca Barber'}
                         </p>
                       </div>
 
-                      <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                        <span className="font-black text-[#D4AF37] text-sm">
+                      {/* Price and Add Action */}
+                      <div className="flex items-center justify-between pt-1.5 border-t border-white/5 mt-auto">
+                        <span className="font-black text-[#D4AF37] text-xs sm:text-sm">
                           {formatCurrency(prod.price)}
                         </span>
 
@@ -341,10 +417,10 @@ export const BarberPosView: React.FC<BarberPosViewProps> = ({
                             e.stopPropagation();
                             addToCart(prod.id);
                           }}
-                          className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white/5 group-hover:bg-[#D4AF37] group-hover:text-slate-950 text-slate-200 text-[11px] font-bold transition-all"
+                          className="p-1.5 rounded-xl bg-white/5 group-hover:bg-[#D4AF37] group-hover:text-slate-950 text-slate-200 text-xs font-bold transition-all flex items-center justify-center"
+                          title="Añadir a la orden"
                         >
-                          <Plus className="w-3 h-3" />
-                          <span>Agregar</span>
+                          <Plus className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </div>

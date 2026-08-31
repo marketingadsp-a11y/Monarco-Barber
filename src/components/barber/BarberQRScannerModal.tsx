@@ -331,6 +331,29 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
     });
   };
 
+  // Helper to retrieve high-res barbershop product images with fallback
+  const getProductImage = (prod: Product) => {
+    if (prod.imageUrl) return prod.imageUrl;
+    const name = prod.name.toLowerCase();
+    const desc = (prod.description || '').toLowerCase();
+    if (name.includes('pomada') || name.includes('matte') || desc.includes('fijación')) {
+      return 'https://images.unsplash.com/photo-1597854710119-a5a8fc004a66?auto=format&fit=crop&w=400&q=80';
+    }
+    if (name.includes('aceite') || name.includes('barba') || desc.includes('barba')) {
+      return 'https://images.unsplash.com/photo-1621607512214-68297480165e?auto=format&fit=crop&w=400&q=80';
+    }
+    if (name.includes('shampoo') || name.includes('capilar') || name.includes('anticaída')) {
+      return 'https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=400&q=80';
+    }
+    if (name.includes('cera') || name.includes('polvo') || name.includes('texturiz')) {
+      return 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=400&q=80';
+    }
+    if (name.includes('aftershave') || name.includes('balsamo') || name.includes('bálsamo') || name.includes('afeitado')) {
+      return 'https://images.unsplash.com/photo-1512290900672-1f4a47146522?auto=format&fit=crop&w=400&q=80';
+    }
+    return 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=400&q=80';
+  };
+
   // Active products list
   const activeProducts = products.filter((p) => p.active !== false);
 
@@ -979,16 +1002,25 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                         ) : (
                           activeProducts.map((prod) => {
                             const inCart = productCart[prod.id] || 0;
+                            const imgUrl = getProductImage(prod);
                             return (
                               <div
                                 key={prod.id}
                                 className="p-2 rounded-xl bg-[#181D26] border border-white/5 flex items-center justify-between gap-2"
                               >
-                                <div className="min-w-0 flex-1">
-                                  <h5 className="font-bold text-white text-[11px] truncate">{prod.name}</h5>
-                                  <span className="text-[10px] text-[#D4AF37] font-semibold">
-                                    {formatCurrency(prod.price)}
-                                  </span>
+                                <div className="flex items-center gap-2 min-w-0 flex-1">
+                                  <img
+                                    src={imgUrl}
+                                    alt={prod.name}
+                                    className="w-9 h-9 rounded-lg object-cover shrink-0 border border-white/10 bg-slate-900"
+                                    referrerPolicy="no-referrer"
+                                  />
+                                  <div className="min-w-0 flex-1">
+                                    <h5 className="font-bold text-white text-[11px] truncate">{prod.name}</h5>
+                                    <span className="text-[10px] text-[#D4AF37] font-semibold">
+                                      {formatCurrency(prod.price)}
+                                    </span>
+                                  </div>
                                 </div>
                                 <div className="flex items-center gap-1 shrink-0">
                                   {inCart > 0 && (

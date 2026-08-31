@@ -64,6 +64,30 @@ export const BarberProductsSection: React.FC<BarberProductsSectionProps> = ({ on
     }
   };
 
+  // Helper for image fallback
+  const getProductImage = (prod: Product) => {
+    if (prod.imageUrl) return prod.imageUrl;
+    const name = prod.name.toLowerCase();
+    const desc = (prod.description || '').toLowerCase();
+    const cat = (prod.category || '').toLowerCase();
+    if (name.includes('pomada') || name.includes('matte') || desc.includes('fijación') || cat.includes('fijación')) {
+      return 'https://images.unsplash.com/photo-1597854710119-a5a8fc004a66?auto=format&fit=crop&w=400&q=80';
+    }
+    if (name.includes('aceite') || name.includes('barba') || desc.includes('barba') || cat.includes('barba')) {
+      return 'https://images.unsplash.com/photo-1621607512214-68297480165e?auto=format&fit=crop&w=400&q=80';
+    }
+    if (name.includes('shampoo') || name.includes('capilar') || name.includes('anticaída') || cat.includes('capilar')) {
+      return 'https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=400&q=80';
+    }
+    if (name.includes('cera') || name.includes('polvo') || name.includes('texturiz')) {
+      return 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=400&q=80';
+    }
+    if (name.includes('aftershave') || name.includes('balsamo') || name.includes('bálsamo') || name.includes('afeitado') || cat.includes('afeitado')) {
+      return 'https://images.unsplash.com/photo-1512290900672-1f4a47146522?auto=format&fit=crop&w=400&q=80';
+    }
+    return 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=400&q=80';
+  };
+
   return (
     <div className="space-y-5">
       {/* Header card */}
@@ -143,53 +167,69 @@ export const BarberProductsSection: React.FC<BarberProductsSectionProps> = ({ on
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {filteredProducts.map((prod) => (
-            <div
-              key={prod.id}
-              className={`rounded-2xl bg-[#14171E] border ${
-                prod.active ? 'border-white/10' : 'border-white/5 opacity-60'
-              } p-4 flex flex-col justify-between gap-3 shadow-lg hover:border-[#D4AF37]/40 transition-all`}
-            >
-              <div className="space-y-1.5">
-                <div className="flex items-start justify-between gap-2">
-                  <h4 className="font-bold text-white text-sm leading-snug">{prod.name}</h4>
-                  <span className="font-black text-[#D4AF37] text-base shrink-0">
-                    {formatCurrency(prod.price)}
-                  </span>
+          {filteredProducts.map((prod) => {
+            const imgUrl = getProductImage(prod);
+            return (
+              <div
+                key={prod.id}
+                className={`rounded-2xl bg-[#14171E] border ${
+                  prod.active ? 'border-white/10' : 'border-white/5 opacity-60'
+                } p-3.5 flex flex-col justify-between gap-3 shadow-lg hover:border-[#D4AF37]/40 transition-all`}
+              >
+                <div className="flex gap-3">
+                  <img
+                    src={imgUrl}
+                    alt={prod.name}
+                    className="w-16 h-16 rounded-xl object-cover shrink-0 border border-white/10 bg-slate-900"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="space-y-1 min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-1.5">
+                      <h4 className="font-bold text-white text-xs leading-snug line-clamp-2">{prod.name}</h4>
+                      <span className="font-black text-[#D4AF37] text-sm shrink-0">
+                        {formatCurrency(prod.price)}
+                      </span>
+                    </div>
+
+                    <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+                      {prod.description || 'Sin descripción detallada.'}
+                    </p>
+                    {prod.category && (
+                      <span className="inline-block text-[9px] font-semibold px-2 py-0.5 rounded bg-white/5 text-slate-300">
+                        {prod.category}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
-                <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
-                  {prod.description || 'Sin descripción detallada.'}
-                </p>
-              </div>
+                <div className="pt-2 border-t border-white/5 flex items-center justify-between gap-2">
+                  <div className="text-[11px] text-slate-500">
+                    {prod.createdByType === 'barber' ? (
+                      <span className="text-blue-300">
+                        Por: {prod.createdByBarberName || 'Barbero'}
+                      </span>
+                    ) : (
+                      <span className="text-amber-300">Monarca Oficial</span>
+                    )}
+                  </div>
 
-              <div className="pt-2 border-t border-white/5 flex items-center justify-between gap-2">
-                <div className="text-[11px] text-slate-500">
-                  {prod.createdByType === 'barber' ? (
-                    <span className="text-blue-300">
-                      Por: {prod.createdByBarberName || 'Barbero'}
-                    </span>
-                  ) : (
-                    <span className="text-amber-300">Monarca Oficial</span>
-                  )}
+                  {/* Edit Button (Barber can edit, but CANNOT delete) */}
+                  <button
+                    onClick={() => setEditingProduct(prod)}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 hover:text-white text-xs font-semibold transition-all"
+                    title="Editar producto"
+                  >
+                    <Edit2 className="w-3.5 h-3.5 text-[#D4AF37]" />
+                    <span>Editar</span>
+                  </button>
                 </div>
-
-                {/* Edit Button (Barber can edit, but CANNOT delete) */}
-                <button
-                  onClick={() => setEditingProduct(prod)}
-                  className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 hover:text-white text-xs font-semibold transition-all"
-                  title="Editar producto"
-                >
-                  <Edit2 className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span>Editar</span>
-                </button>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
-      {/* Modal: Registrar / Editar Producto (Solo NOMBRE, DESCRIPCIÓN, PRECIO) */}
+      {/* Modal: Registrar / Editar Producto (NOMBRE, CATEGORÍA, IMAGEN, DESCRIPCIÓN, PRECIO) */}
       {editingProduct && (
         <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in">
           <div className="bg-[#14171E] border border-white/15 rounded-3xl p-5 w-full max-w-md space-y-4 shadow-2xl">
@@ -209,7 +249,7 @@ export const BarberProductsSection: React.FC<BarberProductsSectionProps> = ({ on
               </div>
             </div>
 
-            <div className="space-y-3.5 text-xs">
+            <div className="space-y-3 text-xs">
               {/* NOMBRE */}
               <div>
                 <label className="text-slate-300 font-semibold block mb-1">
@@ -224,6 +264,39 @@ export const BarberProductsSection: React.FC<BarberProductsSectionProps> = ({ on
                 />
               </div>
 
+              {/* CATEGORÍA */}
+              <div>
+                <label className="text-slate-300 font-semibold block mb-1">
+                  CATEGORÍA
+                </label>
+                <select
+                  value={editingProduct.category || ''}
+                  onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })}
+                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-none focus:border-[#D4AF37]"
+                >
+                  <option value="">Seleccionar categoría...</option>
+                  <option value="Fijación">Fijación (Pomadas / Ceras / Sprays)</option>
+                  <option value="Cuidado de Barba">Cuidado de Barba (Aceites / Bálsamos)</option>
+                  <option value="Cuidado Capilar">Cuidado Capilar (Shampoo / Tónicos)</option>
+                  <option value="Afeitado">Afeitado (Geles / Aftershave)</option>
+                  <option value="Accesorios">Accesorios y Herramientas</option>
+                </select>
+              </div>
+
+              {/* URL DE IMAGEN (OPCIONAL) */}
+              <div>
+                <label className="text-slate-300 font-semibold block mb-1">
+                  URL DE IMAGEN (OPCIONAL)
+                </label>
+                <input
+                  type="url"
+                  value={editingProduct.imageUrl || ''}
+                  onChange={(e) => setEditingProduct({ ...editingProduct, imageUrl: e.target.value })}
+                  placeholder="https://ejemplo.com/foto-producto.jpg"
+                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-none focus:border-[#D4AF37]"
+                />
+              </div>
+
               {/* DESCRIPCIÓN */}
               <div>
                 <label className="text-slate-300 font-semibold block mb-1">
@@ -232,7 +305,7 @@ export const BarberProductsSection: React.FC<BarberProductsSectionProps> = ({ on
                 <textarea
                   value={editingProduct.description || ''}
                   onChange={(e) => setEditingProduct({ ...editingProduct, description: e.target.value })}
-                  rows={3}
+                  rows={2}
                   placeholder="Describe las características y beneficios del producto..."
                   className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-none focus:border-[#D4AF37]"
                 />

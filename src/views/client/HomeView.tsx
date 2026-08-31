@@ -2,19 +2,11 @@ import React from 'react';
 import {
   Crown,
   Scissors,
-  Sparkles,
   Calendar,
   Clock,
   ChevronRight,
   Star,
-  MapPin,
-  Flame,
-  Coffee,
-  ShieldCheck,
-  ArrowRight,
-  User,
 } from 'lucide-react';
-import { motion } from 'motion/react';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { formatCurrency, formatDateSpanish, formatTime12h } from '../../utils/dateTime';
@@ -175,12 +167,12 @@ export const HomeView: React.FC<HomeViewProps> = ({
         </div>
       </section>
 
-      {/* MASTER BARBERS CAROUSEL */}
+      {/* NUESTROS BARBEROS (VISTA COMPACTA Y ELEGANTE) */}
       <section className="space-y-3">
         <div className="flex items-center justify-between px-1">
           <div>
             <h2 className="text-lg font-bold text-white tracking-tight">Nuestros Barberos</h2>
-            <p className="text-xs text-slate-400">Profesionales certificados y especialistas en imagen</p>
+            <p className="text-xs text-slate-400">Especialistas certificados en imagen masculina</p>
           </div>
           <button
             onClick={() => onNavigateTab('barbers')}
@@ -191,104 +183,49 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
           {activeBarbers.map((barber) => (
             <div
               key={barber.id}
               onClick={() => onOpenBarberProfile(barber)}
-              className="group p-4 rounded-3xl bg-[#14171E] hover:bg-[#181D26] border border-white/10 hover:border-[#D4AF37]/40 transition-all cursor-pointer shadow-lg space-y-3"
+              className="group p-3 rounded-2xl bg-[#14171E] hover:bg-[#181D26] border border-white/10 hover:border-[#D4AF37]/40 transition-all cursor-pointer shadow-md flex items-center justify-between gap-3"
             >
-              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-slate-800">
-                <img
-                  src={barber.photoUrl}
-                  alt={barber.displayName}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-amber-400 text-xs font-bold border border-amber-400/20">
-                  <Star className="w-3 h-3 fill-amber-400" />
-                  <span>{barber.rating.toFixed(1)}</span>
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl overflow-hidden bg-slate-800 shrink-0 border border-white/15 group-hover:scale-105 transition-transform shadow-inner">
+                  <img
+                    src={barber.photoUrl}
+                    alt={barber.displayName}
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="font-bold text-white text-xs sm:text-sm truncate group-hover:text-[#D4AF37] transition-colors">
+                      {barber.displayName}
+                    </h3>
+                  </div>
+                  <p className="text-[11px] text-[#D4AF37] font-semibold truncate mt-0.5">
+                    {barber.specialties[0] || 'Corte Clásico'}
+                  </p>
+                  <div className="flex items-center gap-2 text-[10px] text-slate-400 mt-1">
+                    <span className="flex items-center gap-0.5 text-amber-400 font-bold">
+                      <Star className="w-3 h-3 fill-amber-400" />
+                      {barber.rating.toFixed(1)}
+                    </span>
+                    <span>•</span>
+                    <span>{barber.experienceYears || 5} años exp.</span>
+                  </div>
                 </div>
               </div>
 
-              <div>
-                <h3 className="font-bold text-white text-sm group-hover:text-[#D4AF37] transition-colors">
-                  {barber.displayName}
-                </h3>
-                <p className="text-xs text-[#D4AF37] font-medium truncate">
-                  {barber.specialties[0] || 'Corte Clásico'}
-                </p>
-                <p className="text-[11px] text-slate-400 line-clamp-2 mt-1">
-                  {barber.bio}
-                </p>
-              </div>
-
-              <div className="pt-2 border-t border-white/5 flex items-center justify-between text-xs">
-                <span className="text-slate-400 font-medium">{barber.experienceYears || 5} años exp.</span>
-                <span className="text-[#D4AF37] font-bold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
-                  <span>Ver Galería</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </span>
+              <div className="p-1.5 rounded-xl bg-white/5 text-slate-400 group-hover:bg-[#D4AF37] group-hover:text-slate-950 transition-colors shrink-0">
+                <ChevronRight className="w-4 h-4" />
               </div>
             </div>
           ))}
         </div>
-      </section>
-
-      {/* THE MONARCA EXPERIENCE PERKS */}
-      <section className="rounded-3xl bg-[#101217] border border-white/10 p-5 space-y-4">
-        <h3 className="text-xs font-bold uppercase tracking-widest text-[#D4AF37]">
-          LA EXPERIENCIA MONARCA
-        </h3>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-          <div className="p-3 rounded-2xl bg-white/5 border border-white/5 space-y-1">
-            <Coffee className="w-5 h-5 text-[#D4AF37]" />
-            <h4 className="font-bold text-white">Bar de Cortesía</h4>
-            <p className="text-[11px] text-slate-400">Café espresso y whisky premium sin costo en tu cita.</p>
-          </div>
-
-          <div className="p-3 rounded-2xl bg-white/5 border border-white/5 space-y-1">
-            <Flame className="w-5 h-5 text-amber-400" />
-            <h4 className="font-bold text-white">Ritual Toalla Caliente</h4>
-            <p className="text-[11px] text-slate-400">Vaporizador de ozono y aceites esenciales relajantes.</p>
-          </div>
-
-          <div className="p-3 rounded-2xl bg-white/5 border border-white/5 space-y-1">
-            <ShieldCheck className="w-5 h-5 text-emerald-400" />
-            <h4 className="font-bold text-white">Cero Esperas</h4>
-            <p className="text-[11px] text-slate-400">Tu turno comienza con puntualidad garantizada.</p>
-          </div>
-
-          <div className="p-3 rounded-2xl bg-white/5 border border-white/5 space-y-1">
-            <Scissors className="w-5 h-5 text-blue-400" />
-            <h4 className="font-bold text-white">Asesoría de Imagen</h4>
-            <p className="text-[11px] text-slate-400">Diagnóstico morfofacial para el estilo que mejor te luce.</p>
-          </div>
-        </div>
-      </section>
-
-      {/* LOCATION & SCHEDULE BANNER */}
-      <section className="rounded-3xl bg-[#14171E] border border-white/10 p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-start gap-3">
-          <div className="p-3 rounded-2xl bg-[#D4AF37]/10 text-[#D4AF37] shrink-0">
-            <MapPin className="w-6 h-6" />
-          </div>
-          <div>
-            <h4 className="font-bold text-white text-sm">{businessSettings.name}</h4>
-            <p className="text-xs text-slate-300 mt-0.5">{businessSettings.address}</p>
-            <p className="text-xs text-[#D4AF37] mt-1 font-medium">
-              Horario: Lunes a Sábado • {businessSettings.openingTime} - {businessSettings.closingTime}
-            </p>
-          </div>
-        </div>
-
-        <button
-          onClick={() => onStartBooking()}
-          className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-white/10 hover:bg-[#D4AF37] hover:text-slate-950 text-white text-xs font-bold transition-all shrink-0"
-        >
-          Agendar en esta sucursal
-        </button>
       </section>
     </div>
   );
