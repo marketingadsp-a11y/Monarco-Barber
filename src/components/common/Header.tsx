@@ -20,11 +20,11 @@ export const Header: React.FC<HeaderProps> = ({ onOpenProfile, onOpenQr }) => {
 
   return (
     <div className="sticky top-0 z-40 w-full flex flex-col">
-      {/* Header superior vacío, aproximadamente 30% del tamaño del header principal */}
+      {/* Header superior vacío, el doble de alto */}
       <div 
         className="w-full bg-[#07080A]/95 backdrop-blur-md border-b border-white/5" 
         style={{
-          height: '22px',
+          height: '44px',
           paddingTop: 'env(safe-area-inset-top, 0px)',
         }}
       />
