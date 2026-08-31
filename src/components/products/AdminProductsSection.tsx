@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Package,
   Plus,
@@ -17,10 +17,17 @@ import {
   Percent,
   Save,
   Info,
+  Upload,
+  Image as ImageIcon,
+  X,
+  RefreshCw,
+  QrCode,
+  Scissors,
 } from 'lucide-react';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { Product, PosSale } from '../../types';
 import { formatCurrency, formatDateSpanish, formatTime12h } from '../../utils/dateTime';
+import { imageService } from '../../services/imgbb/imageService';
 
 export const AdminProductsSection: React.FC = () => {
   const {
@@ -30,21 +37,29 @@ export const AdminProductsSection: React.FC = () => {
     saveProduct,
     deleteProduct,
     toggleProductActive,
-    updateProductPointsSettings,
+    saveSettings,
     showToast,
   } = useBarbershop();
 
-  // Sub-tab: products or posSales
+  // Sub-tab: products, sales or points_config
   const [subTab, setSubTab] = useState<'inventory' | 'sales' | 'points_config'>('inventory');
 
   // Search filter
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Product modal
+  // Product modal state
   const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
   const [isSavingProduct, setIsSavingProduct] = useState(false);
+  const [isUploadingProductPhoto, setIsUploadingProductPhoto] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Points settings state
+  const [pointsPerVisit, setPointsPerVisit] = useState<number>(
+    businessSettings.pointsPerVisit !== undefined ? businessSettings.pointsPerVisit : 0
+  );
+  const [servicePointsReward, setServicePointsReward] = useState<number>(
+    businessSettings.servicePointsReward !== undefined ? businessSettings.servicePointsReward : 50
+  );
   const [pointsEnabled, setPointsEnabled] = useState<boolean>(
     businessSettings.enableProductPointsReward !== undefined ? businessSettings.enableProductPointsReward : true
   );
@@ -56,6 +71,12 @@ export const AdminProductsSection: React.FC = () => {
   // Update local points state when settings change
   React.useEffect(() => {
     if (businessSettings) {
+      setPointsPerVisit(
+        businessSettings.pointsPerVisit !== undefined ? businessSettings.pointsPerVisit : 0
+      );
+      setServicePointsReward(
+        businessSettings.servicePointsReward !== undefined ? businessSettings.servicePointsReward : 50
+      );
       setPointsEnabled(
         businessSettings.enableProductPointsReward !== undefined ? businessSettings.enableProductPointsReward : true
       );
@@ -74,6 +95,25 @@ export const AdminProductsSection: React.FC = () => {
   const totalSalesRevenue = posSales.reduce((acc, s) => acc + (s.total || 0), 0);
   const totalPointsAwarded = posSales.reduce((acc, s) => acc + (s.pointsAwarded || 0), 0);
 
+  // Handle Image Upload for Product
+  const handleProductImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingProductPhoto(true);
+    try {
+      const uploadedResult = await imageService.uploadImage(file);
+      const cleanUrl = typeof uploadedResult === 'string' ? uploadedResult : (uploadedResult as any)?.url || '';
+      setEditingProduct((prev) => (prev ? { ...prev, imageUrl: cleanUrl } : { imageUrl: cleanUrl }));
+      showToast('success', 'Imagen cargada', 'La fotografía del producto se ha subido correctamente.');
+    } catch (err: any) {
+      showToast('error', 'Error al subir imagen', err.message);
+    } finally {
+      setIsUploadingProductPhoto(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   const handleSaveProductSubmit = async () => {
     if (!editingProduct?.name || editingProduct.name.trim() === '') {
       showToast('error', 'Nombre requerido', 'Ingresa el nombre del producto.');
@@ -91,6 +131,7 @@ export const AdminProductsSection: React.FC = () => {
         createdByType: editingProduct.createdByType || 'admin',
       });
       setEditingProduct(null);
+      showToast('success', 'Producto guardado', 'El producto se ha guardado en el catálogo general.');
     } catch (err: any) {
       showToast('error', 'Error al guardar', err.message);
     } finally {
@@ -102,6 +143,7 @@ export const AdminProductsSection: React.FC = () => {
     if (confirm(`¿Estás seguro de eliminar el producto "${productName}" del inventario general?`)) {
       try {
         await deleteProduct(productId);
+        showToast('info', 'Producto eliminado', `Se eliminó "${productName}" del inventario.`);
       } catch (err: any) {
         showToast('error', 'Error al eliminar', err.message);
       }
@@ -111,12 +153,46 @@ export const AdminProductsSection: React.FC = () => {
   const handleSavePointsSettings = async () => {
     setIsSavingPoints(true);
     try {
-      await updateProductPointsSettings(pointsEnabled, Number(pointsPercentage) || 1);
+      await saveSettings({
+        pointsPerVisit: Number(pointsPerVisit) || 0,
+        servicePointsReward: Number(servicePointsReward) || 50,
+        enableProductPointsReward: pointsEnabled,
+        productPointsPercentage: Number(pointsPercentage) || 1,
+      });
+      showToast(
+        'success',
+        'Configuración de puntos guardada',
+        'Los parámetros de acumulación de puntos por visita, servicio y productos se han actualizado.'
+      );
     } catch (err: any) {
-      showToast('error', 'Error', err.message);
+      showToast('error', 'Error al guardar puntos', err.message);
     } finally {
       setIsSavingPoints(false);
     }
+  };
+
+  // Helper for image fallback
+  const getProductImage = (prod: Partial<Product>) => {
+    if (prod.imageUrl) return prod.imageUrl;
+    const name = (prod.name || '').toLowerCase();
+    const desc = (prod.description || '').toLowerCase();
+    const cat = (prod.category || '').toLowerCase();
+    if (name.includes('pomada') || name.includes('matte') || desc.includes('fijación') || cat.includes('fijación')) {
+      return 'https://images.unsplash.com/photo-1597854710119-a5a8fc004a66?auto=format&fit=crop&w=400&q=80';
+    }
+    if (name.includes('aceite') || name.includes('barba') || desc.includes('barba') || cat.includes('barba')) {
+      return 'https://images.unsplash.com/photo-1621607512214-68297480165e?auto=format&fit=crop&w=400&q=80';
+    }
+    if (name.includes('shampoo') || name.includes('capilar') || name.includes('anticaída') || cat.includes('capilar')) {
+      return 'https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=400&q=80';
+    }
+    if (name.includes('cera') || name.includes('polvo') || name.includes('texturiz')) {
+      return 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=400&q=80';
+    }
+    if (name.includes('aftershave') || name.includes('balsamo') || name.includes('bálsamo') || name.includes('afeitado') || cat.includes('afeitado')) {
+      return 'https://images.unsplash.com/photo-1512290900672-1f4a47146522?auto=format&fit=crop&w=400&q=80';
+    }
+    return 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=400&q=80';
   };
 
   return (
@@ -124,19 +200,19 @@ export const AdminProductsSection: React.FC = () => {
       {/* Header & Sub-tabs */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-3xl bg-gradient-to-r from-[#181D26] to-[#12151B] border border-white/10 shadow-xl">
         <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
+          <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
             <Package className="w-6 h-6" />
           </div>
           <div>
             <h3 className="text-lg font-bold text-white tracking-tight">Inventario de Productos & POS</h3>
             <p className="text-xs text-slate-400">
-              Catálogo unificado para barberos, control de stock y sistema de puntos por compras
+              Catálogo general con fotografías, control para barberos y programa de puntos por compra
             </p>
           </div>
         </div>
 
         {/* Sub-nav buttons */}
-        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-black/40 border border-white/10">
+        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-black/40 border border-white/10 flex-wrap">
           <button
             onClick={() => setSubTab('inventory')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
@@ -187,9 +263,10 @@ export const AdminProductsSection: React.FC = () => {
                 setEditingProduct({
                   name: '',
                   description: '',
-                  price: 150,
+                  price: 180,
                   active: true,
                   createdByType: 'admin',
+                  imageUrl: '',
                 })
               }
               className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-2xl bg-[#D4AF37] text-slate-950 text-xs font-bold shadow-lg hover:bg-[#E5B869] transition-all shrink-0"
@@ -205,86 +282,106 @@ export const AdminProductsSection: React.FC = () => {
               <Package className="w-10 h-10 mx-auto text-slate-600 mb-2" />
               <p className="font-semibold text-white text-sm">No hay productos en el inventario</p>
               <p className="text-xs text-slate-500">
-                Registra productos para que los barberos puedan venderlos a través de su punto de venta POS.
+                Registra productos con su fotografía y precio para que los barberos puedan venderlos desde el POS.
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {filteredProducts.map((prod) => (
-                <div
-                  key={prod.id}
-                  className={`rounded-2xl bg-[#14171E] border ${
-                    prod.active ? 'border-white/10' : 'border-white/5 opacity-60'
-                  } p-4 flex flex-col justify-between gap-3 shadow-lg hover:border-[#D4AF37]/40 transition-all`}
-                >
-                  <div className="space-y-1.5">
-                    <div className="flex items-start justify-between gap-2">
-                      <h4 className="font-bold text-white text-sm leading-snug">{prod.name}</h4>
-                      <span className="font-black text-[#D4AF37] text-base shrink-0">
-                        {formatCurrency(prod.price)}
-                      </span>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+              {filteredProducts.map((prod) => {
+                const imgSource = getProductImage(prod);
+                return (
+                  <div
+                    key={prod.id}
+                    className={`rounded-2xl bg-[#14171E] border ${
+                      prod.active ? 'border-white/10' : 'border-white/5 opacity-60'
+                    } p-4 flex flex-col justify-between gap-3 shadow-lg hover:border-[#D4AF37]/40 transition-all`}
+                  >
+                    <div className="flex gap-3">
+                      {/* Product Thumbnail */}
+                      <div className="w-20 h-20 rounded-xl overflow-hidden bg-black/40 border border-white/10 shrink-0 relative group">
+                        <img
+                          src={imgSource}
+                          alt={prod.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        {prod.imageUrl ? (
+                          <span className="absolute bottom-1 right-1 px-1 py-0.5 rounded bg-black/70 text-[9px] font-bold text-amber-300">
+                            Foto
+                          </span>
+                        ) : null}
+                      </div>
+
+                      <div className="space-y-1 min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-1.5">
+                          <h4 className="font-bold text-white text-sm leading-snug truncate" title={prod.name}>
+                            {prod.name}
+                          </h4>
+                        </div>
+                        <span className="font-black text-[#D4AF37] text-base block">
+                          {formatCurrency(prod.price)}
+                        </span>
+                        <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                          {prod.description || 'Sin descripción detallada.'}
+                        </p>
+                      </div>
                     </div>
 
-                    <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
-                      {prod.description || 'Sin descripción detallada.'}
-                    </p>
-                  </div>
-
-                  <div className="pt-2 border-t border-white/5 flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
-                      {prod.createdByType === 'barber' ? (
-                        <span className="px-2 py-0.5 rounded-md bg-blue-500/15 text-blue-300 font-semibold border border-blue-500/20">
-                          Barbero: {prod.createdByBarberName || 'Equipo'}
-                        </span>
-                      ) : (
-                        <span className="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 font-semibold border border-amber-500/20">
-                          Administración
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-1">
-                      {/* Active toggle */}
-                      <button
-                        onClick={() => toggleProductActive(prod.id, !prod.active)}
-                        className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 transition-all"
-                        title={prod.active ? 'Desactivar producto' : 'Activar producto'}
-                      >
-                        {prod.active ? (
-                          <ToggleRight className="w-5 h-5 text-emerald-400" />
+                    <div className="pt-2 border-t border-white/5 flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
+                        {prod.createdByType === 'barber' ? (
+                          <span className="px-2 py-0.5 rounded-md bg-blue-500/15 text-blue-300 font-semibold border border-blue-500/20">
+                            Barbero: {prod.createdByBarberName || 'Equipo'}
+                          </span>
                         ) : (
-                          <ToggleLeft className="w-5 h-5 text-slate-500" />
+                          <span className="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 font-semibold border border-amber-500/20">
+                            Monarca Oficial
+                          </span>
                         )}
-                      </button>
+                      </div>
 
-                      {/* Edit product */}
-                      <button
-                        onClick={() => setEditingProduct(prod)}
-                        className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-all"
-                        title="Editar producto"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center gap-1">
+                        {/* Active toggle */}
+                        <button
+                          onClick={() => toggleProductActive(prod.id, !prod.active)}
+                          className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 transition-all"
+                          title={prod.active ? 'Desactivar producto' : 'Activar producto'}
+                        >
+                          {prod.active ? (
+                            <ToggleRight className="w-5 h-5 text-emerald-400" />
+                          ) : (
+                            <ToggleLeft className="w-5 h-5 text-slate-500" />
+                          )}
+                        </button>
 
-                      {/* Delete product (Admin only) */}
-                      <button
-                        onClick={() => handleDeleteProductSubmit(prod.id, prod.name)}
-                        className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 transition-all"
-                        title="Eliminar producto del catálogo"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                        {/* Edit product */}
+                        <button
+                          onClick={() => setEditingProduct(prod)}
+                          className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-all"
+                          title="Editar producto"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+
+                        {/* Delete product */}
+                        <button
+                          onClick={() => handleDeleteProductSubmit(prod.id, prod.name)}
+                          className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 transition-all"
+                          title="Eliminar producto del catálogo"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 
-          {/* Modal: Crear / Editar Producto (Solo NOMBRE, DESCRIPCIÓN, PRECIO) */}
+          {/* Modal: Crear / Editar Producto con FOTOGRAFÍA */}
           {editingProduct && (
-            <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in">
-              <div className="bg-[#14171E] border border-white/15 rounded-3xl p-5 w-full max-w-md space-y-4 shadow-2xl">
+            <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in overflow-y-auto">
+              <div className="bg-[#14171E] border border-white/15 rounded-3xl p-5 w-full max-w-lg space-y-4 shadow-2xl my-8">
                 <div className="flex items-center justify-between pb-2 border-b border-white/10">
                   <div className="flex items-center gap-2.5">
                     <div className="w-9 h-9 rounded-xl bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
@@ -295,13 +392,94 @@ export const AdminProductsSection: React.FC = () => {
                         {editingProduct.id ? 'Editar Producto' : 'Registrar Nuevo Producto'}
                       </h3>
                       <p className="text-[11px] text-slate-400">
-                        Catálogo general para todos los barberos
+                        Configura imagen, nombre, descripción y precio de venta
                       </p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => setEditingProduct(null)}
+                    className="p-1.5 rounded-xl bg-white/5 text-slate-400 hover:text-white"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* FOTOGRAFÍA DEL PRODUCTO */}
+                <div className="space-y-2 p-3.5 rounded-2xl bg-slate-900 border border-white/10">
+                  <label className="text-slate-300 font-semibold block text-xs flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <ImageIcon className="w-4 h-4 text-[#D4AF37]" />
+                      <span>FOTOGRAFÍA DEL PRODUCTO</span>
+                    </span>
+                    {editingProduct.imageUrl && (
+                      <button
+                        type="button"
+                        onClick={() => setEditingProduct({ ...editingProduct, imageUrl: '' })}
+                        className="text-[10px] text-rose-400 hover:underline flex items-center gap-1"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        Quitar foto
+                      </button>
+                    )}
+                  </label>
+
+                  <div className="flex items-center gap-3">
+                    {/* Preview Thumbnail */}
+                    <div className="w-20 h-20 rounded-2xl overflow-hidden bg-black/60 border border-white/20 shrink-0 relative flex items-center justify-center">
+                      <img
+                        src={editingProduct.imageUrl || getProductImage(editingProduct)}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                      {isUploadingProductPhoto && (
+                        <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center">
+                          <RefreshCw className="w-5 h-5 text-[#D4AF37] animate-spin" />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-1.5 flex-1 text-xs">
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        accept="image/png,image/jpeg,image/webp,image/jpg"
+                        onChange={handleProductImageUpload}
+                        className="hidden"
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploadingProductPhoto}
+                        className="w-full py-2 px-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white font-semibold flex items-center justify-center gap-1.5 transition-all text-xs"
+                      >
+                        {isUploadingProductPhoto ? (
+                          <>
+                            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                            <span>Subiendo imagen...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-3.5 h-3.5 text-[#D4AF37]" />
+                            <span>Subir Foto desde Dispositivo</span>
+                          </>
+                        )}
+                      </button>
+
+                      {/* URL input fallback */}
+                      <input
+                        type="url"
+                        value={editingProduct.imageUrl || ''}
+                        onChange={(e) => setEditingProduct({ ...editingProduct, imageUrl: e.target.value })}
+                        placeholder="O pega una URL de imagen (https://...)"
+                        className="w-full p-2 rounded-xl bg-black/40 border border-white/10 text-white text-[11px] placeholder:text-slate-500 focus:outline-none focus:border-[#D4AF37]"
+                      />
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-3.5 text-xs">
+                <div className="space-y-3 text-xs">
                   {/* NOMBRE */}
                   <div>
                     <label className="text-slate-300 font-semibold block mb-1">
@@ -311,9 +489,28 @@ export const AdminProductsSection: React.FC = () => {
                       type="text"
                       value={editingProduct.name || ''}
                       onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
-                      placeholder="Ej. Cera Fijadora Pomade Classic Monarca"
+                      placeholder="Ej. Cera Pomade Mate Masaryk 120ml"
                       className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-none focus:border-[#D4AF37]"
                     />
+                  </div>
+
+                  {/* CATEGORÍA */}
+                  <div>
+                    <label className="text-slate-300 font-semibold block mb-1">
+                      CATEGORÍA (OPCIONAL)
+                    </label>
+                    <select
+                      value={editingProduct.category || ''}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })}
+                      className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-none focus:border-[#D4AF37]"
+                    >
+                      <option value="">Seleccionar categoría...</option>
+                      <option value="Fijación">Fijación (Pomadas / Ceras / Sprays)</option>
+                      <option value="Cuidado de Barba">Cuidado de Barba (Aceites / Bálsamos)</option>
+                      <option value="Cuidado Capilar">Cuidado Capilar (Shampoo / Tónicos)</option>
+                      <option value="Afeitado">Afeitado (Geles / Aftershave)</option>
+                      <option value="Accesorios">Accesorios y Herramientas</option>
+                    </select>
                   </div>
 
                   {/* DESCRIPCIÓN */}
@@ -324,8 +521,8 @@ export const AdminProductsSection: React.FC = () => {
                     <textarea
                       value={editingProduct.description || ''}
                       onChange={(e) => setEditingProduct({ ...editingProduct, description: e.target.value })}
-                      rows={3}
-                      placeholder="Ej. Fijación media con brillo natural y aroma a madera noble. 100g."
+                      rows={2}
+                      placeholder="Ej. Fijación media con brillo mate natural y aroma sutil amaderado."
                       className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-none focus:border-[#D4AF37]"
                     />
                   </div>
@@ -333,7 +530,7 @@ export const AdminProductsSection: React.FC = () => {
                   {/* PRECIO */}
                   <div>
                     <label className="text-slate-300 font-semibold block mb-1">
-                      PRECIO ($ MXN) *
+                      PRECIO DE VENTA ($ MXN) *
                     </label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#D4AF37] font-bold text-sm">
@@ -363,8 +560,8 @@ export const AdminProductsSection: React.FC = () => {
                   </button>
                   <button
                     onClick={handleSaveProductSubmit}
-                    disabled={isSavingProduct}
-                    className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 text-xs font-bold shadow-md hover:scale-[1.02] active:scale-95 transition-all"
+                    disabled={isSavingProduct || isUploadingProductPhoto}
+                    className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 text-xs font-bold shadow-md hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
                   >
                     {isSavingProduct ? 'Guardando...' : 'Guardar Producto'}
                   </button>
@@ -452,99 +649,168 @@ export const AdminProductsSection: React.FC = () => {
         </div>
       )}
 
-      {/* SUBTAB 3: POINTS REWARD CONFIGURATION */}
+      {/* SUBTAB 3: COMPLETE POINTS REWARD CONFIGURATION (VISITS / QR, SERVICES, PRODUCTS) */}
       {subTab === 'points_config' && (
-        <div className="rounded-3xl bg-[#14171E] border border-white/10 p-6 space-y-6 shadow-2xl">
+        <div className="rounded-3xl bg-[#14171E] border border-white/10 p-6 space-y-6 shadow-2xl animate-in fade-in">
           <div className="flex items-center gap-3 pb-4 border-b border-white/10">
-            <div className="w-12 h-12 rounded-2xl bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
+            <div className="w-12 h-12 rounded-2xl bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shrink-0">
               <Award className="w-6 h-6" />
             </div>
             <div>
-              <h4 className="text-base font-bold text-white">Programa de Lealtad en Venta de Productos</h4>
+              <h4 className="text-base font-bold text-white">Programa Global de Puntos y Fidelización</h4>
               <p className="text-xs text-slate-400">
-                Otorga puntos automáticos a clientes registrados cuando compran productos a los barberos
+                Gestiona cuántos puntos recibe el cliente por escanear su QR/visitas, cobrar servicios y comprar productos
               </p>
             </div>
           </div>
 
-          <div className="space-y-4 max-w-xl">
-            {/* Toggle Habilitar / Deshabilitar */}
-            <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-900 border border-white/10">
-              <div className="space-y-0.5">
-                <span className="text-sm font-bold text-white block">
-                  Otorgar Puntos de Lealtad por Productos
-                </span>
-                <span className="text-xs text-slate-400">
-                  {pointsEnabled
-                    ? 'Los clientes acumulan puntos al comprar productos en el POS del barbero.'
-                    : 'Las ventas de productos no generarán puntos de lealtad.'}
-                </span>
-              </div>
-              <button
-                onClick={() => setPointsEnabled(!pointsEnabled)}
-                className="p-1 rounded-xl transition-all shrink-0 ml-3"
-              >
-                {pointsEnabled ? (
-                  <ToggleRight className="w-9 h-9 text-[#D4AF37]" />
-                ) : (
-                  <ToggleLeft className="w-9 h-9 text-slate-600" />
-                )}
-              </button>
-            </div>
-
-            {/* Percentage setting */}
+          <div className="space-y-4 max-w-2xl">
+            {/* 1. PUNTOS POR VISITA / ESCANEO DE QR */}
             <div className="p-4 rounded-2xl bg-slate-900 border border-white/10 space-y-3">
-              <div>
-                <label className="text-sm font-bold text-white block mb-1">
-                  Porcentaje de Puntos sobre el Valor del Producto (%)
-                </label>
-                <p className="text-xs text-slate-400 mb-3">
-                  Porcentaje del valor total del producto vendido que se convierte en puntos para el cliente (por ejemplo, el 1% de un producto de $300 otorga 3 puntos).
-                </p>
+              <div className="flex items-start justify-between gap-3">
+                <div className="space-y-0.5">
+                  <span className="text-sm font-bold text-white flex items-center gap-2">
+                    <QrCode className="w-4 h-4 text-[#D4AF37]" />
+                    <span>Puntos por Visita / Escaneo de Código QR</span>
+                  </span>
+                  <p className="text-xs text-slate-400">
+                    Cantidad fija de puntos que se abonan automáticamente a la cuenta del cliente cada vez que se escanea su código QR o se registra una visita (establece 0 si no deseas otorgar puntos solo por escanear).
+                  </p>
+                </div>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 pt-1">
                 <div className="relative w-36">
                   <input
                     type="number"
-                    min="0.1"
-                    max="100"
-                    step="0.5"
-                    value={pointsPercentage}
-                    onChange={(e) => setPointsPercentage(parseFloat(e.target.value) || 1)}
-                    disabled={!pointsEnabled}
-                    className="w-full pl-3 pr-8 py-2.5 rounded-xl bg-[#14171E] border border-white/15 text-white font-bold text-base focus:outline-none focus:border-[#D4AF37] disabled:opacity-50"
+                    min="0"
+                    step="5"
+                    value={pointsPerVisit}
+                    onChange={(e) => setPointsPerVisit(parseInt(e.target.value, 10) || 0)}
+                    className="w-full pl-3 pr-8 py-2.5 rounded-xl bg-[#14171E] border border-white/15 text-white font-bold text-base focus:outline-none focus:border-[#D4AF37]"
                   />
-                  <Percent className="w-4 h-4 text-[#D4AF37] absolute right-3 top-1/2 -translate-y-1/2" />
+                  <span className="text-xs font-bold text-[#D4AF37] absolute right-3 top-1/2 -translate-y-1/2">
+                    pts
+                  </span>
                 </div>
                 <span className="text-xs text-slate-400">
-                  Valor predeterminado: <strong>1%</strong>
+                  Puntos por escaneo de QR: <strong>+{pointsPerVisit} pts por visita</strong>
                 </span>
               </div>
             </div>
 
-            {/* Example calculation card */}
-            <div className="p-4 rounded-2xl bg-[#1E232F]/50 border border-[#D4AF37]/20 flex items-start gap-3 text-xs text-slate-300">
-              <Info className="w-5 h-5 text-[#D4AF37] shrink-0 mt-0.5" />
-              <div>
-                <strong className="text-white block font-bold mb-0.5">Ejemplo en Vivo:</strong>
-                <span>
-                  Si un cliente compra una cera de <strong>$250 MXN</strong> y un shampoo de <strong>$350 MXN</strong> (Total $600 MXN), recibirá{' '}
-                  <strong className="text-[#D4AF37]">
-                    +{pointsEnabled ? Math.floor((600 * pointsPercentage) / 100) : 0} puntos
-                  </strong>{' '}
-                  en su cuenta Monarca Barber.
+            {/* 2. PUNTOS POR SERVICIO COBRADO EN SILLA */}
+            <div className="p-4 rounded-2xl bg-slate-900 border border-white/10 space-y-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="space-y-0.5">
+                  <span className="text-sm font-bold text-white flex items-center gap-2">
+                    <Scissors className="w-4 h-4 text-blue-400" />
+                    <span>Puntos por Servicio / Corte Cobrado</span>
+                  </span>
+                  <p className="text-xs text-slate-400">
+                    Puntos automáticos que el cliente acumula cuando el barbero cobra un servicio o corte de cabello en silla.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 pt-1">
+                <div className="relative w-36">
+                  <input
+                    type="number"
+                    min="0"
+                    step="5"
+                    value={servicePointsReward}
+                    onChange={(e) => setServicePointsReward(parseInt(e.target.value, 10) || 0)}
+                    className="w-full pl-3 pr-8 py-2.5 rounded-xl bg-[#14171E] border border-white/15 text-white font-bold text-base focus:outline-none focus:border-[#D4AF37]"
+                  />
+                  <span className="text-xs font-bold text-[#D4AF37] absolute right-3 top-1/2 -translate-y-1/2">
+                    pts
+                  </span>
+                </div>
+                <span className="text-xs text-slate-400">
+                  Predeterminado: <strong>50 pts</strong> por servicio cobrado
                 </span>
+              </div>
+            </div>
+
+            {/* 3. PUNTOS POR COMPRA DE PRODUCTOS */}
+            <div className="p-4 rounded-2xl bg-slate-900 border border-white/10 space-y-3">
+              <div className="flex items-center justify-between gap-3 pb-2 border-b border-white/5">
+                <div className="space-y-0.5">
+                  <span className="text-sm font-bold text-white flex items-center gap-2">
+                    <Package className="w-4 h-4 text-amber-400" />
+                    <span>Puntos por Venta de Productos POS</span>
+                  </span>
+                  <span className="text-xs text-slate-400">
+                    {pointsEnabled
+                      ? 'Los clientes acumulan un porcentaje de puntos sobre el valor de los productos comprados.'
+                      : 'Las ventas de productos no generarán puntos de fidelización.'}
+                  </span>
+                </div>
+                <button
+                  onClick={() => setPointsEnabled(!pointsEnabled)}
+                  className="p-1 rounded-xl transition-all shrink-0 ml-3"
+                >
+                  {pointsEnabled ? (
+                    <ToggleRight className="w-9 h-9 text-[#D4AF37]" />
+                  ) : (
+                    <ToggleLeft className="w-9 h-9 text-slate-600" />
+                  )}
+                </button>
+              </div>
+
+              {pointsEnabled && (
+                <div className="space-y-2 pt-1">
+                  <label className="text-xs font-semibold text-slate-300 block">
+                    Porcentaje de Puntos sobre el Valor del Producto (%)
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <div className="relative w-36">
+                      <input
+                        type="number"
+                        min="0.1"
+                        max="100"
+                        step="0.5"
+                        value={pointsPercentage}
+                        onChange={(e) => setPointsPercentage(parseFloat(e.target.value) || 1)}
+                        className="w-full pl-3 pr-8 py-2.5 rounded-xl bg-[#14171E] border border-white/15 text-white font-bold text-base focus:outline-none focus:border-[#D4AF37]"
+                      />
+                      <Percent className="w-4 h-4 text-[#D4AF37] absolute right-3 top-1/2 -translate-y-1/2" />
+                    </div>
+                    <span className="text-xs text-slate-400">
+                      Ejemplo: Un producto de $300 otorga <strong>{Math.floor((300 * pointsPercentage) / 100)} pts</strong>
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* LIVE SIMULATION CARD */}
+            <div className="p-4 rounded-2xl bg-[#1E232F]/50 border border-[#D4AF37]/20 flex items-start gap-3 text-xs text-slate-300">
+              <Sparkles className="w-5 h-5 text-[#D4AF37] shrink-0 mt-0.5" />
+              <div>
+                <strong className="text-white block font-bold mb-0.5">Simulación en Vivo de una Atención Completa:</strong>
+                <span>
+                  Si un cliente asiste a su corte de <strong>$350 MXN</strong> y compra un producto de <strong>$250 MXN</strong>:
+                </span>
+                <div className="mt-2 space-y-0.5 font-mono text-[11px] text-slate-300">
+                  {pointsPerVisit > 0 && <div>• Escaneo de QR / Visita: +{pointsPerVisit} pts</div>}
+                  <div>• Servicio en Silla: +{servicePointsReward} pts</div>
+                  <div>• Compra de Producto: +{pointsEnabled ? Math.floor((250 * pointsPercentage) / 100) : 0} pts</div>
+                  <div className="text-[#D4AF37] font-bold pt-1">
+                    = Total a Recibir: +{pointsPerVisit + servicePointsReward + (pointsEnabled ? Math.floor((250 * pointsPercentage) / 100) : 0)} puntos de fidelización VIP
+                  </div>
+                </div>
               </div>
             </div>
 
             <button
               onClick={handleSavePointsSettings}
               disabled={isSavingPoints}
-              className="flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-bold text-xs shadow-lg hover:scale-[1.02] active:scale-95 transition-all"
+              className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-bold text-xs shadow-lg hover:scale-[1.01] active:scale-95 transition-all disabled:opacity-50"
             >
               <Save className="w-4 h-4" />
-              <span>{isSavingPoints ? 'Guardando...' : 'Guardar Configuración de Puntos'}</span>
+              <span>{isSavingPoints ? 'Guardando configuración...' : 'Guardar Parámetros de Puntos'}</span>
             </button>
           </div>
         </div>

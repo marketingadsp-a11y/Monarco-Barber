@@ -48,6 +48,7 @@ import { formatCurrency, formatDateSpanish, formatTime12h, getTodayDateString } 
 import { imageService } from '../../services/imgbb/imageService';
 import { AdminUsersSection } from '../../components/admin/AdminUsersSection';
 import { AdminProductsSection } from '../../components/products/AdminProductsSection';
+import { AdminMetricsSection } from '../../components/admin/AdminMetricsSection';
 import { getBrowserNotificationPermission, isBrowserNotificationSupported } from '../../services/notificationService';
 
 export const AdminDashboardView: React.FC = () => {
@@ -56,6 +57,7 @@ export const AdminDashboardView: React.FC = () => {
     services,
     barbers,
     products,
+    posSales,
     appointments,
     businessSettings,
     notificationSettings,
@@ -92,6 +94,8 @@ export const AdminDashboardView: React.FC = () => {
   // Barber Edit/Create Modal State
   const [editingBarber, setEditingBarber] = useState<Partial<Barber> | null>(null);
   const [isSavingBarber, setIsSavingBarber] = useState(false);
+  const [isUploadingBarberPhoto, setIsUploadingBarberPhoto] = useState(false);
+  const barberPhotoInputRef = useRef<HTMLInputElement>(null);
 
   // Settings State
   const [settingsForm, setSettingsForm] = useState<BusinessSettings>(businessSettings);
@@ -154,6 +158,24 @@ export const AdminDashboardView: React.FC = () => {
       showToast('error', 'Error al subir foto', err.message);
     } finally {
       setIsUploadingServicePhoto(false);
+    }
+  };
+
+  // Upload Photo for Barber
+  const handleBarberPhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingBarberPhoto(true);
+    try {
+      const uploadedResult = await imageService.uploadImage(file);
+      const cleanUrl = typeof uploadedResult === 'string' ? uploadedResult : (uploadedResult as any)?.url || '';
+      setEditingBarber((prev) => ({ ...prev, photoUrl: cleanUrl }));
+      showToast('success', 'Foto de barbero subida', 'Imagen cargada correctamente.');
+    } catch (err: any) {
+      showToast('error', 'Error al subir foto', err.message);
+    } finally {
+      setIsUploadingBarberPhoto(false);
     }
   };
 
@@ -223,33 +245,21 @@ export const AdminDashboardView: React.FC = () => {
   return (
     <div className="space-y-6 pb-24">
       {/* Admin Header */}
-      <div className="rounded-3xl bg-gradient-to-r from-[#181D26] to-[#12151B] border border-white/15 p-5 shadow-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
+      <div className="rounded-3xl bg-gradient-to-r from-[#181D26] to-[#12151B] border border-white/15 p-4 sm:p-5 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-3 shrink-0">
           {businessSettings.logoUrl ? (
             <img
               src={businessSettings.logoUrl}
               alt="Logo Monarca Barber"
-              className="w-14 h-14 rounded-2xl object-contain bg-black/40 border border-[#D4AF37]/50 p-1 shadow-lg"
+              className="h-10 sm:h-12 w-auto max-w-[170px] object-contain shrink-0"
               referrerPolicy="no-referrer"
             />
           ) : (
-            <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
+            <div className="flex items-center gap-2 text-[#D4AF37]">
               <Shield className="w-6 h-6" />
+              <span className="font-black text-white text-base tracking-wider">MONARCA</span>
             </div>
           )}
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-white tracking-tight">
-                Panel de Administración General
-              </h1>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                PRO
-              </span>
-            </div>
-            <p className="text-xs text-slate-400">
-              Gestión centralizada de Monarca Barber: catálogo, equipo, agenda y marca
-            </p>
-          </div>
         </div>
 
         {/* Navigation Section Pills & Logout */}
@@ -337,39 +347,11 @@ export const AdminDashboardView: React.FC = () => {
 
       {/* SECTION: OVERVIEW / METRICS */}
       {activeSection === 'overview' && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-            <div className="p-4 rounded-2xl bg-[#14171E] border border-white/10 shadow-lg">
-              <span className="text-slate-400 block text-[10px] uppercase font-bold">Citas Hoy</span>
-              <span className="text-2xl font-black text-white mt-1 block">{todayAppointments.length}</span>
-              <span className="text-[11px] text-slate-500 mt-1 block">En tiempo real</span>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-[#14171E] border border-white/10 shadow-lg">
-              <span className="text-slate-400 block text-[10px] uppercase font-bold">Total Facturado</span>
-              <span className="text-2xl font-black text-[#D4AF37] mt-1 block">{formatCurrency(totalRevenue)}</span>
-              <span className="text-[11px] text-emerald-400 mt-1 block">Citas completadas</span>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-[#14171E] border border-white/10 shadow-lg">
-              <span className="text-slate-400 block text-[10px] uppercase font-bold">Barberos Activos</span>
-              <span className="text-2xl font-black text-white mt-1 block">
-                {barbers.filter((b) => b.active).length} / {barbers.length}
-              </span>
-              <span className="text-[11px] text-slate-500 mt-1 block">Equipo disponible</span>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-[#14171E] border border-white/10 shadow-lg">
-              <span className="text-slate-400 block text-[10px] uppercase font-bold">Catálogo Servicios</span>
-              <span className="text-2xl font-black text-white mt-1 block">{services.length}</span>
-              <span className="text-[11px] text-slate-500 mt-1 block">Tratamientos activos</span>
-            </div>
-          </div>
-
+        <div className="space-y-6">
           {/* Quick Access to Users Banner */}
           <div
             onClick={() => setActiveSection('users')}
-            className="p-4 rounded-2xl bg-gradient-to-r from-[#181D27] via-[#141720] to-[#101217] border border-[#D4AF37]/30 hover:border-[#D4AF37] p-5 cursor-pointer shadow-xl transition-all duration-150 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 group"
+            className="p-4 rounded-3xl bg-gradient-to-r from-[#181D27] via-[#141720] to-[#101217] border border-[#D4AF37]/30 hover:border-[#D4AF37] p-5 cursor-pointer shadow-xl transition-all duration-150 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 group"
           >
             <div className="flex items-center gap-3.5">
               <div className="w-12 h-12 rounded-2xl bg-[#D4AF37]/15 border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37] group-hover:scale-105 transition-transform">
@@ -390,6 +372,15 @@ export const AdminDashboardView: React.FC = () => {
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
+
+          {/* Full Interactive Metrics Dashboard with Date Range & Barber Filtering */}
+          <AdminMetricsSection
+            appointments={appointments}
+            posSales={posSales}
+            barbers={barbers}
+            services={services}
+            onNavigateToSection={(sec) => setActiveSection(sec)}
+          />
         </div>
       )}
 
@@ -814,7 +805,43 @@ export const AdminDashboardView: React.FC = () => {
                   {editingBarber.id ? 'Editar Barbero' : 'Nuevo Barbero'}
                 </h3>
 
-                <div className="space-y-3 text-xs">
+                <div className="space-y-3.5 text-xs">
+                  {/* Photo of Barber */}
+                  <div className="space-y-2">
+                    <label className="text-slate-300 font-semibold block">Fotografía del Barbero</label>
+                    <div className="flex items-center gap-3">
+                      {editingBarber.photoUrl && (
+                        <img
+                          src={editingBarber.photoUrl}
+                          alt="Preview barbero"
+                          className="w-16 h-16 rounded-2xl object-cover border-2 border-[#D4AF37] shadow-md shrink-0"
+                          referrerPolicy="no-referrer"
+                        />
+                      )}
+                      <div className="flex-1 space-y-1.5">
+                        <label className="flex items-center justify-center gap-2 p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-slate-200 cursor-pointer font-bold transition-all">
+                          <Upload className="w-4 h-4 text-[#D4AF37]" />
+                          <span>{isUploadingBarberPhoto ? 'Subiendo foto...' : 'Subir Foto'}</span>
+                          <input
+                            type="file"
+                            ref={barberPhotoInputRef}
+                            accept="image/*"
+                            onChange={handleBarberPhotoUpload}
+                            disabled={isUploadingBarberPhoto}
+                            className="hidden"
+                          />
+                        </label>
+                        <input
+                          type="url"
+                          value={editingBarber.photoUrl || ''}
+                          onChange={(e) => setEditingBarber({ ...editingBarber, photoUrl: e.target.value })}
+                          placeholder="O escribe URL de foto"
+                          className="w-full p-2 rounded-xl bg-slate-900 border border-white/10 text-white text-[11px]"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
                   <div>
                     <label className="text-slate-400 block mb-1">Nombre Completo *</label>
                     <input
@@ -827,16 +854,43 @@ export const AdminDashboardView: React.FC = () => {
                           firstName: e.target.value.split(' ')[0] || '',
                         })
                       }
+                      placeholder="Ej. Carlos Mendoza"
                       className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
                     />
                   </div>
 
                   <div>
-                    <label className="text-slate-400 block mb-1">URL Foto de Perfil</label>
+                    <label className="text-slate-400 block mb-1">Especialidades (separadas por coma)</label>
                     <input
-                      type="url"
-                      value={editingBarber.photoUrl || ''}
-                      onChange={(e) => setEditingBarber({ ...editingBarber, photoUrl: e.target.value })}
+                      type="text"
+                      value={(editingBarber.specialties || []).join(', ')}
+                      onChange={(e) =>
+                        setEditingBarber({
+                          ...editingBarber,
+                          specialties: e.target.value
+                            .split(',')
+                            .map((s) => s.trim())
+                            .filter(Boolean),
+                        })
+                      }
+                      placeholder="Ej. Corte Clásico, Fade, Barba Perfilada"
+                      className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-slate-400 block mb-1">Años de Experiencia</label>
+                    <input
+                      type="number"
+                      min={0}
+                      max={50}
+                      value={editingBarber.experienceYears !== undefined ? editingBarber.experienceYears : 5}
+                      onChange={(e) =>
+                        setEditingBarber({
+                          ...editingBarber,
+                          experienceYears: Number(e.target.value) || 0,
+                        })
+                      }
                       className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
                     />
                   </div>
@@ -847,6 +901,7 @@ export const AdminDashboardView: React.FC = () => {
                       value={editingBarber.bio || ''}
                       onChange={(e) => setEditingBarber({ ...editingBarber, bio: e.target.value })}
                       rows={2}
+                      placeholder="Breve reseña del estilo y trayectoria del barbero..."
                       className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
                     />
                   </div>
@@ -861,7 +916,7 @@ export const AdminDashboardView: React.FC = () => {
                   </button>
                   <button
                     onClick={handleSaveBarberSubmit}
-                    disabled={isSavingBarber}
+                    disabled={isSavingBarber || isUploadingBarberPhoto}
                     className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 text-xs font-bold"
                   >
                     {isSavingBarber ? 'Guardando...' : 'Guardar Barbero'}

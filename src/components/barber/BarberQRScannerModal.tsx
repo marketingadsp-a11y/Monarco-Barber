@@ -391,20 +391,23 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
   const totalAmountToCharge = servicePrice + totalProductsPrice;
 
   // Points Calculation
-  // 1. Service Points: ONLY earned when a service is actually charged (serviceOption !== 'none' && servicePrice > 0)
-  const servicePointsEarned = (serviceOption !== 'none' && servicePrice > 0)
-    ? (businessSettings.servicePointsReward !== undefined ? businessSettings.servicePointsReward : 50)
-    : 0;
+  // 1. Visit Points: Earned when visits are added based on businessSettings.pointsPerVisit
+  const pointsPerVisit = businessSettings.pointsPerVisit !== undefined ? businessSettings.pointsPerVisit : 0;
+  const visitPointsEarned = visitsToAdd > 0 ? visitsToAdd * pointsPerVisit : 0;
 
-  // 2. Product Points: ONLY earned when products are purchased (totalProductsPrice > 0)
+  // 2. Service Points: ONLY earned when a service is actually charged (serviceOption !== 'none' && servicePrice > 0)
+  const serviceRewardConfig = businessSettings.servicePointsReward !== undefined ? businessSettings.servicePointsReward : 50;
+  const servicePointsEarned = (serviceOption !== 'none' && servicePrice > 0) ? serviceRewardConfig : 0;
+
+  // 3. Product Points: ONLY earned when products are purchased (totalProductsPrice > 0)
   const pointsEnabled = businessSettings.enableProductPointsReward !== undefined ? businessSettings.enableProductPointsReward : true;
   const productPointsPercentage = businessSettings.productPointsPercentage !== undefined ? businessSettings.productPointsPercentage : 1;
   const productPointsEarned = pointsEnabled && totalProductsPrice > 0
     ? Math.max(1, Math.floor((totalProductsPrice * productPointsPercentage) / 100))
     : 0;
 
-  // Total automatic points earned from this transaction (0 if only visit without service/products)
-  const autoCalculatedPoints = servicePointsEarned + productPointsEarned;
+  // Total automatic points earned from this transaction
+  const autoCalculatedPoints = visitPointsEarned + servicePointsEarned + productPointsEarned;
   const finalPointsToAdd = customPointsBonus !== null ? customPointsBonus : autoCalculatedPoints;
 
   // EXECUTE UNIFIED CHECKOUT & VISIT REGISTRATION
@@ -1069,7 +1072,9 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                           <span className="font-semibold text-slate-200 block truncate text-[11px]">
                             {serviceName || 'Servicio en Silla'}
                           </span>
-                          <span className="text-[10px] text-slate-400">1x Servicio (+50 pts)</span>
+                          <span className="text-[10px] text-slate-400">
+                            1x Servicio {servicePointsEarned > 0 ? `(+${servicePointsEarned} pts)` : ''}
+                          </span>
                         </div>
                       </div>
                       <span className="font-mono font-bold text-white shrink-0 text-xs">

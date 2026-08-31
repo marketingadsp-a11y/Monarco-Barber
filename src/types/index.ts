@@ -250,10 +250,11 @@ export interface BusinessSettings {
   heroButtonText?: string;
   // Notification Engine Settings
   notificationSettings?: NotificationSettings;
-  // Product POS Loyalty Points
+  // Product POS & Loyalty Points System
   enableProductPointsReward?: boolean; // Habilita o deshabilita la suma de puntos en venta de productos (default: true)
   productPointsPercentage?: number; // Porcentaje de puntos al comprar producto (default: 1%)
   servicePointsReward?: number; // Puntos fijos al cobrar un servicio (default: 50)
+  pointsPerVisit?: number; // Puntos fijos al escanear QR / registrar visita (default: 0)
 }
 
 export interface Review {

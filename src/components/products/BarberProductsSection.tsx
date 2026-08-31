@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Package,
   Plus,
@@ -8,11 +8,17 @@ import {
   Info,
   CheckCircle2,
   Sparkles,
+  Upload,
+  Image as ImageIcon,
+  Trash2,
+  RefreshCw,
+  X,
 } from 'lucide-react';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { Product } from '../../types';
 import { formatCurrency } from '../../utils/dateTime';
+import { imageService } from '../../services/imgbb/imageService';
 
 interface BarberProductsSectionProps {
   onGoToPos?: () => void;
@@ -25,12 +31,32 @@ export const BarberProductsSection: React.FC<BarberProductsSectionProps> = ({ on
   const [searchQuery, setSearchQuery] = useState('');
   const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Filtered products list
   const filteredProducts = products.filter((p) => {
     const query = searchQuery.toLowerCase();
     return p.name.toLowerCase().includes(query) || (p.description && p.description.toLowerCase().includes(query));
   });
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingPhoto(true);
+    try {
+      const uploadedResult = await imageService.uploadImage(file);
+      const cleanUrl = typeof uploadedResult === 'string' ? uploadedResult : (uploadedResult as any)?.url || '';
+      setEditingProduct((prev) => (prev ? { ...prev, imageUrl: cleanUrl } : { imageUrl: cleanUrl }));
+      showToast('success', 'Imagen cargada', 'Fotografía del producto cargada correctamente.');
+    } catch (err: any) {
+      showToast('error', 'Error al subir imagen', err.message);
+    } finally {
+      setIsUploadingPhoto(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   const handleSaveProduct = async () => {
     if (!editingProduct?.name || editingProduct.name.trim() === '') {
@@ -65,9 +91,9 @@ export const BarberProductsSection: React.FC<BarberProductsSectionProps> = ({ on
   };
 
   // Helper for image fallback
-  const getProductImage = (prod: Product) => {
+  const getProductImage = (prod: Partial<Product>) => {
     if (prod.imageUrl) return prod.imageUrl;
-    const name = prod.name.toLowerCase();
+    const name = (prod.name || '').toLowerCase();
     const desc = (prod.description || '').toLowerCase();
     const cat = (prod.category || '').toLowerCase();
     if (name.includes('pomada') || name.includes('matte') || desc.includes('fijación') || cat.includes('fijación')) {
@@ -89,113 +115,88 @@ export const BarberProductsSection: React.FC<BarberProductsSectionProps> = ({ on
   };
 
   return (
-    <div className="space-y-5">
-      {/* Header card */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-3xl bg-gradient-to-r from-[#181D26] to-[#12151B] border border-white/10 shadow-xl">
-        <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
-            <Package className="w-6 h-6" />
+    <div className="space-y-4">
+      {/* Banner de Inventario Unificado */}
+      <div className="p-4 rounded-3xl bg-gradient-to-r from-[#181D26] to-[#12151B] border border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xl">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+            <Package className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white tracking-tight">Catálogo General de Productos</h3>
-            <p className="text-xs text-slate-400">
-              Registra o actualiza productos. Todos los barberos comparten este mismo catálogo general.
+            <h3 className="text-sm font-bold text-white">Inventario General & Catálogo POS</h3>
+            <p className="text-[11px] text-slate-400">
+              Registra nuevos artículos para venderlos en el Punto de Venta (POS) al cobrar a tus clientes
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          {onGoToPos && (
-            <button
-              onClick={onGoToPos}
-              className="px-3.5 py-2 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-bold transition-all"
-            >
-              Ir a Punto de Venta (POS)
-            </button>
-          )}
-
-          <button
-            onClick={() =>
-              setEditingProduct({
-                name: '',
-                description: '',
-                price: 200,
-                active: true,
-                createdByType: 'barber',
-                createdByBarberId: currentBarberId || undefined,
-                createdByBarberName: userProfile?.name || 'Barbero',
-              })
-            }
-            className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-[#D4AF37] text-slate-950 text-xs font-bold shadow-lg hover:bg-[#E5B869] transition-all shrink-0"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Registrar Producto</span>
-          </button>
-        </div>
+        <button
+          onClick={() =>
+            setEditingProduct({
+              name: '',
+              category: '',
+              imageUrl: '',
+              description: '',
+              price: 150,
+              active: true,
+              createdByType: 'barber',
+            })
+          }
+          className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-[#D4AF37] text-slate-950 text-xs font-bold shadow-md hover:bg-[#E5B869] transition-all self-stretch sm:self-auto justify-center shrink-0"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Registrar Producto</span>
+        </button>
       </div>
 
-      {/* Info notice about permissions */}
-      <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-start gap-2.5 text-xs text-blue-200">
-        <Info className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
-        <div>
-          <span>
-            Como barbero puedes <strong>crear nuevos productos</strong> y <strong>editar información</strong>. Los productos registrados se publican en el inventario general de la barbería.
-          </span>
-        </div>
-      </div>
-
-      {/* Search Bar */}
+      {/* Barra de búsqueda */}
       <div className="relative">
-        <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+        <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Buscar producto por nombre o descripción..."
-          className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-[#14171E] border border-white/10 text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-[#D4AF37]"
+          className="w-full pl-9 pr-4 py-2 rounded-2xl bg-[#14171E] border border-white/10 text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-[#D4AF37]"
         />
       </div>
 
-      {/* Products Grid */}
+      {/* Grid de Productos */}
       {filteredProducts.length === 0 ? (
-        <div className="rounded-3xl bg-[#14171E] border border-white/10 p-8 text-center text-slate-400 space-y-2">
-          <Package className="w-10 h-10 mx-auto text-slate-600 mb-2" />
-          <p className="font-semibold text-white text-sm">No se encontraron productos</p>
-          <p className="text-xs text-slate-500">
-            Sé el primero en registrar un producto a la venta en el catálogo general.
+        <div className="p-8 rounded-3xl bg-[#14171E] border border-white/10 text-center text-xs text-slate-400 space-y-2">
+          <Package className="w-8 h-8 mx-auto text-slate-600 mb-1" />
+          <p className="font-semibold text-white">No se encontraron productos</p>
+          <p className="text-slate-500">
+            Sé el primero en registrar un producto para tenerlo listo al momento de cobrar con el POS.
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
           {filteredProducts.map((prod) => {
-            const imgUrl = getProductImage(prod);
+            const imgSource = getProductImage(prod);
             return (
               <div
                 key={prod.id}
-                className={`rounded-2xl bg-[#14171E] border ${
-                  prod.active ? 'border-white/10' : 'border-white/5 opacity-60'
-                } p-3.5 flex flex-col justify-between gap-3 shadow-lg hover:border-[#D4AF37]/40 transition-all`}
+                className="rounded-2xl bg-[#14171E] border border-white/10 p-3.5 flex flex-col justify-between gap-2.5 shadow-lg hover:border-[#D4AF37]/40 transition-all"
               >
-                <div className="flex gap-3">
-                  <img
-                    src={imgUrl}
-                    alt={prod.name}
-                    className="w-16 h-16 rounded-xl object-cover shrink-0 border border-white/10 bg-slate-900"
-                    referrerPolicy="no-referrer"
-                  />
-                  <div className="space-y-1 min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-1.5">
-                      <h4 className="font-bold text-white text-xs leading-snug line-clamp-2">{prod.name}</h4>
-                      <span className="font-black text-[#D4AF37] text-sm shrink-0">
-                        {formatCurrency(prod.price)}
-                      </span>
-                    </div>
+                <div className="flex gap-2.5">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-black/40 border border-white/10 shrink-0">
+                    <img
+                      src={imgSource}
+                      alt={prod.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
 
-                    <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
-                      {prod.description || 'Sin descripción detallada.'}
-                    </p>
+                  <div className="space-y-0.5 min-w-0 flex-1">
+                    <h4 className="font-bold text-white text-xs leading-snug truncate" title={prod.name}>
+                      {prod.name}
+                    </h4>
+                    <span className="font-black text-[#D4AF37] text-sm block">
+                      {formatCurrency(prod.price)}
+                    </span>
                     {prod.category && (
-                      <span className="inline-block text-[9px] font-semibold px-2 py-0.5 rounded bg-white/5 text-slate-300">
+                      <span className="inline-block text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-slate-400">
                         {prod.category}
                       </span>
                     )}
@@ -213,7 +214,6 @@ export const BarberProductsSection: React.FC<BarberProductsSectionProps> = ({ on
                     )}
                   </div>
 
-                  {/* Edit Button (Barber can edit, but CANNOT delete) */}
                   <button
                     onClick={() => setEditingProduct(prod)}
                     className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 hover:text-white text-xs font-semibold transition-all"
@@ -229,10 +229,10 @@ export const BarberProductsSection: React.FC<BarberProductsSectionProps> = ({ on
         </div>
       )}
 
-      {/* Modal: Registrar / Editar Producto (NOMBRE, CATEGORÍA, IMAGEN, DESCRIPCIÓN, PRECIO) */}
+      {/* Modal: Registrar / Editar Producto con IMAGEN */}
       {editingProduct && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-[#14171E] border border-white/15 rounded-3xl p-5 w-full max-w-md space-y-4 shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in overflow-y-auto">
+          <div className="bg-[#14171E] border border-white/15 rounded-3xl p-5 w-full max-w-md space-y-4 shadow-2xl my-8">
             <div className="flex items-center justify-between pb-2 border-b border-white/10">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
@@ -245,6 +245,85 @@ export const BarberProductsSection: React.FC<BarberProductsSectionProps> = ({ on
                   <p className="text-[11px] text-slate-400">
                     Se añadirá al inventario general visible para todos los barberos
                   </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setEditingProduct(null)}
+                className="p-1 rounded-lg bg-white/5 text-slate-400 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* FOTOGRAFÍA DEL PRODUCTO */}
+            <div className="space-y-2 p-3 rounded-2xl bg-slate-900 border border-white/10">
+              <label className="text-slate-300 font-semibold block text-xs flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <ImageIcon className="w-4 h-4 text-[#D4AF37]" />
+                  <span>FOTOGRAFÍA DEL PRODUCTO</span>
+                </span>
+                {editingProduct.imageUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setEditingProduct({ ...editingProduct, imageUrl: '' })}
+                    className="text-[10px] text-rose-400 hover:underline flex items-center gap-1"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    Quitar foto
+                  </button>
+                )}
+              </label>
+
+              <div className="flex items-center gap-3">
+                <div className="w-16 h-16 rounded-xl overflow-hidden bg-black/60 border border-white/20 shrink-0 relative flex items-center justify-center">
+                  <img
+                    src={editingProduct.imageUrl || getProductImage(editingProduct)}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
+                  {isUploadingPhoto && (
+                    <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
+                      <RefreshCw className="w-4 h-4 text-[#D4AF37] animate-spin" />
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-1 flex-1 text-xs">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept="image/png,image/jpeg,image/webp,image/jpg"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploadingPhoto}
+                    className="w-full py-1.5 px-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white font-semibold flex items-center justify-center gap-1.5 transition-all text-xs"
+                  >
+                    {isUploadingPhoto ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        <span>Subiendo...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-3.5 h-3.5 text-[#D4AF37]" />
+                        <span>Subir Foto</span>
+                      </>
+                    )}
+                  </button>
+
+                  <input
+                    type="url"
+                    value={editingProduct.imageUrl || ''}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, imageUrl: e.target.value })}
+                    placeholder="O escribe URL de imagen"
+                    className="w-full p-1.5 rounded-xl bg-black/40 border border-white/10 text-white text-[11px] placeholder:text-slate-500 focus:outline-none focus:border-[#D4AF37]"
+                  />
                 </div>
               </div>
             </div>
@@ -281,20 +360,6 @@ export const BarberProductsSection: React.FC<BarberProductsSectionProps> = ({ on
                   <option value="Afeitado">Afeitado (Geles / Aftershave)</option>
                   <option value="Accesorios">Accesorios y Herramientas</option>
                 </select>
-              </div>
-
-              {/* URL DE IMAGEN (OPCIONAL) */}
-              <div>
-                <label className="text-slate-300 font-semibold block mb-1">
-                  URL DE IMAGEN (OPCIONAL)
-                </label>
-                <input
-                  type="url"
-                  value={editingProduct.imageUrl || ''}
-                  onChange={(e) => setEditingProduct({ ...editingProduct, imageUrl: e.target.value })}
-                  placeholder="https://ejemplo.com/foto-producto.jpg"
-                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-none focus:border-[#D4AF37]"
-                />
               </div>
 
               {/* DESCRIPCIÓN */}
@@ -344,8 +409,8 @@ export const BarberProductsSection: React.FC<BarberProductsSectionProps> = ({ on
               </button>
               <button
                 onClick={handleSaveProduct}
-                disabled={isSaving}
-                className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 text-xs font-bold shadow-md hover:scale-[1.02] active:scale-95 transition-all"
+                disabled={isSaving || isUploadingPhoto}
+                className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 text-xs font-bold shadow-md hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
               >
                 {isSaving ? 'Guardando...' : 'Guardar Producto'}
               </button>
