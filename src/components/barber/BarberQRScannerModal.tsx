@@ -391,14 +391,19 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
   const totalAmountToCharge = servicePrice + totalProductsPrice;
 
   // Points Calculation
-  // 1. Service Points (50 base points or proportional)
-  const servicePointsEarned = serviceOption !== 'none' && servicePrice > 0 ? 50 : 0;
+  // 1. Service Points: ONLY earned when a service is actually charged (serviceOption !== 'none' && servicePrice > 0)
+  const servicePointsEarned = (serviceOption !== 'none' && servicePrice > 0)
+    ? (businessSettings.servicePointsReward !== undefined ? businessSettings.servicePointsReward : 50)
+    : 0;
 
-  // 2. Product Points (% configured in settings, default 1%)
+  // 2. Product Points: ONLY earned when products are purchased (totalProductsPrice > 0)
   const pointsEnabled = businessSettings.enableProductPointsReward !== undefined ? businessSettings.enableProductPointsReward : true;
   const productPointsPercentage = businessSettings.productPointsPercentage !== undefined ? businessSettings.productPointsPercentage : 1;
-  const productPointsEarned = pointsEnabled && totalProductsPrice > 0 ? Math.floor((totalProductsPrice * productPointsPercentage) / 100) : 0;
+  const productPointsEarned = pointsEnabled && totalProductsPrice > 0
+    ? Math.max(1, Math.floor((totalProductsPrice * productPointsPercentage) / 100))
+    : 0;
 
+  // Total automatic points earned from this transaction (0 if only visit without service/products)
   const autoCalculatedPoints = servicePointsEarned + productPointsEarned;
   const finalPointsToAdd = customPointsBonus !== null ? customPointsBonus : autoCalculatedPoints;
 
@@ -1043,21 +1048,85 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                 </div>
               </div>
 
-              {/* 4. TOTAL & ACTION BUTTON */}
-              <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#181D26] to-[#12151B] border border-white/15 space-y-3">
-                <div className="flex items-center justify-between">
+              {/* 4. TOTAL A COBRAR CON DESGLOSE DETALLADO */}
+              <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-br from-[#181D26] to-[#12151B] border border-white/15 space-y-3 shadow-lg">
+                {/* Header with Title */}
+                <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                  <div className="flex items-center gap-1.5">
+                    <Receipt className="w-4 h-4 text-[#D4AF37]" />
+                    <span className="text-[11px] font-bold text-white uppercase tracking-wider">
+                      Detalle de Cobro
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-slate-400 font-semibold">
+                    {cartItems.length + (serviceOption !== 'none' && servicePrice > 0 ? 1 : 0)} concepto(s)
+                  </span>
+                </div>
+
+                {/* Itemized List */}
+                <div className="space-y-1.5 text-xs">
+                  {/* Service Line Item if selected */}
+                  {serviceOption !== 'none' && servicePrice > 0 ? (
+                    <div className="flex items-center justify-between p-2 rounded-xl bg-black/40 border border-white/5">
+                      <div className="flex items-center gap-2 min-w-0 pr-2">
+                        <Scissors className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
+                        <div className="min-w-0">
+                          <span className="font-semibold text-slate-200 block truncate text-[11px]">
+                            {serviceName || 'Servicio en Silla'}
+                          </span>
+                          <span className="text-[10px] text-slate-400">1x Servicio (+50 pts)</span>
+                        </div>
+                      </div>
+                      <span className="font-mono font-bold text-white shrink-0 text-xs">
+                        {formatCurrency(servicePrice)}
+                      </span>
+                    </div>
+                  ) : null}
+
+                  {/* Product Line Items */}
+                  {cartItems.map((item) => (
+                    <div key={item.productId} className="flex items-center justify-between p-2 rounded-xl bg-black/40 border border-white/5">
+                      <div className="flex items-center gap-2 min-w-0 pr-2">
+                        <Package className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                        <div className="min-w-0">
+                          <span className="font-semibold text-slate-200 block truncate text-[11px]">
+                            {item.productName}
+                          </span>
+                          <span className="text-[10px] text-slate-400">
+                            {item.quantity}x a {formatCurrency(item.price)}
+                          </span>
+                        </div>
+                      </div>
+                      <span className="font-mono font-bold text-white shrink-0 text-xs">
+                        {formatCurrency(item.subtotal)}
+                      </span>
+                    </div>
+                  ))}
+
+                  {/* Fallback if no service and no products */}
+                  {serviceOption === 'none' && cartItems.length === 0 && (
+                    <div className="p-2.5 rounded-xl bg-black/20 border border-dashed border-white/10 text-center text-slate-400 text-xs">
+                      <span>Solo registro de visita • Sin cobro de servicio ni productos ($0)</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Total Row */}
+                <div className="pt-2 border-t border-white/10 flex items-baseline justify-between">
                   <div>
-                    <span className="text-[11px] text-slate-400 block">Total a Cobrar:</span>
-                    <span className="text-xl font-black text-white">
+                    <span className="text-[11px] text-slate-400 block font-semibold uppercase tracking-wider">
+                      Total a Cobrar:
+                    </span>
+                    <span className="text-xl sm:text-2xl font-black text-white tracking-tight">
                       {formatCurrency(totalAmountToCharge)}
                     </span>
                   </div>
 
-                  <div className="text-right">
-                    <span className="text-xs font-black text-[#D4AF37] flex items-center justify-end gap-1">
-                      <Sparkles className="w-3.5 h-3.5" />
-                      +{finalPointsToAdd} pts
-                    </span>
+                  <div className="text-right space-y-0.5">
+                    <div className="text-xs font-black text-[#D4AF37] flex items-center justify-end gap-1">
+                      <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
+                      <span>+{finalPointsToAdd} pts VIP</span>
+                    </div>
                     <span className="text-[10px] text-emerald-400 font-semibold block">
                       +{visitsToAdd} Visita al cliente
                     </span>
@@ -1073,7 +1142,9 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                   <span>
                     {isSubmittingAction
                       ? 'Procesando...'
-                      : `Cobrar ${formatCurrency(totalAmountToCharge)} y Registrar (+${visitsToAdd} Visita, +${finalPointsToAdd} Pts)`}
+                      : totalAmountToCharge > 0
+                      ? `Cobrar ${formatCurrency(totalAmountToCharge)} y Registrar (+${visitsToAdd} Visita, +${finalPointsToAdd} Pts)`
+                      : `Registrar Visita (+${visitsToAdd} Visita, 0 Pts)`}
                   </span>
                 </button>
               </div>

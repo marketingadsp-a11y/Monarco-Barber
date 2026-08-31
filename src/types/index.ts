@@ -253,6 +253,7 @@ export interface BusinessSettings {
   // Product POS Loyalty Points
   enableProductPointsReward?: boolean; // Habilita o deshabilita la suma de puntos en venta de productos (default: true)
   productPointsPercentage?: number; // Porcentaje de puntos al comprar producto (default: 1%)
+  servicePointsReward?: number; // Puntos fijos al cobrar un servicio (default: 50)
 }
 
 export interface Review {

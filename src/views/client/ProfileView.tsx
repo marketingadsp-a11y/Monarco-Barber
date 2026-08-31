@@ -683,31 +683,6 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             </div>
           </div>
 
-          {/* QUICK ACTION SHORTCUTS */}
-          <div className="grid grid-cols-2 gap-2.5">
-            <button
-              onClick={() => onNavigateTab && onNavigateTab('book')}
-              className="p-3 rounded-2xl bg-[#14171E] border border-white/10 hover:border-[#D4AF37]/40 text-left transition-all group shadow-md"
-            >
-              <div className="w-8 h-8 rounded-xl bg-[#D4AF37]/15 text-[#D4AF37] flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                <Calendar className="w-4 h-4" />
-              </div>
-              <p className="text-xs font-bold text-white">Agendar Cita</p>
-              <p className="text-[10px] text-slate-400">Reserva con tu barbero</p>
-            </button>
-
-            <button
-              onClick={() => onNavigateTab && onNavigateTab('appointments')}
-              className="p-3 rounded-2xl bg-[#14171E] border border-white/10 hover:border-[#D4AF37]/40 text-left transition-all group shadow-md"
-            >
-              <div className="w-8 h-8 rounded-xl bg-[#D4AF37]/15 text-[#D4AF37] flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                <ShieldCheck className="w-4 h-4" />
-              </div>
-              <p className="text-xs font-bold text-white">Mis Citas</p>
-              <p className="text-[10px] text-slate-400">Historial y próximas</p>
-            </button>
-          </div>
-
           {/* USER DATA & EDIT PROFILE ACCORDION */}
           <div className="rounded-3xl bg-[#14171E] border border-white/10 p-5 space-y-4 shadow-xl">
             <div className="flex items-center justify-between">
