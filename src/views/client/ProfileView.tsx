@@ -700,13 +700,8 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   )}
                 </div>
                 <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-bold text-white text-sm">{userProfile.name}</h3>
-                    <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/40 uppercase">
-                      {currentRole === 'admin' ? 'ADMIN' : 'CLIENTE VIP'}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-400 font-mono">
+                  <h3 className="font-bold text-white text-sm">{userProfile.name}</h3>
+                  <p className="text-xs text-slate-400 font-mono mt-0.5">
                     {userProfile.phone || 'Sin celular'}
                   </p>
                 </div>

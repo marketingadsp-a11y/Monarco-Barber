@@ -55,11 +55,22 @@ export const ClientQRModal: React.FC<ClientQRModalProps> = ({
         </button>
 
         {/* Top Header */}
-        <div className="flex items-center justify-center gap-2 pt-1 pb-1">
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/40 text-[#D4AF37] text-xs font-bold tracking-wider">
-            <Crown className="w-3.5 h-3.5" />
-            <span>PASE VIP • MONARCA</span>
-          </div>
+        <div className="flex items-center justify-center pt-1 pb-1">
+          {businessSettings?.logoUrl ? (
+            <img
+              src={businessSettings.logoUrl}
+              alt="Logo"
+              className="h-9 w-auto max-w-[140px] object-contain"
+              referrerPolicy="no-referrer"
+            />
+          ) : (
+            <div className="flex items-center gap-2 text-[#D4AF37]">
+              <Crown className="w-5 h-5" />
+              <span className="font-serif font-black tracking-wider text-sm text-white">
+                {businessSettings?.name || 'MONARCA'}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* High Contrast QR Container */}

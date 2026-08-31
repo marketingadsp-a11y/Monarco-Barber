@@ -255,9 +255,6 @@ export const BarberDashboardView: React.FC<BarberDashboardViewProps> = ({
               <h1 className="text-xl font-bold text-white tracking-tight">
                 {activeBarber.displayName}
               </h1>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-[#D4AF37] border border-[#D4AF37]/30">
-                PANEL BARBERO
-              </span>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
               {activeBarber.specialties.slice(0, 3).join(' • ')}

@@ -45,23 +45,8 @@ export const Header: React.FC<HeaderProps> = ({ onOpenProfile, onOpenQr }) => {
           )}
         </div>
 
-        {/* Right Actions: Role Badge (if Admin/Barber), WhatsApp Direct, User Avatar & Logout */}
+        {/* Right Actions: WhatsApp Direct, User Avatar & Logout */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          {/* Active Role Badge (Only for Staff) */}
-          {currentRole === 'admin' && (
-            <span className="hidden md:flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[11px] font-bold">
-              <Shield className="w-3 h-3" />
-              <span>Panel Admin</span>
-            </span>
-          )}
-
-          {currentRole === 'barber' && (
-            <span className="hidden md:flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/30 text-[#D4AF37] text-[11px] font-bold">
-              <Scissors className="w-3 h-3" />
-              <span>Panel Barbero</span>
-            </span>
-          )}
-
           {/* WhatsApp Direct */}
           {businessSettings.whatsapp && (
             <a

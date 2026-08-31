@@ -734,12 +734,7 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                   </div>
 
                   <div className="min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <h3 className="font-bold text-white text-sm truncate">{scannedClient.name}</h3>
-                      <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30 shrink-0">
-                        {scannedClient.membershipTier || 'VIP'}
-                      </span>
-                    </div>
+                    <h3 className="font-bold text-white text-sm truncate">{scannedClient.name}</h3>
                     <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
                       <span className="text-[#D4AF37] font-mono font-semibold">#{scannedClient.clientNumber || 'VIP'}</span>
                       {scannedClient.phone && (

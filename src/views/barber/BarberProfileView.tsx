@@ -289,9 +289,6 @@ export const BarberProfileView: React.FC<BarberProfileViewProps> = ({ activeBarb
               <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
                 {displayName || 'Mi Perfil de Barbero'}
               </h1>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30 uppercase">
-                Perfil Público
-              </span>
             </div>
             <p className="text-xs text-slate-400">
               Esta foto y nombre son los que verán los clientes al agendar una cita contigo.
