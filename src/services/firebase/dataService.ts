@@ -40,6 +40,7 @@ import {
   DEFAULT_WEEKLY_SCHEDULE,
 } from './seedData';
 import { doIntervalsOverlap } from '../availabilityEngine';
+import { timeToMinutes, minutesToTime } from '../../utils/dateTime';
 
 // ============================================================================
 // MAPPER FUNCTIONS: Typescript Model <-> Firestore Document en Español
@@ -1215,7 +1216,12 @@ export class DataService {
         for (const docSnap of existingSnapshots.docs) {
           const existing = fromSpanishAppointment(docSnap.data(), docSnap.id);
           if (existing.status !== 'cancelled' && existing.status !== 'rejected') {
-            if (doIntervalsOverlap(appointment.startTime, appointment.endTime, existing.startTime, existing.endTime)) {
+            const appDuration = timeToMinutes(existing.endTime) - timeToMinutes(existing.startTime);
+            const interval = 30; // 30-minute block rounding for grid optimization
+            const roundedDuration = Math.ceil(appDuration / interval) * interval;
+            const existingRoundedEndTime = minutesToTime(timeToMinutes(existing.startTime) + roundedDuration);
+
+            if (doIntervalsOverlap(appointment.startTime, appointment.endTime, existing.startTime, existingRoundedEndTime)) {
               throw new Error(
                 `Conflicto de horario: Este espacio (${appointment.startTime} - ${appointment.endTime}) acaba de ser reservado por otro cliente.`
               );

@@ -94,6 +94,9 @@ export const BarbershopProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [schedules, setSchedules] = useState<Record<string, BarberSchedule>>({});
   const [blockedSlots, setBlockedSlots] = useState<BlockedSlot[]>([]);
   const [businessSettings, setBusinessSettings] = useState<BusinessSettings>(SEED_BUSINESS_SETTINGS);
+  const [settingsLoaded, setSettingsLoaded] = useState<boolean>(false);
+  const [servicesLoaded, setServicesLoaded] = useState<boolean>(false);
+  const [barbersLoaded, setBarbersLoaded] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
@@ -138,11 +141,17 @@ export const BarbershopProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     init();
 
     const unsubServices = dataService.subscribeToServices((srvs) => {
-      if (isMounted) setServices(srvs);
+      if (isMounted) {
+        setServices(srvs);
+        setServicesLoaded(true);
+      }
     });
 
     const unsubBarbers = dataService.subscribeToBarbers((barbs) => {
-      if (isMounted) setBarbers(barbs);
+      if (isMounted) {
+        setBarbers(barbs);
+        setBarbersLoaded(true);
+      }
     });
 
     const unsubSchedules = dataService.subscribeToBarberSchedules((scheds) => {
@@ -154,7 +163,10 @@ export const BarbershopProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     });
 
     const unsubSettings = dataService.subscribeToBusinessSettings((settings) => {
-      if (isMounted) setBusinessSettings(settings);
+      if (isMounted) {
+        setBusinessSettings(settings);
+        setSettingsLoaded(true);
+      }
     });
 
     const unsubProducts = dataService.subscribeToProducts((prods) => {
@@ -164,8 +176,6 @@ export const BarbershopProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const unsubPosSales = dataService.subscribeToPosSales((sales) => {
       if (isMounted) setPosSales(sales);
     });
-
-    setIsLoading(false);
 
     return () => {
       isMounted = false;
@@ -178,6 +188,13 @@ export const BarbershopProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       unsubPosSales();
     };
   }, []);
+
+  // Update loading state only when critical initial data from subscriptions is fully loaded
+  useEffect(() => {
+    if (settingsLoaded && servicesLoaded && barbersLoaded) {
+      setIsLoading(false);
+    }
+  }, [settingsLoaded, servicesLoaded, barbersLoaded]);
 
   // 2. Appointments subscription & Real-time Barber New Booking Notification
   useEffect(() => {

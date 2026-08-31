@@ -133,12 +133,16 @@ export function getAvailableSlots(params: AvailabilityParams): AvailableTimeSlot
         continue;
       }
 
-      // Check overlap with existing appointments
+      // Check overlap with existing appointments with rounded-up end times for grid alignment
       let hasAppointmentConflict = false;
       let conflictReason: string | undefined = undefined;
 
       for (const app of activeAppointments) {
-        if (doIntervalsOverlap(slotStartTime, slotEndTime, app.startTime, app.endTime)) {
+        const appDuration = timeToMinutes(app.endTime) - timeToMinutes(app.startTime);
+        const roundedDuration = Math.ceil(appDuration / slotInterval) * slotInterval;
+        const appRoundedEndTime = minutesToTime(timeToMinutes(app.startTime) + roundedDuration);
+
+        if (doIntervalsOverlap(slotStartTime, slotEndTime, app.startTime, appRoundedEndTime)) {
           hasAppointmentConflict = true;
           conflictReason = `Reservado (${app.startTime} - ${app.endTime})`;
           break;

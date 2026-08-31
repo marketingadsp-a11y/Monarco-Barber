@@ -22,6 +22,8 @@ import {
   formatTime12h,
   formatCurrency,
   addMinutesToTime,
+  timeToMinutes,
+  minutesToTime,
 } from '../../utils/dateTime';
 import { dataService } from '../../services/firebase/dataService';
 
@@ -127,13 +129,18 @@ export const BarberBookAppointmentModal: React.FC<BarberBookAppointmentModalProp
       const end = addMinutesToTime(current, duration);
       if (end > closing) break;
 
-      // Check appointment conflict
-      const hasAppConflict = dayAppointments.some(
-        (a) =>
-          (current >= a.startTime && current < a.endTime) ||
-          (end > a.startTime && end <= a.endTime) ||
-          (current <= a.startTime && end >= a.endTime)
-      );
+      // Check appointment conflict with rounded-up end times for grid alignment
+      const hasAppConflict = dayAppointments.some((a) => {
+        const appDuration = timeToMinutes(a.endTime) - timeToMinutes(a.startTime);
+        const roundedDuration = Math.ceil(appDuration / interval) * interval;
+        const appRoundedEndTime = minutesToTime(timeToMinutes(a.startTime) + roundedDuration);
+
+        return (
+          (current >= a.startTime && current < appRoundedEndTime) ||
+          (end > a.startTime && end <= appRoundedEndTime) ||
+          (current <= a.startTime && end >= appRoundedEndTime)
+        );
+      });
 
       // Check block conflict
       const hasBlockConflict = dayBlocks.some(

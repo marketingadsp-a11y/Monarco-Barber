@@ -609,9 +609,10 @@ export const AdminMetricsSection: React.FC<AdminMetricsSectionProps> = ({
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex items-center gap-3">
                     <img
-                      src={bm.barber.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'}
+                      src={bm.barber.photoUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'}
                       alt={bm.barber.displayName}
                       className="w-12 h-12 rounded-2xl object-cover border border-white/15 shadow"
+                      referrerPolicy="no-referrer"
                     />
                     <div>
                       <h5 className="font-bold text-white text-sm flex items-center gap-1.5">
