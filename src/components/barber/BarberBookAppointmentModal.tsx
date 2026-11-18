@@ -232,7 +232,7 @@ export const BarberBookAppointmentModal: React.FC<BarberBookAppointmentModalProp
           particleCount: 60,
           spread: 70,
           origin: { y: 0.5 },
-          colors: ['#D4AF37', '#10B981', '#FFFFFF'],
+          colors: ['#9A6B3B', '#161514', '#C69765'],
         });
       } catch {
         // ignore
@@ -258,25 +258,25 @@ export const BarberBookAppointmentModal: React.FC<BarberBookAppointmentModalProp
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in">
-      <div className="bg-[#12151B] border border-white/15 rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl flex flex-col my-auto max-h-[92vh]">
+    <div className="fixed inset-0 z-50 bg-[#161514]/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in">
+      <div className="bg-[#FAF9F6] border border-[#D2CBBF] rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl flex flex-col my-auto max-h-[92vh]">
         {/* Modal Header */}
-        <div className="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between bg-gradient-to-r from-[#181D26] to-[#12151B]">
+        <div className="p-4 sm:p-5 border-b border-[#E6E1D6] flex items-center justify-between bg-white">
           <div className="flex items-center gap-3">
             <img
               src={activeBarber.photoUrl}
               alt={activeBarber.displayName}
-              className="w-11 h-11 rounded-2xl object-cover border-2 border-[#D4AF37] shadow-md"
+              className="w-11 h-11 rounded-2xl object-cover border border-[#9A6B3B]/60 shadow-xs"
               referrerPolicy="no-referrer"
             />
             <div>
-              <h2 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
+              <h2 className="font-display text-lg font-bold text-[#161514] uppercase tracking-wide flex items-center gap-2 flex-wrap">
                 <span>Agendar Cita en Mi Silla</span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30">
+                <span className="font-sans normal-case text-[10px] font-semibold px-2 py-0.5 rounded-md bg-[#FBF6EE] text-[#7D542B] border border-[#9A6B3B]/30">
                   {activeBarber.displayName}
                 </span>
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-[#5C5852]">
                 Programa un servicio para un cliente con tu disponibilidad
               </p>
             </div>
@@ -284,50 +284,50 @@ export const BarberBookAppointmentModal: React.FC<BarberBookAppointmentModalProp
 
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 flex items-center justify-center transition-colors"
+            className="w-8 h-8 rounded-full bg-[#F2EFE9] hover:bg-[#E8E3D9] text-[#5C5852] hover:text-[#161514] flex items-center justify-center transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Step Indicator Pills */}
-        <div className="grid grid-cols-4 border-b border-white/10 text-center text-xs bg-[#0D0F12]">
+        {/* Step Indicator Tabs */}
+        <div className="grid grid-cols-4 border-b border-[#E6E1D6] text-center text-xs bg-[#F2EFE9]">
           <button
             onClick={() => setCurrentStep(1)}
-            className={`py-2.5 px-1 font-bold border-b-2 transition-all ${
+            className={`py-2.5 px-1 font-semibold border-b-2 transition-all ${
               currentStep === 1
-                ? 'border-[#D4AF37] text-[#D4AF37] bg-[#D4AF37]/5'
-                : 'border-transparent text-slate-400'
+                ? 'border-[#161514] text-[#161514] bg-white'
+                : 'border-transparent text-[#5C5852] hover:text-[#161514]'
             }`}
           >
             1. Servicio
           </button>
           <button
             onClick={() => selectedServiceId && setCurrentStep(2)}
-            className={`py-2.5 px-1 font-bold border-b-2 transition-all ${
+            className={`py-2.5 px-1 font-semibold border-b-2 transition-all ${
               currentStep === 2
-                ? 'border-[#D4AF37] text-[#D4AF37] bg-[#D4AF37]/5'
-                : 'border-transparent text-slate-400'
+                ? 'border-[#161514] text-[#161514] bg-white'
+                : 'border-transparent text-[#5C5852] hover:text-[#161514]'
             }`}
           >
             2. Horario
           </button>
           <button
             onClick={() => selectedTimeSlot && setCurrentStep(3)}
-            className={`py-2.5 px-1 font-bold border-b-2 transition-all ${
+            className={`py-2.5 px-1 font-semibold border-b-2 transition-all ${
               currentStep === 3
-                ? 'border-[#D4AF37] text-[#D4AF37] bg-[#D4AF37]/5'
-                : 'border-transparent text-slate-400'
+                ? 'border-[#161514] text-[#161514] bg-white'
+                : 'border-transparent text-[#5C5852] hover:text-[#161514]'
             }`}
           >
             3. Cliente
           </button>
           <button
             onClick={() => setCurrentStep(4)}
-            className={`py-2.5 px-1 font-bold border-b-2 transition-all ${
+            className={`py-2.5 px-1 font-semibold border-b-2 transition-all ${
               currentStep === 4
-                ? 'border-[#D4AF37] text-[#D4AF37] bg-[#D4AF37]/5'
-                : 'border-transparent text-slate-400'
+                ? 'border-[#161514] text-[#161514] bg-white'
+                : 'border-transparent text-[#5C5852] hover:text-[#161514]'
             }`}
           >
             4. Confirmar
@@ -340,10 +340,10 @@ export const BarberBookAppointmentModal: React.FC<BarberBookAppointmentModalProp
           {currentStep === 1 && (
             <div className="space-y-3 animate-in fade-in">
               <div className="flex items-center justify-between">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#5C5852]">
                   Selecciona el servicio a realizar:
                 </h3>
-                <span className="text-slate-400 text-[11px] font-medium">
+                <span className="text-[#5C5852] text-[11px] font-medium">
                   {barberServices.length} servicios disponibles
                 </span>
               </div>
@@ -360,8 +360,8 @@ export const BarberBookAppointmentModal: React.FC<BarberBookAppointmentModalProp
                       }}
                       className={`p-3.5 rounded-2xl border flex items-center justify-between gap-3 cursor-pointer transition-all ${
                         isSelected
-                          ? 'bg-[#181D26] border-[#D4AF37] shadow-lg shadow-[#D4AF37]/10'
-                          : 'bg-[#14171E] border-white/10 hover:border-white/20'
+                          ? 'bg-[#FAF7F0] border-[#161514] shadow-xs'
+                          : 'bg-white border-[#E6E1D6] hover:border-[#9A6B3B]/50'
                       }`}
                     >
                       <div className="flex items-center gap-3 min-w-0">
@@ -371,17 +371,17 @@ export const BarberBookAppointmentModal: React.FC<BarberBookAppointmentModalProp
                             'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=600&q=80'
                           }
                           alt={service.name}
-                          className="w-12 h-12 rounded-xl object-cover border border-white/10 shrink-0"
+                          className="w-12 h-12 rounded-xl object-cover border border-[#E6E1D6] shrink-0"
                           referrerPolicy="no-referrer"
                         />
                         <div className="min-w-0">
-                          <h4 className="font-bold text-white text-sm truncate">{service.name}</h4>
-                          <p className="text-[11px] text-slate-400">
-                            {service.durationMinutes} min •{' '}
-                            <strong className="text-[#D4AF37]">{formatCurrency(service.price)}</strong>
+                          <h4 className="font-bold text-[#161514] text-sm truncate">{service.name}</h4>
+                          <p className="text-[11px] text-[#5C5852] font-mono tabular-nums">
+                            {service.durationMinutes} min ·{' '}
+                            <strong className="text-[#9A6B3B]">{formatCurrency(service.price)}</strong>
                           </p>
                           {service.description && (
-                            <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">
+                            <p className="text-[10px] text-[#767067] line-clamp-1 mt-0.5">
                               {service.description}
                             </p>
                           )}
@@ -391,8 +391,8 @@ export const BarberBookAppointmentModal: React.FC<BarberBookAppointmentModalProp
                       <div
                         className={`w-6 h-6 rounded-full flex items-center justify-center border transition-colors shrink-0 ${
                           isSelected
-                            ? 'bg-[#D4AF37] border-[#D4AF37] text-slate-950 font-bold'
-                            : 'border-white/20 text-transparent'
+                            ? 'bg-[#161514] border-[#161514] text-[#FAF9F6] font-bold'
+                            : 'border-[#D2CBBF] text-transparent bg-white'
                         }`}
                       >
                         ✓
@@ -409,15 +409,15 @@ export const BarberBookAppointmentModal: React.FC<BarberBookAppointmentModalProp
             <div className="space-y-4 animate-in fade-in">
               {/* Date Picker Bar */}
               <div className="space-y-2">
-                <label className="text-slate-300 font-semibold block">Selecciona la Fecha</label>
+                <label className="text-[#161514] font-semibold block">Selecciona la Fecha</label>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => setSelectedDate(getTodayDateString())}
-                    className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all ${
+                    className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${
                       selectedDate === getTodayDateString()
-                        ? 'bg-[#D4AF37] text-slate-950 border-[#D4AF37]'
-                        : 'bg-[#14171E] border-white/10 text-slate-300'
+                        ? 'bg-[#161514] text-[#FAF9F6] border-[#161514]'
+                        : 'bg-white border-[#D2CBBF] text-[#5C5852] hover:text-[#161514]'
                     }`}
                   >
                     Hoy
@@ -429,7 +429,7 @@ export const BarberBookAppointmentModal: React.FC<BarberBookAppointmentModalProp
                       setSelectedDate(e.target.value);
                       setSelectedTimeSlot('');
                     }}
-                    className="flex-1 p-2 rounded-xl bg-slate-900 border border-white/15 text-white font-medium text-xs focus:outline-none focus:border-[#D4AF37]"
+                    className="flex-1 p-2 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] font-medium text-xs focus:outline-none focus:border-[#161514]"
                   />
                 </div>
               </div>
@@ -437,10 +437,10 @@ export const BarberBookAppointmentModal: React.FC<BarberBookAppointmentModalProp
               {/* Slots Grid */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-slate-300 font-semibold block">
+                  <label className="text-[#161514] font-semibold block">
                     Horarios Disponibles para {formatDateSpanish(selectedDate)}
                   </label>
-                  <span className="text-slate-400 text-[11px]">
+                  <span className="text-[#5C5852] text-[11px] font-mono tabular-nums">
                     Duración: {activeSelectedService?.durationMinutes || 45} min
                   </span>
                 </div>
@@ -452,17 +452,17 @@ export const BarberBookAppointmentModal: React.FC<BarberBookAppointmentModalProp
                       type="button"
                       disabled={!slot.available}
                       onClick={() => setSelectedTimeSlot(slot.start)}
-                      className={`p-2.5 rounded-xl text-xs font-bold text-center border transition-all ${
+                      className={`p-2.5 rounded-xl text-xs font-mono tabular-nums font-semibold text-center border transition-all ${
                         selectedTimeSlot === slot.start
-                          ? 'bg-[#D4AF37] text-slate-950 border-[#D4AF37] shadow-lg shadow-[#D4AF37]/20 scale-105'
+                          ? 'bg-[#161514] text-[#FAF9F6] border-[#161514] shadow-sm scale-[1.02]'
                           : slot.available
-                          ? 'bg-[#14171E] hover:bg-[#1C212B] border-white/10 text-white'
-                          : 'bg-black/30 border-white/5 text-slate-600 cursor-not-allowed opacity-50'
+                          ? 'bg-white hover:bg-[#FAF7F0] hover:border-[#9A6B3B] border-[#E6E1D6] text-[#161514]'
+                          : 'bg-[#F2EFE9] border-[#E6E1D6] text-[#9E978D] cursor-not-allowed opacity-60'
                       }`}
                     >
                       <span>{formatTime12h(slot.start)}</span>
                       {slot.conflictReason && (
-                        <span className="block text-[9px] font-normal text-rose-400/80">
+                        <span className="font-sans block text-[9px] font-medium text-rose-700 mt-0.5">
                           {slot.conflictReason}
                         </span>
                       )}
@@ -477,12 +477,12 @@ export const BarberBookAppointmentModal: React.FC<BarberBookAppointmentModalProp
           {currentStep === 3 && (
             <div className="space-y-4 animate-in fade-in">
               {/* Client Type Switcher */}
-              <div className="grid grid-cols-2 p-1 rounded-2xl bg-black/40 border border-white/10">
+              <div className="grid grid-cols-2 p-1 rounded-2xl bg-[#F2EFE9] border border-[#E6E1D6]">
                 <button
                   type="button"
                   onClick={() => setClientType('registered')}
-                  className={`py-2 rounded-xl text-xs font-bold transition-all ${
-                    clientType === 'registered' ? 'bg-[#D4AF37] text-slate-950' : 'text-slate-400'
+                  className={`py-2 rounded-xl text-xs font-semibold transition-all ${
+                    clientType === 'registered' ? 'bg-[#161514] text-[#FAF9F6] shadow-xs' : 'text-[#5C5852] hover:text-[#161514]'
                   }`}
                 >
                   Cliente Registrado
@@ -490,8 +490,8 @@ export const BarberBookAppointmentModal: React.FC<BarberBookAppointmentModalProp
                 <button
                   type="button"
                   onClick={() => setClientType('walkin')}
-                  className={`py-2 rounded-xl text-xs font-bold transition-all ${
-                    clientType === 'walkin' ? 'bg-[#D4AF37] text-slate-950' : 'text-slate-400'
+                  className={`py-2 rounded-xl text-xs font-semibold transition-all ${
+                    clientType === 'walkin' ? 'bg-[#161514] text-[#FAF9F6] shadow-xs' : 'text-[#5C5852] hover:text-[#161514]'
                   }`}
                 >
                   Cliente en Tienda (Nuevo)
@@ -501,30 +501,30 @@ export const BarberBookAppointmentModal: React.FC<BarberBookAppointmentModalProp
               {clientType === 'registered' ? (
                 <div className="space-y-3">
                   <div className="relative">
-                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#8E887E]" />
                     <input
                       type="text"
                       value={clientSearchQuery}
                       onChange={(e) => setClientSearchQuery(e.target.value)}
                       placeholder="Buscar por nombre, celular o No. de Cliente..."
-                      className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-[#D4AF37]"
+                      className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] placeholder-[#8E887E] text-xs focus:outline-none focus:border-[#161514]"
                     />
                   </div>
 
                   {selectedClient && (
-                    <div className="p-3.5 rounded-2xl bg-[#D4AF37]/15 border border-[#D4AF37] flex items-center justify-between">
+                    <div className="p-3.5 rounded-2xl bg-[#FAF7F0] border border-[#9A6B3B] flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-[#D4AF37] text-slate-950 font-black flex items-center justify-center text-sm">
+                        <div className="w-10 h-10 rounded-xl bg-[#161514] text-[#FAF9F6] font-bold flex items-center justify-center text-sm">
                           {selectedClient.name.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <h4 className="font-bold text-white text-xs">{selectedClient.name}</h4>
-                          <p className="text-[11px] text-[#D4AF37]">
-                            #{selectedClient.clientNumber || 'VIP'} • {selectedClient.phone}
+                          <h4 className="font-bold text-[#161514] text-xs">{selectedClient.name}</h4>
+                          <p className="text-[11px] text-[#9A6B3B] font-mono tabular-nums">
+                            #{selectedClient.clientNumber || 'VIP'} · {selectedClient.phone}
                           </p>
                         </div>
                       </div>
-                      <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
                         Seleccionado
                       </span>
                     </div>
@@ -539,17 +539,17 @@ export const BarberBookAppointmentModal: React.FC<BarberBookAppointmentModalProp
                           onClick={() => setSelectedClient(user)}
                           className={`p-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
                             isSel
-                              ? 'bg-[#D4AF37]/20 border-[#D4AF37]'
-                              : 'bg-[#14171E] border-white/10 hover:bg-[#1C212B]'
+                              ? 'bg-[#FAF7F0] border-[#161514]'
+                              : 'bg-white border-[#E6E1D6] hover:bg-[#FAF9F6]'
                           }`}
                         >
                           <div>
-                            <span className="font-bold text-white text-xs block">{user.name}</span>
-                            <span className="text-[10px] text-slate-400 font-mono">
-                              #{user.clientNumber || 'VIP'} • {user.phone}
+                            <span className="font-bold text-[#161514] text-xs block">{user.name}</span>
+                            <span className="text-[10px] text-[#5C5852] font-mono">
+                              #{user.clientNumber || 'VIP'} · {user.phone}
                             </span>
                           </div>
-                          <span className="text-[10px] text-[#D4AF37] font-bold">
+                          <span className="text-[10px] text-[#9A6B3B] font-mono tabular-nums font-bold">
                             {user.points || 0} pts
                           </span>
                         </div>
@@ -560,37 +560,37 @@ export const BarberBookAppointmentModal: React.FC<BarberBookAppointmentModalProp
               ) : (
                 <div className="space-y-3">
                   <div>
-                    <label className="text-slate-300 block mb-1">Nombre completo del cliente *</label>
+                    <label className="text-[#5C5852] font-semibold block mb-1">Nombre completo del cliente *</label>
                     <input
                       type="text"
                       value={walkinName}
                       onChange={(e) => setWalkinName(e.target.value)}
                       placeholder="Ej. Roberto Gómez"
-                      className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/15 text-white"
+                      className="w-full p-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] placeholder-[#8E887E] focus:outline-none focus:border-[#161514]"
                     />
                   </div>
 
                   <div>
-                    <label className="text-slate-300 block mb-1">Teléfono / WhatsApp (Opcional)</label>
+                    <label className="text-[#5C5852] font-semibold block mb-1">Teléfono / WhatsApp (Opcional)</label>
                     <input
                       type="tel"
                       value={walkinPhone}
                       onChange={(e) => setWalkinPhone(e.target.value)}
                       placeholder="+52 34 1197 5639"
-                      className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/15 text-white"
+                      className="w-full p-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] placeholder-[#8E887E] focus:outline-none focus:border-[#161514]"
                     />
                   </div>
                 </div>
               )}
 
               <div>
-                <label className="text-slate-400 block mb-1">Nota o preferencia del corte (Opcional)</label>
+                <label className="text-[#5C5852] font-semibold block mb-1">Nota o preferencia del corte (Opcional)</label>
                 <textarea
                   value={appointmentNotes}
                   onChange={(e) => setAppointmentNotes(e.target.value)}
                   rows={2}
                   placeholder="Ej. Quiere desvanecido bajo con navaja..."
-                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/15 text-white"
+                  className="w-full p-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] placeholder-[#8E887E] focus:outline-none focus:border-[#161514]"
                 />
               </div>
             </div>
@@ -599,49 +599,49 @@ export const BarberBookAppointmentModal: React.FC<BarberBookAppointmentModalProp
           {/* STEP 4: SUMMARY & CONFIRM */}
           {currentStep === 4 && (
             <div className="space-y-4 animate-in fade-in">
-              <div className="p-4 rounded-3xl bg-gradient-to-b from-[#181D26] to-[#12151B] border border-[#D4AF37]/30 shadow-xl space-y-3">
-                <div className="flex items-center justify-between pb-3 border-b border-white/10">
+              <div className="p-4 rounded-3xl bg-white border border-[#9A6B3B]/45 shadow-xs space-y-3">
+                <div className="flex items-center justify-between pb-3 border-b border-[#E6E1D6]">
                   <div className="flex items-center gap-2.5">
-                    <Scissors className="w-5 h-5 text-[#D4AF37]" />
+                    <Scissors className="w-5 h-5 text-[#9A6B3B]" />
                     <div>
-                      <h4 className="font-bold text-white text-sm">
+                      <h4 className="font-bold text-[#161514] text-sm">
                         {activeSelectedService?.name || 'Servicio'}
                       </h4>
-                      <p className="text-[11px] text-slate-400">
+                      <p className="text-[11px] text-[#5C5852] font-mono tabular-nums">
                         {activeSelectedService?.durationMinutes} min de duración
                       </p>
                     </div>
                   </div>
-                  <span className="font-black text-[#D4AF37] text-base">
+                  <span className="font-mono tabular-nums font-bold text-[#9A6B3B] text-base">
                     {formatCurrency(activeSelectedService?.price || 0)}
                   </span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 text-xs">
                   <div>
-                    <span className="text-slate-400 block text-[10px] uppercase font-bold">Fecha</span>
-                    <span className="text-white font-bold mt-0.5 block">
+                    <span className="text-[#5C5852] block text-[10px] uppercase font-semibold tracking-wider">Fecha</span>
+                    <span className="text-[#161514] font-bold mt-0.5 block">
                       {formatDateSpanish(selectedDate)}
                     </span>
                   </div>
 
                   <div>
-                    <span className="text-slate-400 block text-[10px] uppercase font-bold">Horario</span>
-                    <span className="text-white font-bold mt-0.5 block">
+                    <span className="text-[#5C5852] block text-[10px] uppercase font-semibold tracking-wider">Horario</span>
+                    <span className="text-[#161514] font-mono tabular-nums font-bold mt-0.5 block">
                       {selectedTimeSlot ? formatTime12h(selectedTimeSlot) : 'No seleccionado'}
                     </span>
                   </div>
 
                   <div>
-                    <span className="text-slate-400 block text-[10px] uppercase font-bold">Barbero</span>
-                    <span className="text-[#D4AF37] font-bold mt-0.5 block">
+                    <span className="text-[#5C5852] block text-[10px] uppercase font-semibold tracking-wider">Barbero</span>
+                    <span className="text-[#9A6B3B] font-bold mt-0.5 block">
                       {activeBarber.displayName} (Tú)
                     </span>
                   </div>
 
                   <div>
-                    <span className="text-slate-400 block text-[10px] uppercase font-bold">Cliente</span>
-                    <span className="text-white font-bold mt-0.5 block">
+                    <span className="text-[#5C5852] block text-[10px] uppercase font-semibold tracking-wider">Cliente</span>
+                    <span className="text-[#161514] font-bold mt-0.5 block">
                       {clientType === 'registered'
                         ? selectedClient?.name || 'No seleccionado'
                         : walkinName || 'Cliente en Tienda'}
@@ -650,8 +650,8 @@ export const BarberBookAppointmentModal: React.FC<BarberBookAppointmentModalProp
                 </div>
 
                 {appointmentNotes && (
-                  <p className="text-[11px] text-slate-400 bg-white/5 p-2 rounded-xl">
-                    <strong>Nota:</strong> {appointmentNotes}
+                  <p className="text-[11px] text-[#5C5852] bg-[#FAF9F6] border border-[#E6E1D6] p-2 rounded-xl">
+                    <strong className="text-[#161514]">Nota:</strong> {appointmentNotes}
                   </p>
                 )}
               </div>
@@ -660,12 +660,12 @@ export const BarberBookAppointmentModal: React.FC<BarberBookAppointmentModalProp
         </div>
 
         {/* Modal Footer Navigation */}
-        <div className="p-3.5 sm:p-4 border-t border-white/10 bg-[#0D0F12] flex items-center justify-between gap-2">
+        <div className="p-3.5 sm:p-4 border-t border-[#E6E1D6] bg-white flex items-center justify-between gap-2">
           {currentStep > 1 ? (
             <button
               type="button"
               onClick={() => setCurrentStep((prev) => (prev - 1) as any)}
-              className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold"
+              className="px-4 py-2 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] border border-[#D2CBBF] text-[#161514] text-xs font-semibold transition-colors"
             >
               Atrás
             </button>
@@ -673,7 +673,7 @@ export const BarberBookAppointmentModal: React.FC<BarberBookAppointmentModalProp
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold"
+              className="px-4 py-2 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] border border-[#D2CBBF] text-[#161514] text-xs font-semibold transition-colors"
             >
               Cancelar
             </button>
@@ -703,7 +703,7 @@ export const BarberBookAppointmentModal: React.FC<BarberBookAppointmentModalProp
                 }
                 setCurrentStep((prev) => (prev + 1) as any);
               }}
-              className="px-5 py-2 rounded-xl bg-[#D4AF37] hover:bg-[#E5B869] text-slate-950 font-bold text-xs shadow-md transition-all flex items-center gap-1"
+              className="px-5 py-2 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] font-semibold text-xs shadow-xs transition-all flex items-center gap-1"
             >
               <span>Siguiente</span>
               <ChevronRight className="w-4 h-4" />
@@ -713,9 +713,9 @@ export const BarberBookAppointmentModal: React.FC<BarberBookAppointmentModalProp
               type="button"
               onClick={handleConfirmBooking}
               disabled={isSubmitting || !selectedTimeSlot}
-              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-bold text-xs shadow-lg hover:scale-105 active:scale-95 transition-all disabled:opacity-50 flex items-center gap-1.5"
+              className="px-6 py-2.5 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] font-semibold text-xs shadow-sm active:scale-95 transition-all disabled:opacity-50 flex items-center gap-1.5"
             >
-              <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
+              <CheckCircle2 className="w-4 h-4 text-[#C69765]" />
               <span>{isSubmitting ? 'Agendando...' : 'Confirmar y Agendar'}</span>
             </button>
           )}

@@ -4,10 +4,8 @@ import {
   Star,
   Scissors,
   Heart,
-  ChevronRight,
   Sparkles,
   Search,
-  Filter,
 } from 'lucide-react';
 import { Barber } from '../../types';
 import { useBarbershop } from '../../contexts/BarbershopContext';
@@ -41,47 +39,46 @@ export const BarbersView: React.FC<BarbersViewProps> = ({
   });
 
   return (
-    <div className="space-y-5 pb-24">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 pb-24">
+      <div className="flex items-end justify-between border-b border-[#E6E1D6] pb-3">
         <div>
-          <h1 className="text-2xl font-black text-white tracking-tight">Nuestros Barberos</h1>
-          <p className="text-xs text-slate-400">
+          <h1 className="font-display text-3xl font-bold text-[#161514] tracking-wide uppercase">
+            Nuestros Barberos
+          </h1>
+          <p className="text-xs text-[#5C5852] mt-0.5">
             Conoce a los maestros del estilo en MONARCA BARBER
           </p>
         </div>
-        <div className="p-2.5 rounded-2xl bg-[#D4AF37]/10 text-[#D4AF37]">
+        <div className="p-2.5 rounded-xl bg-[#F2EFE9] border border-[#E6E1D6] text-[#9A6B3B]">
           <Users className="w-5 h-5" />
         </div>
       </div>
 
-      {/* Search & Favorites Filter */}
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[#5C5852] absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Buscar por nombre o especialidad (Fade, Barba...)"
-            className="w-full pl-9 pr-4 py-2.5 rounded-2xl bg-[#14171E] border border-white/10 text-white text-xs focus:outline-none focus:border-[#D4AF37] transition-colors"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-[#E6E1D6] text-[#161514] placeholder-[#5C5852]/70 text-xs focus:outline-none focus:border-[#9A6B3B] transition-colors"
           />
         </div>
 
         <button
           onClick={() => setOnlyFavorites(!onlyFavorites)}
-          className={`p-2.5 rounded-2xl border transition-all ${
+          className={`p-2.5 rounded-xl border transition-all ${
             onlyFavorites
-              ? 'bg-rose-500/20 border-rose-500/40 text-rose-400'
-              : 'bg-[#14171E] border-white/10 text-slate-400 hover:text-white'
+              ? 'bg-rose-50 border-rose-300 text-rose-700'
+              : 'bg-white border-[#E6E1D6] text-[#5C5852] hover:text-[#161514]'
           }`}
           title="Solo favoritos"
         >
-          <Heart className={`w-4 h-4 ${onlyFavorites ? 'fill-rose-400' : ''}`} />
+          <Heart className={`w-4 h-4 ${onlyFavorites ? 'fill-rose-600' : ''}`} />
         </button>
       </div>
 
-      {/* Barbers Cards Grid */}
       <div className="grid gap-4 sm:grid-cols-2">
         {filteredBarbers.map((barber) => {
           const isFav = userProfile?.favoriteBarberIds?.includes(barber.id);
@@ -89,12 +86,12 @@ export const BarbersView: React.FC<BarbersViewProps> = ({
           return (
             <div
               key={barber.id}
-              className="rounded-3xl bg-[#14171E] border border-white/10 p-4 space-y-4 hover:border-[#D4AF37]/40 transition-all shadow-xl"
+              className="rounded-2xl bg-white border border-[#E6E1D6] p-4 sm:p-5 space-y-4 hover:border-[#9A6B3B]/60 transition-all"
             >
               <div className="flex items-start gap-3.5">
                 <div
                   onClick={() => onOpenBarberProfile(barber)}
-                  className="relative w-20 h-20 rounded-2xl overflow-hidden bg-slate-800 shrink-0 cursor-pointer group"
+                  className="relative w-20 h-20 rounded-xl overflow-hidden bg-[#F2EFE9] border border-[#E6E1D6] shrink-0 cursor-pointer group"
                 >
                   <img
                     src={barber.photoUrl}
@@ -103,8 +100,8 @@ export const BarbersView: React.FC<BarbersViewProps> = ({
                     referrerPolicy="no-referrer"
                   />
                   {barber.featured && (
-                    <span className="absolute bottom-1 right-1 p-1 rounded-full bg-[#D4AF37] text-slate-950">
-                      <Sparkles className="w-2.5 h-2.5 fill-slate-950" />
+                    <span className="absolute bottom-1 right-1 p-1 rounded-full bg-[#161514] text-[#FAF9F6]">
+                      <Sparkles className="w-2.5 h-2.5 text-[#C69765]" />
                     </span>
                   )}
                 </div>
@@ -113,60 +110,56 @@ export const BarbersView: React.FC<BarbersViewProps> = ({
                   <div className="flex items-start justify-between gap-1">
                     <h3
                       onClick={() => onOpenBarberProfile(barber)}
-                      className="font-bold text-white text-base truncate cursor-pointer hover:text-[#D4AF37] transition-colors"
+                      className="font-display text-xl font-bold text-[#161514] uppercase tracking-wide truncate cursor-pointer hover:text-[#9A6B3B] transition-colors"
                     >
                       {barber.displayName}
                     </h3>
                     <button
                       onClick={() => toggleFavorite(barber.id)}
                       className={`p-1.5 rounded-full transition-colors ${
-                        isFav ? 'text-rose-400' : 'text-slate-500 hover:text-rose-400'
+                        isFav ? 'text-rose-600' : 'text-[#5C5852] hover:text-rose-600'
                       }`}
                     >
-                      <Heart className={`w-4 h-4 ${isFav ? 'fill-rose-400' : ''}`} />
+                      <Heart className={`w-4 h-4 ${isFav ? 'fill-rose-600' : ''}`} />
                     </button>
                   </div>
 
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <div className="flex items-center gap-0.5 text-amber-400 text-xs font-bold">
-                      <Star className="w-3 h-3 fill-amber-400" />
+                  <div className="flex items-center gap-2 mt-0.5 tabular-nums">
+                    <div className="flex items-center gap-1 text-[#161514] text-xs font-semibold">
+                      <Star className="w-3.5 h-3.5 text-[#9A6B3B] fill-[#9A6B3B]" />
                       <span>{barber.rating.toFixed(2)}</span>
-                      <span className="text-slate-500 font-normal">({barber.reviewCount})</span>
+                      <span className="text-[#5C5852] font-normal">({barber.reviewCount})</span>
                     </div>
-                    <span className="text-[11px] text-slate-400">• {barber.experienceYears || 5} años</span>
+                    <span className="text-[11px] text-[#5C5852]">· {barber.experienceYears || 5} años</span>
                   </div>
 
-                  <p className="text-xs text-slate-300 line-clamp-2 mt-1.5 leading-relaxed">
+                  <p className="text-xs text-[#5C5852] line-clamp-2 mt-1.5 leading-relaxed">
                     {barber.bio}
                   </p>
                 </div>
               </div>
 
-              {/* Specialties */}
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[#9A6B3B] font-medium">
                 {barber.specialties.map((spec, i) => (
-                  <span
-                    key={i}
-                    className="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-white/5 text-[#D4AF37] border border-[#D4AF37]/20"
-                  >
-                    {spec}
-                  </span>
+                  <React.Fragment key={i}>
+                    {i > 0 && <span className="text-[#D2CBBF]" aria-hidden="true">/</span>}
+                    <span>{spec}</span>
+                  </React.Fragment>
                 ))}
               </div>
 
-              {/* Action Buttons */}
-              <div className="pt-2 border-t border-white/5 flex items-center gap-2">
+              <div className="pt-3 border-t border-[#E6E1D6] flex items-center gap-2.5">
                 <button
                   onClick={() => onOpenBarberProfile(barber)}
-                  className="flex-1 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold transition-colors"
+                  className="flex-1 py-2.5 rounded-xl bg-[#F2EFE9] hover:bg-[#E6E1D6] text-[#161514] text-xs font-semibold transition-colors whitespace-nowrap"
                 >
                   Ver Perfil & Galería
                 </button>
                 <button
                   onClick={() => onBookWithBarber(barber.id)}
-                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 text-xs font-bold shadow-lg shadow-[#D4AF37]/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-1"
+                  className="flex-1 py-2.5 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] text-xs font-semibold active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 whitespace-nowrap"
                 >
-                  <Scissors className="w-3.5 h-3.5 stroke-[2.5]" />
+                  <Scissors className="w-3.5 h-3.5 text-[#C69765] stroke-[2.2]" />
                   <span>Reservar Cita</span>
                 </button>
               </div>

@@ -207,7 +207,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
         particleCount: 80,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ['#D4AF37', '#E5B869', '#FFFFFF', '#996515'],
+        colors: ['#9A6B3B', '#C69765', '#161514', '#FAF9F6'],
       });
     } catch {
       // ignore
@@ -359,9 +359,9 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
       {/* Step Progress Header (1 to 5) */}
       {currentStep < 6 && (
         <div className="mb-6 px-1">
-          <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+          <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-[#5C5852] mb-2 tabular-nums">
             <span>Paso {currentStep} de 5</span>
-            <span className="text-[#D4AF37]">
+            <span className="text-[#9A6B3B]">
               {currentStep === 1 && '1. Servicio'}
               {currentStep === 2 && '2. Barbero'}
               {currentStep === 3 && '3. Fecha'}
@@ -370,9 +370,9 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
             </span>
           </div>
 
-          <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden flex">
+          <div className="w-full h-1.5 bg-[#E6E1D6] rounded-full overflow-hidden flex">
             <motion.div
-              className="h-full bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] rounded-full"
+              className="h-full bg-gradient-to-r from-[#161514] to-[#9A6B3B] rounded-full"
               initial={{ width: '20%' }}
               animate={{ width: `${(currentStep / 5) * 100}%` }}
               transition={{ duration: 0.3 }}
@@ -381,35 +381,38 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
         </div>
       )}
 
-      {/* STEP 1: SELECT SERVICE (COMPACT HIGH-DENSITY VIEW) */}
+      {/* STEP 1: SELECT SERVICE */}
       {currentStep === 1 && (
         <motion.div
-          initial={{ opacity: 0, x: 20 }}
+          initial={{ opacity: 0, x: 16 }}
           animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          className="space-y-3.5"
+          exit={{ opacity: 0, x: -16 }}
+          className="space-y-4"
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-end justify-between border-b border-[#E6E1D6] pb-3">
             <div>
-              <h2 className="text-xl font-bold text-white tracking-tight">Elige tu Servicio</h2>
-              <p className="text-xs text-slate-400">Selecciona el tratamiento o corte para tu cita</p>
+              <h2 className="font-display text-3xl font-bold text-[#161514] tracking-wide uppercase">
+                Elige tu Servicio
+              </h2>
+              <p className="text-xs text-[#5C5852] mt-0.5">
+                Selecciona el tratamiento o corte para tu cita
+              </p>
             </div>
-            <div className="p-2 rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]">
+            <div className="p-2.5 rounded-xl bg-[#F2EFE9] border border-[#E6E1D6] text-[#9A6B3B]">
               <Scissors className="w-5 h-5" />
             </div>
           </div>
 
-          {/* Quick Search & Filters for high service volume */}
           {activeServices.length > 4 && (
-            <div className="space-y-2 pt-1">
+            <div className="space-y-2.5 pt-1">
               <div className="relative">
-                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Search className="w-3.5 h-3.5 text-[#5C5852] absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   value={serviceSearchQuery}
                   onChange={(e) => setServiceSearchQuery(e.target.value)}
                   placeholder="Buscar servicio por nombre..."
-                  className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-[#14171E] border border-white/10 text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-[#D4AF37]"
+                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-white border border-[#E6E1D6] text-[#161514] text-xs placeholder:text-[#5C5852]/70 focus:outline-none focus:border-[#9A6B3B]"
                 />
               </div>
 
@@ -420,10 +423,10 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
                       key={cat}
                       type="button"
                       onClick={() => setServiceCategoryFilter(cat)}
-                      className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-all ${
+                      className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-all ${
                         serviceCategoryFilter === cat
-                          ? 'bg-[#D4AF37] text-slate-950 shadow-sm'
-                          : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10'
+                          ? 'bg-[#161514] text-[#FAF9F6]'
+                          : 'bg-[#F2EFE9] text-[#5C5852] hover:text-[#161514] hover:bg-[#E6E1D6]'
                       }`}
                     >
                       {cat === 'all' ? 'Todos los Servicios' : cat}
@@ -434,24 +437,22 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
             </div>
           )}
 
-          {/* Compact Service Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5 pt-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
             {filteredServices.map((service) => {
               const isSelected = selectedServiceId === service.id;
               return (
                 <div
                   key={service.id}
                   onClick={() => setSelectedServiceId(service.id)}
-                  className={`group relative overflow-hidden rounded-2xl p-2.5 sm:p-3 transition-all cursor-pointer border flex items-center justify-between gap-2.5 ${
+                  className={`group relative overflow-hidden rounded-2xl p-3 transition-all cursor-pointer border flex items-center justify-between gap-2.5 ${
                     isSelected
-                      ? 'bg-[#181D26] border-[#D4AF37] shadow-md shadow-[#D4AF37]/15 ring-1 ring-[#D4AF37]'
-                      : 'bg-[#12151B]/90 hover:bg-[#161A22] border-white/10 hover:border-white/20'
+                      ? 'bg-[#F7F5F0] border-[#161514] ring-1 ring-[#161514]'
+                      : 'bg-white hover:bg-[#FAF9F6] border-[#E6E1D6] hover:border-[#9A6B3B]/60'
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                    {/* Service Thumbnail / Icon */}
                     {service.imageUrl ? (
-                      <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl overflow-hidden bg-slate-900 border border-white/10 shrink-0">
+                      <div className="w-12 h-12 rounded-xl overflow-hidden bg-[#F2EFE9] border border-[#E6E1D6] shrink-0">
                         <img
                           src={service.imageUrl}
                           alt={service.name}
@@ -460,51 +461,50 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
                         />
                       </div>
                     ) : (
-                      <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-slate-800/80 border border-white/10 flex items-center justify-center text-[#D4AF37] shrink-0">
+                      <div className="w-12 h-12 rounded-xl bg-[#F2EFE9] border border-[#E6E1D6] flex items-center justify-center text-[#9A6B3B] shrink-0">
                         <Scissors className="w-5 h-5" />
                       </div>
                     )}
 
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5 mb-0.5">
-                        <h3 className="font-bold text-white text-xs sm:text-sm tracking-tight truncate">
+                        <h3 className="font-display text-base font-bold text-[#161514] uppercase tracking-wide truncate">
                           {service.name}
                         </h3>
                         {service.isPopular && (
-                          <span className="text-[9px] uppercase font-extrabold tracking-wider px-1.5 py-0.2 rounded-md bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30 shrink-0">
-                            VIP
+                          <span className="text-[10px] uppercase font-bold tracking-wider text-[#9A6B3B] shrink-0">
+                            · VIP
                           </span>
                         )}
                         {service.barberId && (
-                          <span className="text-[9px] font-semibold px-1.5 py-0.2 rounded-md bg-blue-500/20 text-blue-300 shrink-0">
-                            Exclusivo
+                          <span className="text-[10px] font-semibold text-sky-800 shrink-0">
+                            · Exclusivo
                           </span>
                         )}
                       </div>
 
-                      <p className="text-[11px] text-slate-400 truncate leading-tight mb-1">
+                      <p className="text-[11px] text-[#5C5852] truncate leading-tight mb-1">
                         {service.description || 'Tratamiento profesional exclusivo'}
                       </p>
 
-                      <div className="flex items-center gap-2 text-[11px]">
-                        <span className="text-[#D4AF37] font-bold text-xs">
+                      <div className="flex items-center gap-2 text-[11px] tabular-nums">
+                        <span className="font-mono text-[#161514] font-bold text-xs">
                           {formatCurrency(service.price)}
                         </span>
-                        <span className="text-slate-500">•</span>
-                        <span className="flex items-center gap-1 text-slate-400">
-                          <Clock className="w-3 h-3 text-slate-400" />
+                        <span className="text-[#D2CBBF]">·</span>
+                        <span className="flex items-center gap-1 text-[#5C5852]">
+                          <Clock className="w-3 h-3 text-[#9A6B3B]" />
                           {service.durationMinutes} min
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Radio Indicator */}
                   <div
                     className={`w-5 h-5 rounded-full flex items-center justify-center border transition-all shrink-0 ${
                       isSelected
-                        ? 'bg-[#D4AF37] border-[#D4AF37] text-slate-950'
-                        : 'border-white/20 group-hover:border-white/40'
+                        ? 'bg-[#161514] border-[#161514] text-[#FAF9F6]'
+                        : 'border-[#D2CBBF] group-hover:border-[#9A6B3B]'
                     }`}
                   >
                     {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
@@ -515,7 +515,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
           </div>
 
           {filteredServices.length === 0 && (
-            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 text-center text-slate-400 text-xs">
+            <div className="p-6 rounded-2xl bg-white border border-[#E6E1D6] text-center text-[#5C5852] text-xs">
               No se encontraron servicios que coincidan con la búsqueda.
             </div>
           )}
@@ -524,10 +524,10 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
             <button
               onClick={() => setCurrentStep(2)}
               disabled={!selectedServiceId}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-bold text-sm shadow-xl shadow-[#D4AF37]/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] font-semibold text-sm active:scale-[0.99] transition-all disabled:opacity-50"
             >
               <span>Continuar con Barbero</span>
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-4 h-4 text-[#C69765]" />
             </button>
           </div>
         </motion.div>
@@ -536,53 +536,57 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
       {/* STEP 2: SELECT BARBER */}
       {currentStep === 2 && (
         <motion.div
-          initial={{ opacity: 0, x: 20 }}
+          initial={{ opacity: 0, x: 16 }}
           animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
+          exit={{ opacity: 0, x: -16 }}
           className="space-y-4"
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-end justify-between border-b border-[#E6E1D6] pb-3">
             <div>
-              <h2 className="text-xl font-bold text-white tracking-tight">Selecciona tu Barbero</h2>
-              <p className="text-xs text-slate-400">
+              <h2 className="font-display text-3xl font-bold text-[#161514] tracking-wide uppercase">
+                Selecciona tu Barbero
+              </h2>
+              <p className="text-xs text-[#5C5852] mt-0.5">
                 Elige a tu profesional favorito o selecciona el primer barbero disponible
               </p>
             </div>
-            <div className="p-2 rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]">
+            <div className="p-2.5 rounded-xl bg-[#F2EFE9] border border-[#E6E1D6] text-[#9A6B3B]">
               <User className="w-5 h-5" />
             </div>
           </div>
 
-          {/* Any Available Barber Option */}
           <div
             onClick={() => setSelectedBarberId('any')}
             className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all ${
               selectedBarberId === 'any'
-                ? 'bg-[#181D26] border-[#D4AF37] shadow-lg shadow-[#D4AF37]/10 scale-[1.01]'
-                : 'bg-[#12151B]/80 hover:bg-[#161A22] border-white/10'
+                ? 'bg-[#F7F5F0] border-[#161514] ring-1 ring-[#161514]'
+                : 'bg-white hover:bg-[#FAF9F6] border-[#E6E1D6]'
             }`}
           >
             <div className="flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#D4AF37]/30 to-[#996515]/20 border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37]">
+              <div className="w-12 h-12 rounded-xl bg-[#F2EFE9] border border-[#9A6B3B]/40 flex items-center justify-center text-[#9A6B3B]">
                 <Sparkles className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-bold text-white text-sm">Cualquier Barbero Disponible</h3>
-                <p className="text-xs text-slate-400">Te asignaremos el barbero con mayor disponibilidad rápida</p>
+                <h3 className="font-display text-lg font-bold text-[#161514] uppercase tracking-wide">
+                  Cualquier Barbero Disponible
+                </h3>
+                <p className="text-xs text-[#5C5852]">
+                  Te asignaremos el barbero con mayor disponibilidad rápida
+                </p>
               </div>
             </div>
             <div
               className={`w-6 h-6 rounded-full flex items-center justify-center border transition-all ${
                 selectedBarberId === 'any'
-                  ? 'bg-[#D4AF37] border-[#D4AF37] text-slate-950'
-                  : 'border-white/20'
+                  ? 'bg-[#161514] border-[#161514] text-[#FAF9F6]'
+                  : 'border-[#D2CBBF]'
               }`}
             >
               {selectedBarberId === 'any' && <Check className="w-3.5 h-3.5 stroke-[3]" />}
             </div>
           </div>
 
-          {/* Specific Barbers List */}
           <div className="grid gap-3 pt-1">
             {activeBarbers.map((barber) => {
               const isSelected = selectedBarberId === barber.id;
@@ -594,37 +598,37 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
                   onClick={() => setSelectedBarberId(barber.id)}
                   className={`flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition-all ${
                     isSelected
-                      ? 'bg-[#181D26] border-[#D4AF37] shadow-lg shadow-[#D4AF37]/10 scale-[1.01]'
-                      : 'bg-[#12151B]/80 hover:bg-[#161A22] border-white/10'
+                      ? 'bg-[#F7F5F0] border-[#161514] ring-1 ring-[#161514]'
+                      : 'bg-white hover:bg-[#FAF9F6] border-[#E6E1D6]'
                   }`}
                 >
                   <div className="flex items-center gap-3.5">
                     <img
                       src={barber.photoUrl}
                       alt={barber.displayName}
-                      className="w-13 h-13 rounded-2xl object-cover border border-white/15"
+                      className="w-13 h-13 rounded-xl object-cover border border-[#E6E1D6]"
                       referrerPolicy="no-referrer"
                     />
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <h3 className="font-bold text-white text-sm tracking-tight">
+                        <h3 className="font-display text-lg font-bold text-[#161514] uppercase tracking-wide">
                           {barber.displayName}
                         </h3>
                         {isFavorite && (
-                          <span className="text-[10px] bg-rose-500/20 text-rose-300 px-1.5 py-0.5 rounded-full border border-rose-500/30">
-                            ★ Favorito
+                          <span className="text-[10px] font-semibold text-rose-700">
+                            · ★ Favorito
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-[#D4AF37] font-medium truncate max-w-[200px]">
-                        {barber.specialties.slice(0, 2).join(' • ')}
+                      <p className="text-xs text-[#9A6B3B] font-semibold truncate max-w-[200px]">
+                        {barber.specialties.slice(0, 2).join(' · ')}
                       </p>
-                      <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-400">
-                        <span className="flex items-center gap-0.5 text-amber-400 font-semibold">
-                          <Star className="w-3 h-3 fill-amber-400" />
+                      <div className="flex items-center gap-2 mt-1 text-[11px] text-[#5C5852] tabular-nums">
+                        <span className="flex items-center gap-0.5 text-[#161514] font-semibold">
+                          <Star className="w-3 h-3 text-[#9A6B3B] fill-[#9A6B3B]" />
                           {barber.rating.toFixed(1)}
                         </span>
-                        <span>• {barber.experienceYears || 5} años exp.</span>
+                        <span>· {barber.experienceYears || 5} años exp.</span>
                       </div>
                     </div>
                   </div>
@@ -632,8 +636,8 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
                   <div
                     className={`w-6 h-6 rounded-full flex items-center justify-center border transition-all ${
                       isSelected
-                        ? 'bg-[#D4AF37] border-[#D4AF37] text-slate-950'
-                        : 'border-white/20'
+                        ? 'bg-[#161514] border-[#161514] text-[#FAF9F6]'
+                        : 'border-[#D2CBBF]'
                     }`}
                   >
                     {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
@@ -646,17 +650,17 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
           <div className="pt-4 flex items-center justify-between gap-3">
             <button
               onClick={() => setCurrentStep(1)}
-              className="px-4 py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+              className="px-4 py-3 rounded-xl bg-[#F2EFE9] hover:bg-[#E6E1D6] text-[#161514] text-xs font-semibold flex items-center gap-1.5 transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
               <span>Atrás</span>
             </button>
             <button
               onClick={() => setCurrentStep(3)}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-bold text-sm shadow-xl shadow-[#D4AF37]/20 hover:scale-[1.02] active:scale-95 transition-all"
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] font-semibold text-sm active:scale-[0.99] transition-all"
             >
               <span>Continuar con Fecha</span>
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-4 h-4 text-[#C69765]" />
             </button>
           </div>
         </motion.div>
@@ -665,24 +669,25 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
       {/* STEP 3: SELECT DATE */}
       {currentStep === 3 && (
         <motion.div
-          initial={{ opacity: 0, x: 20 }}
+          initial={{ opacity: 0, x: 16 }}
           animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
+          exit={{ opacity: 0, x: -16 }}
           className="space-y-4"
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-end justify-between border-b border-[#E6E1D6] pb-3">
             <div>
-              <h2 className="text-xl font-bold text-white tracking-tight">Selecciona la Fecha</h2>
-              <p className="text-xs text-slate-400">
+              <h2 className="font-display text-3xl font-bold text-[#161514] tracking-wide uppercase">
+                Selecciona la Fecha
+              </h2>
+              <p className="text-xs text-[#5C5852] mt-0.5 tabular-nums">
                 Reserva disponible con hasta {businessSettings.maxBookingAdvanceDays} días de anticipación
               </p>
             </div>
-            <div className="p-2 rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]">
+            <div className="p-2.5 rounded-xl bg-[#F2EFE9] border border-[#E6E1D6] text-[#9A6B3B]">
               <CalendarIcon className="w-5 h-5" />
             </div>
           </div>
 
-          {/* Horizontal Day Selector */}
           <div className="py-2 overflow-x-auto no-scrollbar -mx-2 px-2">
             <div className="flex items-center gap-2.5 min-w-max">
               {upcomingDays.map((day) => {
@@ -695,23 +700,23 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
                       setSelectedTimeSlot(null);
                       setSelectedUnavailableTime(null);
                     }}
-                    className={`flex flex-col items-center justify-center w-18 py-3.5 px-2 rounded-2xl border transition-all ${
+                    className={`flex flex-col items-center justify-center w-18 py-3.5 px-2 rounded-2xl border transition-all tabular-nums ${
                       isSelected
-                        ? 'bg-gradient-to-b from-[#1E232E] to-[#14171E] border-[#D4AF37] text-white shadow-xl shadow-[#D4AF37]/15 scale-105'
-                        : 'bg-[#12151B]/80 hover:bg-[#161A22] border-white/10 text-slate-400'
+                        ? 'bg-[#161514] border-[#161514] text-[#FAF9F6] shadow-md scale-[1.03]'
+                        : 'bg-white hover:bg-[#F7F5F0] border-[#E6E1D6] text-[#5C5852]'
                     }`}
                   >
                     <span className="text-[11px] font-semibold uppercase tracking-wider mb-1">
                       {day.dayName}
                     </span>
-                    <span className={`text-xl font-bold ${isSelected ? 'text-[#D4AF37]' : 'text-white'}`}>
+                    <span className={`font-display text-2xl font-bold ${isSelected ? 'text-[#C69765]' : 'text-[#161514]'}`}>
                       {day.dayNumber}
                     </span>
-                    <span className="text-[10px] mt-0.5 opacity-70">
+                    <span className="text-[10px] mt-0.5 opacity-80">
                       {day.monthName}
                     </span>
                     {day.isToday && (
-                      <span className="mt-1 text-[8px] font-bold px-1.5 py-0.2 rounded-full bg-[#D4AF37]/20 text-[#D4AF37]">
+                      <span className={`mt-1 text-[9px] font-bold uppercase tracking-wider ${isSelected ? 'text-[#C69765]' : 'text-[#9A6B3B]'}`}>
                         HOY
                       </span>
                     )}
@@ -721,17 +726,16 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
             </div>
           </div>
 
-          {/* Selected Date Summary Card */}
-          <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
+          <div className="p-4 rounded-2xl bg-white border border-[#E6E1D6] flex items-center justify-between">
             <div>
-              <p className="text-[11px] uppercase tracking-wider text-slate-400">Fecha elegida</p>
-              <h4 className="font-bold text-white text-base">
+              <p className="text-[11px] uppercase tracking-wider text-[#5C5852]">Fecha elegida</p>
+              <h4 className="font-display text-xl font-bold text-[#161514] uppercase tracking-wide">
                 {formatDateSpanish(selectedDate, true)}
               </h4>
             </div>
             <div className="text-right">
-              <p className="text-[11px] text-slate-400">Barbero</p>
-              <p className="text-xs font-semibold text-[#D4AF37]">
+              <p className="text-[11px] text-[#5C5852]">Barbero</p>
+              <p className="text-xs font-bold text-[#9A6B3B]">
                 {selectedBarber?.displayName || 'Cualquiera disponible'}
               </p>
             </div>
@@ -740,17 +744,17 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
           <div className="pt-4 flex items-center justify-between gap-3">
             <button
               onClick={() => setCurrentStep(2)}
-              className="px-4 py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+              className="px-4 py-3 rounded-xl bg-[#F2EFE9] hover:bg-[#E6E1D6] text-[#161514] text-xs font-semibold flex items-center gap-1.5 transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
               <span>Atrás</span>
             </button>
             <button
               onClick={() => setCurrentStep(4)}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-bold text-sm shadow-xl shadow-[#D4AF37]/20 hover:scale-[1.02] active:scale-95 transition-all"
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] font-semibold text-sm active:scale-[0.99] transition-all"
             >
               <span>Ver Horarios Disponibles</span>
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-4 h-4 text-[#C69765]" />
             </button>
           </div>
         </motion.div>
@@ -759,37 +763,42 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
       {/* STEP 4: SELECT TIME SLOT & ALTERNATIVES */}
       {currentStep === 4 && (
         <motion.div
-          initial={{ opacity: 0, x: 20 }}
+          initial={{ opacity: 0, x: 16 }}
           animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
+          exit={{ opacity: 0, x: -16 }}
           className="space-y-4"
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-end justify-between border-b border-[#E6E1D6] pb-3">
             <div>
-              <h2 className="text-xl font-bold text-white tracking-tight">Horarios Disponibles</h2>
-              <p className="text-xs text-slate-400">
-                {formatDateSpanish(selectedDate)} con {selectedBarber?.displayName}
+              <h2 className="font-display text-3xl font-bold text-[#161514] tracking-wide uppercase">
+                Horarios Disponibles
+              </h2>
+              <p className="text-xs text-[#5C5852] mt-0.5">
+                {formatDateSpanish(selectedDate)} · {selectedBarber?.displayName}
               </p>
             </div>
-            <div className="p-2 rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]">
+            <div className="p-2.5 rounded-xl bg-[#F2EFE9] border border-[#E6E1D6] text-[#9A6B3B]">
               <Clock className="w-5 h-5" />
             </div>
           </div>
 
-          {/* Time Slots Grid */}
           {timeSlots.length === 0 || availableSlotsCount === 0 ? (
-            <div className="p-6 rounded-3xl bg-[#14171E] border border-white/10 text-center space-y-3">
-              <AlertTriangle className="w-8 h-8 text-amber-400 mx-auto" />
-              <h3 className="font-bold text-white text-base">Sin disponibilidad con {selectedBarber?.displayName || 'este barbero'}</h3>
-              <p className="text-xs text-slate-400 max-w-xs mx-auto">
+            <div className="p-6 rounded-2xl bg-white border border-[#E6E1D6] text-center space-y-3">
+              <AlertTriangle className="w-8 h-8 text-[#9A6B3B] mx-auto" />
+              <h3 className="font-display text-xl font-bold text-[#161514] uppercase tracking-wide">
+                Sin disponibilidad con {selectedBarber?.displayName || 'este barbero'}
+              </h3>
+              <p className="text-xs text-[#5C5852] max-w-xs mx-auto">
                 No hay turnos libres para la fecha seleccionada.
               </p>
             </div>
           ) : (
             <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs text-slate-400 px-1">
+              <div className="flex items-center justify-between text-xs text-[#5C5852] px-1 tabular-nums">
                 <span>{availableSlotsCount} turnos disponibles</span>
-                <span className="text-[#D4AF37]">Duración: {selectedService.durationMinutes} min</span>
+                <span className="font-semibold text-[#9A6B3B]">
+                  Duración: {selectedService.durationMinutes} min
+                </span>
               </div>
 
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5 pt-1">
@@ -806,17 +815,17 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
                           setSelectedUnavailableTime(slot.startTime);
                           setSelectedTimeSlot(null);
                         }}
-                        className={`p-3 rounded-2xl border text-center transition-all cursor-pointer ${
+                        className={`p-3 rounded-xl border text-center transition-all cursor-pointer tabular-nums ${
                           isTargetedUnavailable
-                            ? 'bg-amber-500/15 border-amber-400/70 shadow-lg ring-1 ring-amber-400/40 scale-[1.02]'
-                            : 'bg-white/[0.02] hover:bg-white/[0.06] border-white/5 opacity-50 hover:opacity-85'
+                            ? 'bg-amber-50 border-[#9A6B3B] ring-1 ring-[#9A6B3B] scale-[1.02]'
+                            : 'bg-[#F2EFE9]/60 hover:bg-[#F2EFE9] border-[#E6E1D6] opacity-65 hover:opacity-100'
                         }`}
                         title={slot.conflictReason || 'Turno ocupado. Clic para buscar otros barberos disponibles a esta hora'}
                       >
-                        <span className="text-xs font-semibold text-slate-400 line-through block">
+                        <span className="font-mono text-xs font-semibold text-[#5C5852] line-through block">
                           {formatTime12h(slot.startTime)}
                         </span>
-                        <span className={`text-[9px] truncate block mt-0.5 font-medium ${isTargetedUnavailable ? 'text-[#D4AF37]' : 'text-slate-500'}`}>
+                        <span className={`text-[10px] truncate block mt-0.5 font-medium ${isTargetedUnavailable ? 'text-[#9A6B3B]' : 'text-[#5C5852]'}`}>
                           {isTargetedUnavailable ? 'Buscando...' : 'Ocupado'}
                         </span>
                       </button>
@@ -830,16 +839,16 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
                         setSelectedTimeSlot(slot);
                         setSelectedUnavailableTime(null);
                       }}
-                      className={`p-3 rounded-2xl border text-center transition-all focus:outline-none ${
+                      className={`p-3 rounded-xl border text-center transition-all focus:outline-none tabular-nums ${
                         isSelected
-                          ? 'bg-[#D4AF37] border-[#D4AF37] text-slate-950 font-bold shadow-lg shadow-[#D4AF37]/25 scale-105'
-                          : 'bg-[#14171E] hover:bg-[#1B202B] border-white/10 text-slate-200 hover:border-white/25'
+                          ? 'bg-[#161514] border-[#161514] text-[#FAF9F6] font-bold shadow-md scale-[1.02]'
+                          : 'bg-white hover:bg-[#F7F5F0] border-[#E6E1D6] text-[#161514] hover:border-[#9A6B3B]'
                       }`}
                     >
-                      <span className="text-xs font-bold block">
+                      <span className="font-mono text-xs font-bold block">
                         {formatTime12h(slot.startTime)}
                       </span>
-                      <span className={`text-[10px] block mt-0.5 ${isSelected ? 'text-slate-900 font-medium' : 'text-slate-400'}`}>
+                      <span className={`text-[10px] block mt-0.5 ${isSelected ? 'text-[#C69765] font-medium' : 'text-[#5C5852]'}`}>
                         hasta {formatTime12h(slot.endTime)}
                       </span>
                     </button>
@@ -849,19 +858,18 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
             </div>
           )}
 
-          {/* ALTERNATIVE BARBERS - SHOWN ONLY IF SELECTED BARBER HAS ZERO SLOTS OR USER CLICKED AN OCCUPIED SLOT */}
           {(availableSlotsCount === 0 || !!selectedUnavailableTime) && alternativeSuggestions.length > 0 && (
-            <div className="mt-6 pt-4 border-t border-white/10 space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-200">
+            <div className="mt-6 pt-4 border-t border-[#E6E1D6] space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-200">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-[#D4AF37] shrink-0" />
+                  <Sparkles className="w-4 h-4 text-[#9A6B3B] shrink-0" />
                   <div>
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-200">
+                    <h4 className="font-display text-base font-bold uppercase tracking-wide text-[#161514]">
                       {selectedUnavailableTime
                         ? `Barberos disponibles a las ${formatTime12h(selectedUnavailableTime)}`
                         : 'Otros Barberos Disponibles para esta Fecha'}
                     </h4>
-                    <p className="text-[11px] text-slate-400">
+                    <p className="text-[11px] text-[#5C5852]">
                       {selectedUnavailableTime
                         ? `${selectedBarber?.displayName || 'El barbero'} no tiene disponible a esa hora, pero estos profesionales sí:`
                         : `${selectedBarber?.displayName || 'El barbero'} no tiene turnos libres hoy. Puedes agendar con:`}
@@ -872,7 +880,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
                   <button
                     type="button"
                     onClick={() => setSelectedUnavailableTime(null)}
-                    className="text-[11px] text-slate-400 hover:text-white px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 transition-colors shrink-0 ml-2"
+                    className="text-[11px] text-[#5C5852] hover:text-[#161514] px-2.5 py-1 rounded-lg bg-[#F2EFE9] hover:bg-[#E6E1D6] transition-colors shrink-0 ml-2"
                   >
                     Ocultar
                   </button>
@@ -883,25 +891,27 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
                 {alternativeSuggestions.slice(0, 3).map((alt) => (
                   <div
                     key={alt.barber.id}
-                    className="flex items-center justify-between p-3 rounded-2xl bg-gradient-to-r from-[#161B24] to-[#12151B] border border-white/10 hover:border-[#D4AF37]/40 transition-all"
+                    className="flex items-center justify-between p-3 rounded-2xl bg-white border border-[#E6E1D6] hover:border-[#9A6B3B]/60 transition-all"
                   >
                     <div className="flex items-center gap-3">
                       <img
                         src={alt.barber.photoUrl}
                         alt={alt.barber.displayName}
-                        className="w-10 h-10 rounded-xl object-cover border border-white/15"
+                        className="w-10 h-10 rounded-xl object-cover border border-[#E6E1D6]"
                         referrerPolicy="no-referrer"
                       />
                       <div>
                         <div className="flex items-center gap-1.5">
-                          <span className="font-bold text-white text-xs">{alt.barber.displayName}</span>
+                          <span className="font-display text-base font-bold uppercase text-[#161514]">
+                            {alt.barber.displayName}
+                          </span>
                           {alt.isFavorite && (
-                            <span className="text-[9px] bg-rose-500/20 text-rose-300 px-1.5 py-0.2 rounded-full">
-                              Favorito
+                            <span className="text-[10px] font-semibold text-rose-700">
+                              · Favorito
                             </span>
                           )}
                         </div>
-                        <p className="text-[11px] text-[#D4AF37] font-semibold">
+                        <p className="text-[11px] text-[#9A6B3B] font-semibold tabular-nums">
                           Disponible a las {formatTime12h(alt.availableSlot.startTime)}
                         </p>
                       </div>
@@ -914,7 +924,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
                         setSelectedUnavailableTime(null);
                         setCurrentStep(5);
                       }}
-                      className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-[#D4AF37] hover:text-slate-950 text-xs font-bold text-slate-200 transition-all flex items-center gap-1"
+                      className="px-3.5 py-2 rounded-xl bg-[#161514] hover:bg-[#9A6B3B] text-xs font-semibold text-[#FAF9F6] transition-colors flex items-center gap-1"
                     >
                       <span>Agendar</span>
                       <ArrowRight className="w-3 h-3" />
@@ -928,7 +938,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
           <div className="pt-4 flex items-center justify-between gap-3">
             <button
               onClick={() => setCurrentStep(3)}
-              className="px-4 py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+              className="px-4 py-3 rounded-xl bg-[#F2EFE9] hover:bg-[#E6E1D6] text-[#161514] text-xs font-semibold flex items-center gap-1.5 transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
               <span>Atrás</span>
@@ -936,10 +946,10 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
             <button
               onClick={() => setCurrentStep(5)}
               disabled={!selectedTimeSlot}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-bold text-sm shadow-xl shadow-[#D4AF37]/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] font-semibold text-sm active:scale-[0.99] transition-all disabled:opacity-50"
             >
               <span>Revisar Cita</span>
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-4 h-4 text-[#C69765]" />
             </button>
           </div>
         </motion.div>
@@ -948,98 +958,116 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
       {/* STEP 5: SUMMARY & CONFIRMATION */}
       {currentStep === 5 && selectedTimeSlot && (
         <motion.div
-          initial={{ opacity: 0, x: 20 }}
+          initial={{ opacity: 0, x: 16 }}
           animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
+          exit={{ opacity: 0, x: -16 }}
           className="space-y-4"
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-end justify-between border-b border-[#E6E1D6] pb-3">
             <div>
-              <h2 className="text-xl font-bold text-white tracking-tight">Confirmar Reserva</h2>
-              <p className="text-xs text-slate-400">Verifica los detalles de tu cita antes de agendar</p>
+              <h2 className="font-display text-3xl font-bold text-[#161514] tracking-wide uppercase">
+                Confirmar Reserva
+              </h2>
+              <p className="text-xs text-[#5C5852] mt-0.5">
+                Verifica los detalles de tu cita antes de agendar
+              </p>
             </div>
-            <div className="p-2 rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]">
+            <div className="p-2.5 rounded-xl bg-[#F2EFE9] border border-[#E6E1D6] text-[#9A6B3B]">
               <ShieldCheck className="w-5 h-5" />
             </div>
           </div>
 
           {bookingError && (
-            <div className="p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-200 text-xs flex items-start gap-2.5 animate-in fade-in">
-              <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5 animate-in fade-in">
+              <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
               <span>{bookingError}</span>
             </div>
           )}
 
-          {/* Summary Spatial Card */}
-          <div className="rounded-3xl bg-gradient-to-b from-[#1A1E27] to-[#12151B] border border-white/15 p-5 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+          <div className="rounded-2xl bg-white border border-[#E6E1D6] p-5 space-y-4">
+            <div className="flex items-center justify-between pb-3.5 border-b border-[#E6E1D6]">
               <div className="flex items-center gap-3">
                 <img
                   src={selectedBarber?.photoUrl}
                   alt={selectedBarber?.displayName}
-                  className="w-12 h-12 rounded-2xl object-cover border border-[#D4AF37]/40 shadow-md"
+                  className="w-12 h-12 rounded-xl object-cover border border-[#9A6B3B]/45"
                   referrerPolicy="no-referrer"
                 />
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#D4AF37]">
+                  <span className="text-[10px] font-semibold uppercase tracking-widest text-[#9A6B3B]">
                     Barbero Asignado
                   </span>
-                  <h3 className="font-bold text-white text-base">{selectedBarber?.displayName}</h3>
+                  <h3 className="font-display text-xl font-bold text-[#161514] uppercase tracking-wide">
+                    {selectedBarber?.displayName}
+                  </h3>
                 </div>
               </div>
 
               <div className="text-right">
-                <span className="text-[10px] font-semibold text-slate-400">Total</span>
-                <p className="text-lg font-black text-[#D4AF37]">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-[#5C5852]">
+                  Total
+                </span>
+                <p className="font-mono text-lg font-bold text-[#161514] tabular-nums">
                   {formatCurrency(selectedService.price)}
                 </p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="p-3 rounded-2xl bg-white/5 border border-white/5">
-                <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Servicio</span>
-                <span className="font-bold text-white block mt-0.5">{selectedService.name}</span>
-                <span className="text-[11px] text-slate-400">{selectedService.durationMinutes} min</span>
+              <div className="p-3 rounded-xl bg-[#FAF9F6] border border-[#E6E1D6]">
+                <span className="text-[10px] text-[#5C5852] uppercase tracking-wider block">
+                  Servicio
+                </span>
+                <span className="font-bold text-[#161514] block mt-0.5">
+                  {selectedService.name}
+                </span>
+                <span className="text-[11px] text-[#5C5852] tabular-nums">
+                  {selectedService.durationMinutes} min
+                </span>
               </div>
 
-              <div className="p-3 rounded-2xl bg-white/5 border border-white/5">
-                <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Fecha y Hora</span>
-                <span className="font-bold text-white block mt-0.5">{formatDateSpanish(selectedDate)}</span>
-                <span className="text-[11px] text-[#D4AF37] font-semibold">
+              <div className="p-3 rounded-xl bg-[#FAF9F6] border border-[#E6E1D6]">
+                <span className="text-[10px] text-[#5C5852] uppercase tracking-wider block">
+                  Fecha y Hora
+                </span>
+                <span className="font-bold text-[#161514] block mt-0.5">
+                  {formatDateSpanish(selectedDate)}
+                </span>
+                <span className="font-mono text-[11px] text-[#9A6B3B] font-semibold tabular-nums">
                   {formatTime12h(selectedTimeSlot.startTime)} - {formatTime12h(selectedTimeSlot.endTime)}
                 </span>
               </div>
             </div>
 
-            {/* Client Inputs & Account Registration / Login */}
             {userProfile ? (
               <div className="space-y-3 pt-2">
-                <div className="p-3.5 rounded-2xl bg-gradient-to-r from-[#D4AF37]/15 via-[#D4AF37]/10 to-transparent border border-[#D4AF37]/30 flex items-center justify-between">
+                <div className="p-3.5 rounded-xl bg-[#F2EFE9] border border-[#9A6B3B]/35 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
+                    <div className="w-10 h-10 rounded-xl bg-white border border-[#E6E1D6] flex items-center justify-center text-[#9A6B3B]">
                       <Award className="w-5 h-5" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-white">{userProfile.name}</span>
-                        <span className="text-[10px] font-extrabold uppercase px-1.5 py-0.2 rounded bg-[#D4AF37] text-slate-950">
-                          VIP
+                        <span className="text-xs font-bold text-[#161514]">{userProfile.name}</span>
+                        <span className="text-[10px] font-bold uppercase text-[#9A6B3B]">
+                          · VIP
                         </span>
                       </div>
-                      <p className="text-[11px] text-slate-400">
-                        {userProfile.phone} • #{userProfile.clientNumber || userProfile.id.slice(-6)}
+                      <p className="text-[11px] text-[#5C5852] font-mono tabular-nums">
+                        {userProfile.phone} · #{userProfile.clientNumber || userProfile.id.slice(-6)}
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <span className="text-[10px] text-slate-400 block">Puntos VIP</span>
-                    <span className="text-xs font-bold text-[#D4AF37]">{userProfile.points || 0} pts</span>
+                    <span className="text-[10px] text-[#5C5852] block">Puntos VIP</span>
+                    <span className="text-xs font-mono font-bold text-[#9A6B3B] tabular-nums">
+                      {userProfile.points || 0} pts
+                    </span>
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-slate-300 block mb-1">
+                  <label className="text-xs font-semibold text-[#161514] block mb-1">
                     Notas o requerimientos especiales (opcional)
                   </label>
                   <input
@@ -1047,14 +1075,14 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="Ej. Prefiero barba perfilada baja o corte a tijera"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-white/15 text-white text-xs focus:outline-none focus:border-[#D4AF37] transition-colors"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF9F6] border border-[#E6E1D6] text-[#161514] placeholder-[#5C5852]/60 text-xs focus:outline-none focus:border-[#9A6B3B] transition-colors"
                   />
                 </div>
               </div>
             ) : (
               <div className="space-y-3 pt-2">
                 <div>
-                  <label className="text-xs font-medium text-slate-300 block mb-1">
+                  <label className="text-xs font-semibold text-[#161514] block mb-1">
                     Nombre completo *
                   </label>
                   <input
@@ -1062,13 +1090,13 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
                     value={clientName}
                     onChange={(e) => setClientName(e.target.value)}
                     placeholder="Tu nombre y apellido"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-white/15 text-white text-xs focus:outline-none focus:border-[#D4AF37] transition-colors"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF9F6] border border-[#E6E1D6] text-[#161514] placeholder-[#5C5852]/60 text-xs focus:outline-none focus:border-[#9A6B3B] transition-colors"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <div>
-                    <label className="text-xs font-medium text-slate-300 block mb-1">
+                    <label className="text-xs font-semibold text-[#161514] block mb-1">
                       Celular (10 dígitos) *
                     </label>
                     <input
@@ -1077,19 +1105,19 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
                       value={clientPhone}
                       onChange={(e) => setClientPhone(e.target.value.replace(/\D/g, ''))}
                       placeholder="Ej. 5512345678"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-white/15 text-white text-xs focus:outline-none focus:border-[#D4AF37] transition-colors"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF9F6] border border-[#E6E1D6] text-[#161514] placeholder-[#5C5852]/60 text-xs font-mono tabular-nums focus:outline-none focus:border-[#9A6B3B] transition-colors"
                     />
                   </div>
 
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <label className="text-xs font-medium text-slate-300">
+                      <label className="text-xs font-semibold text-[#161514]">
                         NIP de acceso (4 dígitos) *
                       </label>
                       <button
                         type="button"
                         onClick={() => setShowPin(!showPin)}
-                        className="text-[11px] text-[#D4AF37] hover:underline flex items-center gap-1"
+                        className="text-[11px] text-[#9A6B3B] hover:underline flex items-center gap-1"
                       >
                         {showPin ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
                         <span>{showPin ? 'Ocultar' : 'Ver'}</span>
@@ -1102,14 +1130,14 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
                         value={clientPin}
                         onChange={(e) => setClientPin(e.target.value.replace(/\D/g, ''))}
                         placeholder="Ej. 1234"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-white/15 text-white text-xs tracking-widest focus:outline-none focus:border-[#D4AF37] transition-colors"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF9F6] border border-[#E6E1D6] text-[#161514] text-xs font-mono tracking-widest tabular-nums focus:outline-none focus:border-[#9A6B3B] transition-colors"
                       />
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-slate-300 block mb-1">
+                  <label className="text-xs font-semibold text-[#161514] block mb-1">
                     Notas o requerimientos especiales (opcional)
                   </label>
                   <input
@@ -1117,15 +1145,14 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="Ej. Prefiero corte a tijera o degradado medio"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-white/15 text-white text-xs focus:outline-none focus:border-[#D4AF37] transition-colors"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF9F6] border border-[#E6E1D6] text-[#161514] placeholder-[#5C5852]/60 text-xs focus:outline-none focus:border-[#9A6B3B] transition-colors"
                   />
                 </div>
               </div>
             )}
 
-            {/* Cancellation Policy Reminder */}
-            <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-200/90 leading-relaxed">
-              💡 <span className="font-semibold text-amber-300">Política de Puntualidad:</span> Puedes cancelar o
+            <div className="p-3 rounded-xl bg-[#F2EFE9] border border-[#E6E1D6] text-[11px] text-[#5C5852] leading-relaxed tabular-nums">
+              <span className="font-semibold text-[#161514]">Política de Puntualidad:</span> Puedes cancelar o
               reprogramar gratis hasta {businessSettings.minCancelNoticeHours} horas antes del horario fijado.
             </div>
           </div>
@@ -1134,7 +1161,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
             <button
               onClick={() => setCurrentStep(4)}
               disabled={isSubmitting}
-              className="px-4 py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+              className="px-4 py-3 rounded-xl bg-[#F2EFE9] hover:bg-[#E6E1D6] text-[#161514] text-xs font-semibold flex items-center gap-1.5 transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
               <span>Atrás</span>
@@ -1142,13 +1169,13 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
             <button
               onClick={handleConfirmBooking}
               disabled={isSubmitting}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-bold text-sm shadow-xl shadow-[#D4AF37]/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] font-semibold text-sm active:scale-[0.99] transition-all disabled:opacity-50"
             >
               {isSubmitting ? (
-                <span className="animate-pulse">Validando y confirmando cita...</span>
+                <span>Validando y confirmando cita...</span>
               ) : (
                 <>
-                  <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
+                  <CheckCircle2 className="w-4 h-4 text-[#C69765] stroke-[2.2]" />
                   <span>Confirmar Cita Ahora</span>
                 </>
               )}
@@ -1157,88 +1184,88 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
         </motion.div>
       )}
 
-      {/* STEP 6: SUCCESS CONFIRMATION SCREEN (Section 38) */}
+      {/* STEP 6: SUCCESS CONFIRMATION SCREEN */}
       {currentStep === 6 && confirmedAppointment && (
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
+          initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
           className="text-center space-y-6 pt-4"
         >
-          <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-[#996515] via-[#D4AF37] to-[#F3E5AB] mx-auto p-[2px] shadow-2xl shadow-[#D4AF37]/30">
-            <div className="w-full h-full bg-[#12151B] rounded-full flex items-center justify-center text-[#D4AF37]">
-              <CheckCircle2 className="w-10 h-10 text-[#D4AF37]" />
-            </div>
+          <div className="w-20 h-20 rounded-full bg-[#161514] mx-auto flex items-center justify-center border-2 border-[#9A6B3B] shadow-md">
+            <CheckCircle2 className="w-10 h-10 text-[#C69765]" />
           </div>
 
           <div>
-            <span className="text-xs uppercase font-bold tracking-widest text-[#D4AF37]">
+            <span className="text-xs uppercase font-semibold tracking-[0.2em] text-[#9A6B3B]">
               MONARCA BARBER
             </span>
-            <h2 className="text-2xl font-black text-white tracking-tight mt-1">
+            <h2 className="font-display text-3xl font-bold text-[#161514] tracking-wide uppercase mt-1">
               ¡Cita Confirmada!
             </h2>
-            <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
+            <p className="text-xs text-[#5C5852] mt-1 max-w-xs mx-auto">
               Te esperamos en nuestra sucursal. Hemos reservado tu lugar con exclusividad.
             </p>
           </div>
 
-          {/* Ticket Card */}
-          <div className="rounded-3xl bg-[#161A22] border border-white/15 p-5 text-left shadow-2xl space-y-4 max-w-md mx-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+          <div className="rounded-2xl bg-white border border-[#E6E1D6] p-5 text-left space-y-4 max-w-md mx-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E6E1D6]">
               <div>
-                <span className="text-[10px] text-slate-400 uppercase tracking-wider">Servicio</span>
-                <h4 className="font-bold text-white text-base">{confirmedAppointment.serviceNameSnapshot}</h4>
+                <span className="text-[10px] text-[#5C5852] uppercase tracking-wider">Servicio</span>
+                <h4 className="font-display text-xl font-bold text-[#161514] uppercase tracking-wide">
+                  {confirmedAppointment.serviceNameSnapshot}
+                </h4>
               </div>
-              <span className="text-sm font-black text-[#D4AF37]">
+              <span className="font-mono text-base font-bold text-[#9A6B3B] tabular-nums">
                 {formatCurrency(confirmedAppointment.servicePriceSnapshot)}
               </span>
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div>
-                <span className="text-[10px] text-slate-400 block">Barbero</span>
-                <span className="font-semibold text-white">{confirmedAppointment.barberName}</span>
+                <span className="text-[10px] text-[#5C5852] block uppercase tracking-wider">Barbero</span>
+                <span className="font-bold text-[#161514]">{confirmedAppointment.barberName}</span>
               </div>
               <div>
-                <span className="text-[10px] text-slate-400 block">Fecha</span>
-                <span className="font-semibold text-white">{formatDateSpanish(confirmedAppointment.date)}</span>
+                <span className="text-[10px] text-[#5C5852] block uppercase tracking-wider">Fecha</span>
+                <span className="font-bold text-[#161514]">{formatDateSpanish(confirmedAppointment.date)}</span>
               </div>
               <div>
-                <span className="text-[10px] text-slate-400 block">Hora</span>
-                <span className="font-bold text-[#D4AF37]">
+                <span className="text-[10px] text-[#5C5852] block uppercase tracking-wider">Hora</span>
+                <span className="font-mono font-bold text-[#9A6B3B] tabular-nums">
                   {formatTime12h(confirmedAppointment.startTime)}
                 </span>
               </div>
               <div>
-                <span className="text-[10px] text-slate-400 block">Duración</span>
-                <span className="font-semibold text-white">
+                <span className="text-[10px] text-[#5C5852] block uppercase tracking-wider">Duración</span>
+                <span className="font-bold text-[#161514] tabular-nums">
                   {confirmedAppointment.serviceDurationSnapshot} minutos
                 </span>
               </div>
             </div>
 
-            <div className="pt-2 border-t border-white/10 text-[11px] text-slate-400 flex items-center justify-between">
-              <span>Folio: <strong className="text-slate-200">{confirmedAppointment.id.substring(0, 12)}</strong></span>
-              <span className="text-emerald-400 font-semibold">● Confirmada en sistema</span>
+            <div className="pt-3 border-t border-[#E6E1D6] text-[11px] text-[#5C5852] flex items-center justify-between tabular-nums">
+              <span>
+                Folio: <strong className="font-mono text-[#161514]">{confirmedAppointment.id.substring(0, 12)}</strong>
+              </span>
+              <span className="text-emerald-700 font-semibold">Confirmada en sistema</span>
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2 max-w-md mx-auto">
             <button
               onClick={downloadIcsFile}
-              className="w-full sm:w-auto flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold border border-white/15 transition-all"
+              className="w-full sm:w-auto flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white hover:bg-[#F2EFE9] text-[#161514] text-xs font-semibold border border-[#E6E1D6] transition-all"
             >
-              <CalendarPlus className="w-4 h-4 text-[#D4AF37]" />
+              <CalendarPlus className="w-4 h-4 text-[#9A6B3B]" />
               <span>Agregar al Calendario</span>
             </button>
 
             <button
               onClick={() => onBookingComplete?.(confirmedAppointment)}
-              className="w-full sm:w-auto flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 text-xs font-bold shadow-lg shadow-[#D4AF37]/20 hover:scale-[1.02] transition-all"
+              className="w-full sm:w-auto flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] text-xs font-semibold transition-all"
             >
               <span>Ver Mis Citas</span>
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-4 h-4 text-[#C69765]" />
             </button>
           </div>
         </motion.div>

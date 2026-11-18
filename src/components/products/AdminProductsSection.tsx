@@ -198,25 +198,25 @@ export const AdminProductsSection: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header & Sub-tabs */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-3xl bg-gradient-to-r from-[#181D26] to-[#12151B] border border-white/10 shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-3xl bg-white border border-[#E6E1D6] shadow-sm">
         <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-[#161514] border border-[#161514] flex items-center justify-center text-[#C69765] shrink-0">
             <Package className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white tracking-tight">Inventario de Productos & POS</h3>
-            <p className="text-xs text-slate-400">
+            <h3 className="font-display text-xl font-bold text-[#161514] uppercase tracking-wide">Inventario de Productos & POS</h3>
+            <p className="text-xs text-[#5C5852]">
               Catálogo general con fotografías, control para barberos y programa de puntos por compra
             </p>
           </div>
         </div>
 
         {/* Sub-nav buttons */}
-        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-black/40 border border-white/10 flex-wrap">
+        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-[#F2EFE9] border border-[#E6E1D6] flex-wrap">
           <button
             onClick={() => setSubTab('inventory')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              subTab === 'inventory' ? 'bg-[#D4AF37] text-slate-950 shadow' : 'text-slate-400 hover:text-white'
+              subTab === 'inventory' ? 'bg-[#161514] text-[#FAF9F6] shadow-sm' : 'text-[#5C5852] hover:text-[#161514]'
             }`}
           >
             Productos ({products.length})
@@ -224,7 +224,7 @@ export const AdminProductsSection: React.FC = () => {
           <button
             onClick={() => setSubTab('sales')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              subTab === 'sales' ? 'bg-[#D4AF37] text-slate-950 shadow' : 'text-slate-400 hover:text-white'
+              subTab === 'sales' ? 'bg-[#161514] text-[#FAF9F6] shadow-sm' : 'text-[#5C5852] hover:text-[#161514]'
             }`}
           >
             Ventas POS ({posSales.length})
@@ -232,7 +232,7 @@ export const AdminProductsSection: React.FC = () => {
           <button
             onClick={() => setSubTab('points_config')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-              subTab === 'points_config' ? 'bg-[#D4AF37] text-slate-950 shadow' : 'text-slate-400 hover:text-white'
+              subTab === 'points_config' ? 'bg-[#161514] text-[#FAF9F6] shadow-sm' : 'text-[#5C5852] hover:text-[#161514]'
             }`}
           >
             <Award className="w-3.5 h-3.5" />
@@ -247,13 +247,13 @@ export const AdminProductsSection: React.FC = () => {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             {/* Search Bar */}
             <div className="relative flex-1 max-w-md">
-              <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-[#767067] absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar producto por nombre o descripción..."
-                className="w-full pl-9 pr-4 py-2 rounded-2xl bg-[#14171E] border border-white/10 text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-[#D4AF37]"
+                className="w-full pl-9 pr-4 py-2 rounded-2xl bg-white border border-[#D2CBBF] text-[#161514] text-xs placeholder:text-[#8E887E] focus:outline-none focus:border-[#9A6B3B]"
               />
             </div>
 
@@ -269,19 +269,19 @@ export const AdminProductsSection: React.FC = () => {
                   imageUrl: '',
                 })
               }
-              className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-2xl bg-[#D4AF37] text-slate-950 text-xs font-bold shadow-lg hover:bg-[#E5B869] transition-all shrink-0"
+              className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-2xl bg-[#161514] text-[#FAF9F6] text-xs font-bold shadow-sm hover:bg-[#2A2826] transition-all shrink-0"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4 text-[#C69765]" />
               <span>Registrar Producto</span>
             </button>
           </div>
 
           {/* Product Cards List */}
           {filteredProducts.length === 0 ? (
-            <div className="rounded-3xl bg-[#14171E] border border-white/10 p-8 text-center text-slate-400 space-y-2">
-              <Package className="w-10 h-10 mx-auto text-slate-600 mb-2" />
-              <p className="font-semibold text-white text-sm">No hay productos en el inventario</p>
-              <p className="text-xs text-slate-500">
+            <div className="rounded-3xl bg-white border border-[#E6E1D6] p-8 text-center text-[#5C5852] space-y-2 shadow-sm">
+              <Package className="w-10 h-10 mx-auto text-[#8E887E] mb-2" />
+              <p className="font-semibold text-[#161514] text-sm">No hay productos en el inventario</p>
+              <p className="text-xs text-[#767067]">
                 Registra productos con su fotografía y precio para que los barberos puedan venderlos desde el POS.
               </p>
             </div>
@@ -292,20 +292,21 @@ export const AdminProductsSection: React.FC = () => {
                 return (
                   <div
                     key={prod.id}
-                    className={`rounded-2xl bg-[#14171E] border ${
-                      prod.active ? 'border-white/10' : 'border-white/5 opacity-60'
-                    } p-4 flex flex-col justify-between gap-3 shadow-lg hover:border-[#D4AF37]/40 transition-all`}
+                    className={`rounded-2xl bg-white border ${
+                      prod.active ? 'border-[#E6E1D6]' : 'border-[#E6E1D6] opacity-60'
+                    } p-4 flex flex-col justify-between gap-3 shadow-sm hover:border-[#9A6B3B]/60 transition-all`}
                   >
                     <div className="flex gap-3">
                       {/* Product Thumbnail */}
-                      <div className="w-20 h-20 rounded-xl overflow-hidden bg-black/40 border border-white/10 shrink-0 relative group">
+                      <div className="w-20 h-20 rounded-xl overflow-hidden bg-[#F2EFE9] border border-[#E6E1D6] shrink-0 relative group">
                         <img
                           src={imgSource}
                           alt={prod.name}
+                          referrerPolicy="no-referrer"
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                         {prod.imageUrl ? (
-                          <span className="absolute bottom-1 right-1 px-1 py-0.5 rounded bg-black/70 text-[9px] font-bold text-amber-300">
+                          <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-[#161514]/85 text-[9px] font-bold text-[#FAF9F6]">
                             Foto
                           </span>
                         ) : null}
@@ -313,27 +314,27 @@ export const AdminProductsSection: React.FC = () => {
 
                       <div className="space-y-1 min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-1.5">
-                          <h4 className="font-bold text-white text-sm leading-snug truncate" title={prod.name}>
+                          <h4 className="font-bold text-[#161514] text-sm leading-snug truncate" title={prod.name}>
                             {prod.name}
                           </h4>
                         </div>
-                        <span className="font-black text-[#D4AF37] text-base block">
+                        <span className="font-mono font-black text-[#9A6B3B] text-base block tabular-nums">
                           {formatCurrency(prod.price)}
                         </span>
-                        <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                        <p className="text-xs text-[#5C5852] line-clamp-2 leading-relaxed">
                           {prod.description || 'Sin descripción detallada.'}
                         </p>
                       </div>
                     </div>
 
-                    <div className="pt-2 border-t border-white/5 flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
+                    <div className="pt-2 border-t border-[#E6E1D6] flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5 text-[11px] text-[#767067]">
                         {prod.createdByType === 'barber' ? (
-                          <span className="px-2 py-0.5 rounded-md bg-blue-500/15 text-blue-300 font-semibold border border-blue-500/20">
+                          <span className="px-2 py-0.5 rounded-md bg-sky-50 text-sky-800 font-semibold border border-sky-200">
                             Barbero: {prod.createdByBarberName || 'Equipo'}
                           </span>
                         ) : (
-                          <span className="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 font-semibold border border-amber-500/20">
+                          <span className="px-2 py-0.5 rounded-md bg-[#FBF6EE] text-[#7D542B] font-semibold border border-[#9A6B3B]/30">
                             Monarca Oficial
                           </span>
                         )}
@@ -343,20 +344,20 @@ export const AdminProductsSection: React.FC = () => {
                         {/* Active toggle */}
                         <button
                           onClick={() => toggleProductActive(prod.id, !prod.active)}
-                          className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 transition-all"
+                          className="p-1.5 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] text-[#5C5852] transition-all"
                           title={prod.active ? 'Desactivar producto' : 'Activar producto'}
                         >
                           {prod.active ? (
-                            <ToggleRight className="w-5 h-5 text-emerald-400" />
+                            <ToggleRight className="w-5 h-5 text-emerald-700" />
                           ) : (
-                            <ToggleLeft className="w-5 h-5 text-slate-500" />
+                            <ToggleLeft className="w-5 h-5 text-[#8E887E]" />
                           )}
                         </button>
 
                         {/* Edit product */}
                         <button
                           onClick={() => setEditingProduct(prod)}
-                          className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-all"
+                          className="p-1.5 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] text-[#5C5852] hover:text-[#161514] transition-all"
                           title="Editar producto"
                         >
                           <Edit2 className="w-4 h-4" />
@@ -365,7 +366,7 @@ export const AdminProductsSection: React.FC = () => {
                         {/* Delete product */}
                         <button
                           onClick={() => handleDeleteProductSubmit(prod.id, prod.name)}
-                          className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 transition-all"
+                          className="p-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 transition-all"
                           title="Eliminar producto del catálogo"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -380,18 +381,18 @@ export const AdminProductsSection: React.FC = () => {
 
           {/* Modal: Crear / Editar Producto con FOTOGRAFÍA */}
           {editingProduct && (
-            <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in overflow-y-auto">
-              <div className="bg-[#14171E] border border-white/15 rounded-3xl p-5 w-full max-w-lg space-y-4 shadow-2xl my-8">
-                <div className="flex items-center justify-between pb-2 border-b border-white/10">
+            <div className="fixed inset-0 z-50 bg-[#161514]/55 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in overflow-y-auto">
+              <div className="bg-[#FAF9F6] border border-[#D2CBBF] rounded-3xl p-5 w-full max-w-lg space-y-4 shadow-2xl my-8">
+                <div className="flex items-center justify-between pb-2 border-b border-[#E6E1D6]">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
+                    <div className="w-9 h-9 rounded-xl bg-[#161514] border border-[#161514] flex items-center justify-center text-[#C69765]">
                       <Package className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="text-sm font-bold text-white">
+                      <h3 className="font-display text-base font-bold text-[#161514] uppercase tracking-wide">
                         {editingProduct.id ? 'Editar Producto' : 'Registrar Nuevo Producto'}
                       </h3>
-                      <p className="text-[11px] text-slate-400">
+                      <p className="text-[11px] text-[#5C5852]">
                         Configura imagen, nombre, descripción y precio de venta
                       </p>
                     </div>
@@ -399,24 +400,24 @@ export const AdminProductsSection: React.FC = () => {
 
                   <button
                     onClick={() => setEditingProduct(null)}
-                    className="p-1.5 rounded-xl bg-white/5 text-slate-400 hover:text-white"
+                    className="p-1.5 rounded-xl bg-[#F2EFE9] border border-[#E6E1D6] text-[#5C5852] hover:text-[#161514]"
                   >
                     <X className="w-4 h-4" />
                   </button>
                 </div>
 
                 {/* FOTOGRAFÍA DEL PRODUCTO */}
-                <div className="space-y-2 p-3.5 rounded-2xl bg-slate-900 border border-white/10">
-                  <label className="text-slate-300 font-semibold block text-xs flex items-center justify-between">
+                <div className="space-y-2 p-3.5 rounded-2xl bg-white border border-[#E6E1D6]">
+                  <label className="text-[#161514] font-semibold block text-xs flex items-center justify-between">
                     <span className="flex items-center gap-1.5">
-                      <ImageIcon className="w-4 h-4 text-[#D4AF37]" />
+                      <ImageIcon className="w-4 h-4 text-[#9A6B3B]" />
                       <span>FOTOGRAFÍA DEL PRODUCTO</span>
                     </span>
                     {editingProduct.imageUrl && (
                       <button
                         type="button"
                         onClick={() => setEditingProduct({ ...editingProduct, imageUrl: '' })}
-                        className="text-[10px] text-rose-400 hover:underline flex items-center gap-1"
+                        className="text-[10px] text-rose-700 hover:underline flex items-center gap-1"
                       >
                         <Trash2 className="w-3 h-3" />
                         Quitar foto
@@ -426,15 +427,16 @@ export const AdminProductsSection: React.FC = () => {
 
                   <div className="flex items-center gap-3">
                     {/* Preview Thumbnail */}
-                    <div className="w-20 h-20 rounded-2xl overflow-hidden bg-black/60 border border-white/20 shrink-0 relative flex items-center justify-center">
+                    <div className="w-20 h-20 rounded-2xl overflow-hidden bg-[#F2EFE9] border border-[#D2CBBF] shrink-0 relative flex items-center justify-center">
                       <img
                         src={editingProduct.imageUrl || getProductImage(editingProduct)}
                         alt="Preview"
+                        referrerPolicy="no-referrer"
                         className="w-full h-full object-cover"
                       />
                       {isUploadingProductPhoto && (
-                        <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center">
-                          <RefreshCw className="w-5 h-5 text-[#D4AF37] animate-spin" />
+                        <div className="absolute inset-0 bg-[#FAF9F6]/80 flex flex-col items-center justify-center">
+                          <RefreshCw className="w-5 h-5 text-[#9A6B3B] animate-spin" />
                         </div>
                       )}
                     </div>
@@ -452,16 +454,16 @@ export const AdminProductsSection: React.FC = () => {
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
                         disabled={isUploadingProductPhoto}
-                        className="w-full py-2 px-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white font-semibold flex items-center justify-center gap-1.5 transition-all text-xs"
+                        className="w-full py-2 px-3 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] border border-[#D2CBBF] text-[#161514] font-semibold flex items-center justify-center gap-1.5 transition-all text-xs"
                       >
                         {isUploadingProductPhoto ? (
                           <>
-                            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                            <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#9A6B3B]" />
                             <span>Subiendo imagen...</span>
                           </>
                         ) : (
                           <>
-                            <Upload className="w-3.5 h-3.5 text-[#D4AF37]" />
+                            <Upload className="w-3.5 h-3.5 text-[#9A6B3B]" />
                             <span>Subir Foto desde Dispositivo</span>
                           </>
                         )}
@@ -473,7 +475,7 @@ export const AdminProductsSection: React.FC = () => {
                         value={editingProduct.imageUrl || ''}
                         onChange={(e) => setEditingProduct({ ...editingProduct, imageUrl: e.target.value })}
                         placeholder="O pega una URL de imagen (https://...)"
-                        className="w-full p-2 rounded-xl bg-black/40 border border-white/10 text-white text-[11px] placeholder:text-slate-500 focus:outline-none focus:border-[#D4AF37]"
+                        className="w-full p-2 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] text-[11px] placeholder:text-[#8E887E] focus:outline-none focus:border-[#9A6B3B]"
                       />
                     </div>
                   </div>
@@ -482,7 +484,7 @@ export const AdminProductsSection: React.FC = () => {
                 <div className="space-y-3 text-xs">
                   {/* NOMBRE */}
                   <div>
-                    <label className="text-slate-300 font-semibold block mb-1">
+                    <label className="text-[#5C5852] font-semibold block mb-1">
                       NOMBRE DEL PRODUCTO *
                     </label>
                     <input
@@ -490,19 +492,19 @@ export const AdminProductsSection: React.FC = () => {
                       value={editingProduct.name || ''}
                       onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
                       placeholder="Ej. Cera Pomade Mate Masaryk 120ml"
-                      className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-none focus:border-[#D4AF37]"
+                      className="w-full p-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] placeholder:text-[#8E887E] focus:outline-none focus:border-[#9A6B3B]"
                     />
                   </div>
 
                   {/* CATEGORÍA */}
                   <div>
-                    <label className="text-slate-300 font-semibold block mb-1">
+                    <label className="text-[#5C5852] font-semibold block mb-1">
                       CATEGORÍA (OPCIONAL)
                     </label>
                     <select
                       value={editingProduct.category || ''}
                       onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })}
-                      className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-none focus:border-[#D4AF37]"
+                      className="w-full p-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] focus:outline-none focus:border-[#9A6B3B]"
                     >
                       <option value="">Seleccionar categoría...</option>
                       <option value="Fijación">Fijación (Pomadas / Ceras / Sprays)</option>
@@ -515,7 +517,7 @@ export const AdminProductsSection: React.FC = () => {
 
                   {/* DESCRIPCIÓN */}
                   <div>
-                    <label className="text-slate-300 font-semibold block mb-1">
+                    <label className="text-[#5C5852] font-semibold block mb-1">
                       DESCRIPCIÓN
                     </label>
                     <textarea
@@ -523,17 +525,17 @@ export const AdminProductsSection: React.FC = () => {
                       onChange={(e) => setEditingProduct({ ...editingProduct, description: e.target.value })}
                       rows={2}
                       placeholder="Ej. Fijación media con brillo mate natural y aroma sutil amaderado."
-                      className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-none focus:border-[#D4AF37]"
+                      className="w-full p-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] placeholder:text-[#8E887E] focus:outline-none focus:border-[#9A6B3B]"
                     />
                   </div>
 
                   {/* PRECIO */}
                   <div>
-                    <label className="text-slate-300 font-semibold block mb-1">
+                    <label className="text-[#5C5852] font-semibold block mb-1">
                       PRECIO DE VENTA ($ MXN) *
                     </label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#D4AF37] font-bold text-sm">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9A6B3B] font-bold text-sm">
                         $
                       </span>
                       <input
@@ -545,23 +547,23 @@ export const AdminProductsSection: React.FC = () => {
                           setEditingProduct({ ...editingProduct, price: parseFloat(e.target.value) || 0 })
                         }
                         placeholder="0.00"
-                        className="w-full pl-8 pr-3 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-white font-bold text-sm focus:outline-none focus:border-[#D4AF37]"
+                        className="w-full pl-8 pr-3 py-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] font-mono font-bold text-sm focus:outline-none focus:border-[#9A6B3B]"
                       />
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 pt-3 border-t border-white/10">
+                <div className="flex items-center gap-2 pt-3 border-t border-[#E6E1D6]">
                   <button
                     onClick={() => setEditingProduct(null)}
-                    className="flex-1 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold transition-all"
+                    className="flex-1 py-2.5 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] border border-[#D2CBBF] text-[#161514] text-xs font-semibold transition-all"
                   >
                     Cancelar
                   </button>
                   <button
                     onClick={handleSaveProductSubmit}
                     disabled={isSavingProduct || isUploadingProductPhoto}
-                    className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 text-xs font-bold shadow-md hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+                    className="flex-1 py-2.5 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] text-xs font-bold shadow-sm active:scale-95 transition-all disabled:opacity-50"
                   >
                     {isSavingProduct ? 'Guardando...' : 'Guardar Producto'}
                   </button>
@@ -577,29 +579,29 @@ export const AdminProductsSection: React.FC = () => {
         <div className="space-y-4">
           {/* Summary Stat Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="rounded-2xl bg-[#14171E] border border-white/10 p-4">
-              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Recaudado POS</p>
-              <p className="text-xl font-extrabold text-[#D4AF37] mt-1">{formatCurrency(totalSalesRevenue)}</p>
-              <p className="text-[11px] text-slate-500 mt-0.5">{posSales.length} transacciones registradas</p>
+            <div className="rounded-2xl bg-white border border-[#E6E1D6] p-4 shadow-sm">
+              <p className="text-[11px] font-bold text-[#767067] uppercase tracking-wider">Total Recaudado POS</p>
+              <p className="font-mono text-xl font-extrabold text-[#9A6B3B] mt-1 tabular-nums">{formatCurrency(totalSalesRevenue)}</p>
+              <p className="text-[11px] text-[#5C5852] mt-0.5">{posSales.length} transacciones registradas</p>
             </div>
-            <div className="rounded-2xl bg-[#14171E] border border-white/10 p-4">
-              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Puntos Otorgados a Clientes</p>
-              <p className="text-xl font-extrabold text-amber-300 mt-1">+{totalPointsAwarded} pts</p>
-              <p className="text-[11px] text-slate-500 mt-0.5">Fidelización por ventas de productos</p>
+            <div className="rounded-2xl bg-white border border-[#E6E1D6] p-4 shadow-sm">
+              <p className="text-[11px] font-bold text-[#767067] uppercase tracking-wider">Puntos Otorgados a Clientes</p>
+              <p className="font-mono text-xl font-extrabold text-emerald-700 mt-1 tabular-nums">+{totalPointsAwarded} pts</p>
+              <p className="text-[11px] text-[#5C5852] mt-0.5">Fidelización por ventas de productos</p>
             </div>
-            <div className="rounded-2xl bg-[#14171E] border border-white/10 p-4">
-              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Productos en Catálogo</p>
-              <p className="text-xl font-extrabold text-white mt-1">{products.length}</p>
-              <p className="text-[11px] text-slate-500 mt-0.5">{products.filter((p) => p.active).length} activos a la venta</p>
+            <div className="rounded-2xl bg-white border border-[#E6E1D6] p-4 shadow-sm">
+              <p className="text-[11px] font-bold text-[#767067] uppercase tracking-wider">Productos en Catálogo</p>
+              <p className="font-mono text-xl font-extrabold text-[#161514] mt-1 tabular-nums">{products.length}</p>
+              <p className="text-[11px] text-[#5C5852] mt-0.5">{products.filter((p) => p.active).length} activos a la venta</p>
             </div>
           </div>
 
           {/* Sales List */}
           {posSales.length === 0 ? (
-            <div className="rounded-3xl bg-[#14171E] border border-white/10 p-8 text-center text-slate-400 space-y-2">
-              <ShoppingBag className="w-10 h-10 mx-auto text-slate-600 mb-2" />
-              <p className="font-semibold text-white text-sm">No hay ventas registradas aún</p>
-              <p className="text-xs text-slate-500">
+            <div className="rounded-3xl bg-white border border-[#E6E1D6] p-8 text-center text-[#5C5852] space-y-2 shadow-sm">
+              <ShoppingBag className="w-10 h-10 mx-auto text-[#8E887E] mb-2" />
+              <p className="font-semibold text-[#161514] text-sm">No hay ventas registradas aún</p>
+              <p className="text-xs text-[#767067]">
                 Cuando los barberos procesen ventas desde su POS, aparecerán listadas aquí con el detalle de artículos y puntos otorgados.
               </p>
             </div>
@@ -608,36 +610,36 @@ export const AdminProductsSection: React.FC = () => {
               {posSales.map((sale) => (
                 <div
                   key={sale.id}
-                  className="rounded-2xl bg-[#14171E] border border-white/10 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md"
+                  className="rounded-2xl bg-white border border-[#E6E1D6] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm"
                 >
                   <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-white text-sm">{sale.customerName}</span>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-bold text-[#161514] text-sm">{sale.customerName}</span>
                       {sale.customerClientNumber && (
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#D4AF37]/20 text-[#D4AF37]">
+                        <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#FBF6EE] border border-[#9A6B3B]/30 text-[#7D542B]">
                           #{sale.customerClientNumber}
                         </span>
                       )}
-                      <span className="text-[11px] text-slate-400">
-                        • Barbero: <strong className="text-slate-300">{sale.barberName}</strong>
+                      <span className="text-[11px] text-[#5C5852]">
+                        • Barbero: <strong className="text-[#161514]">{sale.barberName}</strong>
                       </span>
                     </div>
 
-                    <p className="text-xs text-slate-300">
+                    <p className="text-xs text-[#5C5852]">
                       {(sale.items || []).map((it) => `${it.quantity}x ${it.productName} (${formatCurrency(it.subtotal)})`).join(' • ')}
                     </p>
 
-                    <div className="flex items-center gap-3 text-[11px] text-slate-500">
+                    <div className="flex items-center gap-3 text-[11px] text-[#767067]">
                       <span>{formatDateSpanish(sale.createdAt)}</span>
                       <span>•</span>
                       <span>Método: {sale.paymentMethod === 'cash' ? 'Efectivo' : sale.paymentMethod === 'card' ? 'Tarjeta' : 'Transferencia'}</span>
                     </div>
                   </div>
 
-                  <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 pt-2 sm:pt-0 border-white/5 shrink-0">
-                    <span className="font-black text-[#D4AF37] text-base">{formatCurrency(sale.total)}</span>
+                  <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 pt-2 sm:pt-0 border-[#E6E1D6] shrink-0">
+                    <span className="font-mono font-black text-[#161514] text-base tabular-nums">{formatCurrency(sale.total)}</span>
                     {sale.pointsAwarded > 0 && (
-                      <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full mt-0.5">
+                      <span className="text-[11px] font-mono font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full mt-0.5">
                         +{sale.pointsAwarded} pts ({sale.pointsPercentageUsed}%)
                       </span>
                     )}
@@ -651,14 +653,14 @@ export const AdminProductsSection: React.FC = () => {
 
       {/* SUBTAB 3: COMPLETE POINTS REWARD CONFIGURATION (VISITS / QR, SERVICES, PRODUCTS) */}
       {subTab === 'points_config' && (
-        <div className="rounded-3xl bg-[#14171E] border border-white/10 p-6 space-y-6 shadow-2xl animate-in fade-in">
-          <div className="flex items-center gap-3 pb-4 border-b border-white/10">
-            <div className="w-12 h-12 rounded-2xl bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shrink-0">
+        <div className="rounded-3xl bg-white border border-[#E6E1D6] p-6 space-y-6 shadow-sm animate-in fade-in">
+          <div className="flex items-center gap-3 pb-4 border-b border-[#E6E1D6]">
+            <div className="w-12 h-12 rounded-2xl bg-[#161514] border border-[#161514] flex items-center justify-center text-[#C69765] shrink-0">
               <Award className="w-6 h-6" />
             </div>
             <div>
-              <h4 className="text-base font-bold text-white">Programa Global de Puntos y Fidelización</h4>
-              <p className="text-xs text-slate-400">
+              <h4 className="font-display text-lg font-bold text-[#161514] uppercase tracking-wide">Programa Global de Puntos y Fidelización</h4>
+              <p className="text-xs text-[#5C5852]">
                 Gestiona cuántos puntos recibe el cliente por escanear su QR/visitas, cobrar servicios y comprar productos
               </p>
             </div>
@@ -666,14 +668,14 @@ export const AdminProductsSection: React.FC = () => {
 
           <div className="space-y-4 max-w-2xl">
             {/* 1. PUNTOS POR VISITA / ESCANEO DE QR */}
-            <div className="p-4 rounded-2xl bg-slate-900 border border-white/10 space-y-3">
+            <div className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#E6E1D6] space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-0.5">
-                  <span className="text-sm font-bold text-white flex items-center gap-2">
-                    <QrCode className="w-4 h-4 text-[#D4AF37]" />
+                  <span className="text-sm font-bold text-[#161514] flex items-center gap-2">
+                    <QrCode className="w-4 h-4 text-[#9A6B3B]" />
                     <span>Puntos por Visita / Escaneo de Código QR</span>
                   </span>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-[#5C5852]">
                     Cantidad fija de puntos que se abonan automáticamente a la cuenta del cliente cada vez que se escanea su código QR o se registra una visita (establece 0 si no deseas otorgar puntos solo por escanear).
                   </p>
                 </div>
@@ -687,27 +689,27 @@ export const AdminProductsSection: React.FC = () => {
                     step="5"
                     value={pointsPerVisit}
                     onChange={(e) => setPointsPerVisit(parseInt(e.target.value, 10) || 0)}
-                    className="w-full pl-3 pr-8 py-2.5 rounded-xl bg-[#14171E] border border-white/15 text-white font-bold text-base focus:outline-none focus:border-[#D4AF37]"
+                    className="w-full pl-3 pr-8 py-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] font-mono font-bold text-base focus:outline-none focus:border-[#9A6B3B]"
                   />
-                  <span className="text-xs font-bold text-[#D4AF37] absolute right-3 top-1/2 -translate-y-1/2">
+                  <span className="text-xs font-bold text-[#9A6B3B] absolute right-3 top-1/2 -translate-y-1/2">
                     pts
                   </span>
                 </div>
-                <span className="text-xs text-slate-400">
-                  Puntos por escaneo de QR: <strong>+{pointsPerVisit} pts por visita</strong>
+                <span className="text-xs text-[#5C5852]">
+                  Puntos por escaneo de QR: <strong className="text-[#161514] font-mono">+{pointsPerVisit} pts por visita</strong>
                 </span>
               </div>
             </div>
 
             {/* 2. PUNTOS POR SERVICIO COBRADO EN SILLA */}
-            <div className="p-4 rounded-2xl bg-slate-900 border border-white/10 space-y-3">
+            <div className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#E6E1D6] space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-0.5">
-                  <span className="text-sm font-bold text-white flex items-center gap-2">
-                    <Scissors className="w-4 h-4 text-blue-400" />
+                  <span className="text-sm font-bold text-[#161514] flex items-center gap-2">
+                    <Scissors className="w-4 h-4 text-sky-700" />
                     <span>Puntos por Servicio / Corte Cobrado</span>
                   </span>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-[#5C5852]">
                     Puntos automáticos que el cliente acumula cuando el barbero cobra un servicio o corte de cabello en silla.
                   </p>
                 </div>
@@ -721,27 +723,27 @@ export const AdminProductsSection: React.FC = () => {
                     step="5"
                     value={servicePointsReward}
                     onChange={(e) => setServicePointsReward(parseInt(e.target.value, 10) || 0)}
-                    className="w-full pl-3 pr-8 py-2.5 rounded-xl bg-[#14171E] border border-white/15 text-white font-bold text-base focus:outline-none focus:border-[#D4AF37]"
+                    className="w-full pl-3 pr-8 py-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] font-mono font-bold text-base focus:outline-none focus:border-[#9A6B3B]"
                   />
-                  <span className="text-xs font-bold text-[#D4AF37] absolute right-3 top-1/2 -translate-y-1/2">
+                  <span className="text-xs font-bold text-[#9A6B3B] absolute right-3 top-1/2 -translate-y-1/2">
                     pts
                   </span>
                 </div>
-                <span className="text-xs text-slate-400">
-                  Predeterminado: <strong>50 pts</strong> por servicio cobrado
+                <span className="text-xs text-[#5C5852]">
+                  Predeterminado: <strong className="text-[#161514] font-mono">50 pts</strong> por servicio cobrado
                 </span>
               </div>
             </div>
 
             {/* 3. PUNTOS POR COMPRA DE PRODUCTOS */}
-            <div className="p-4 rounded-2xl bg-slate-900 border border-white/10 space-y-3">
-              <div className="flex items-center justify-between gap-3 pb-2 border-b border-white/5">
+            <div className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#E6E1D6] space-y-3">
+              <div className="flex items-center justify-between gap-3 pb-2 border-b border-[#E6E1D6]">
                 <div className="space-y-0.5">
-                  <span className="text-sm font-bold text-white flex items-center gap-2">
-                    <Package className="w-4 h-4 text-amber-400" />
+                  <span className="text-sm font-bold text-[#161514] flex items-center gap-2">
+                    <Package className="w-4 h-4 text-[#9A6B3B]" />
                     <span>Puntos por Venta de Productos POS</span>
                   </span>
-                  <span className="text-xs text-slate-400">
+                  <span className="text-xs text-[#5C5852]">
                     {pointsEnabled
                       ? 'Los clientes acumulan un porcentaje de puntos sobre el valor de los productos comprados.'
                       : 'Las ventas de productos no generarán puntos de fidelización.'}
@@ -752,16 +754,16 @@ export const AdminProductsSection: React.FC = () => {
                   className="p-1 rounded-xl transition-all shrink-0 ml-3"
                 >
                   {pointsEnabled ? (
-                    <ToggleRight className="w-9 h-9 text-[#D4AF37]" />
+                    <ToggleRight className="w-9 h-9 text-[#9A6B3B]" />
                   ) : (
-                    <ToggleLeft className="w-9 h-9 text-slate-600" />
+                    <ToggleLeft className="w-9 h-9 text-[#8E887E]" />
                   )}
                 </button>
               </div>
 
               {pointsEnabled && (
                 <div className="space-y-2 pt-1">
-                  <label className="text-xs font-semibold text-slate-300 block">
+                  <label className="text-xs font-semibold text-[#5C5852] block">
                     Porcentaje de Puntos sobre el Valor del Producto (%)
                   </label>
                   <div className="flex items-center gap-3">
@@ -773,12 +775,12 @@ export const AdminProductsSection: React.FC = () => {
                         step="0.5"
                         value={pointsPercentage}
                         onChange={(e) => setPointsPercentage(parseFloat(e.target.value) || 1)}
-                        className="w-full pl-3 pr-8 py-2.5 rounded-xl bg-[#14171E] border border-white/15 text-white font-bold text-base focus:outline-none focus:border-[#D4AF37]"
+                        className="w-full pl-3 pr-8 py-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] font-mono font-bold text-base focus:outline-none focus:border-[#9A6B3B]"
                       />
-                      <Percent className="w-4 h-4 text-[#D4AF37] absolute right-3 top-1/2 -translate-y-1/2" />
+                      <Percent className="w-4 h-4 text-[#9A6B3B] absolute right-3 top-1/2 -translate-y-1/2" />
                     </div>
-                    <span className="text-xs text-slate-400">
-                      Ejemplo: Un producto de $300 otorga <strong>{Math.floor((300 * pointsPercentage) / 100)} pts</strong>
+                    <span className="text-xs text-[#5C5852]">
+                      Ejemplo: Un producto de $300 otorga <strong className="text-[#161514] font-mono">{Math.floor((300 * pointsPercentage) / 100)} pts</strong>
                     </span>
                   </div>
                 </div>
@@ -786,18 +788,18 @@ export const AdminProductsSection: React.FC = () => {
             </div>
 
             {/* LIVE SIMULATION CARD */}
-            <div className="p-4 rounded-2xl bg-[#1E232F]/50 border border-[#D4AF37]/20 flex items-start gap-3 text-xs text-slate-300">
-              <Sparkles className="w-5 h-5 text-[#D4AF37] shrink-0 mt-0.5" />
+            <div className="p-4 rounded-2xl bg-[#FBF6EE] border border-[#9A6B3B]/30 flex items-start gap-3 text-xs text-[#5C5852]">
+              <Sparkles className="w-5 h-5 text-[#9A6B3B] shrink-0 mt-0.5" />
               <div>
-                <strong className="text-white block font-bold mb-0.5">Simulación en Vivo de una Atención Completa:</strong>
+                <strong className="text-[#161514] block font-bold mb-0.5">Simulación en Vivo de una Atención Completa:</strong>
                 <span>
-                  Si un cliente asiste a su corte de <strong>$350 MXN</strong> y compra un producto de <strong>$250 MXN</strong>:
+                  Si un cliente asiste a su corte de <strong className="text-[#161514] font-mono">$350 MXN</strong> y compra un producto de <strong className="text-[#161514] font-mono">$250 MXN</strong>:
                 </span>
-                <div className="mt-2 space-y-0.5 font-mono text-[11px] text-slate-300">
+                <div className="mt-2 space-y-0.5 font-mono text-[11px] text-[#5C5852]">
                   {pointsPerVisit > 0 && <div>• Escaneo de QR / Visita: +{pointsPerVisit} pts</div>}
                   <div>• Servicio en Silla: +{servicePointsReward} pts</div>
                   <div>• Compra de Producto: +{pointsEnabled ? Math.floor((250 * pointsPercentage) / 100) : 0} pts</div>
-                  <div className="text-[#D4AF37] font-bold pt-1">
+                  <div className="text-[#9A6B3B] font-bold pt-1">
                     = Total a Recibir: +{pointsPerVisit + servicePointsReward + (pointsEnabled ? Math.floor((250 * pointsPercentage) / 100) : 0)} puntos de fidelización VIP
                   </div>
                 </div>
@@ -807,9 +809,9 @@ export const AdminProductsSection: React.FC = () => {
             <button
               onClick={handleSavePointsSettings}
               disabled={isSavingPoints}
-              className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-bold text-xs shadow-lg hover:scale-[1.01] active:scale-95 transition-all disabled:opacity-50"
+              className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] font-bold text-xs shadow-sm active:scale-95 transition-all disabled:opacity-50"
             >
-              <Save className="w-4 h-4" />
+              <Save className="w-4 h-4 text-[#C69765]" />
               <span>{isSavingPoints ? 'Guardando configuración...' : 'Guardar Parámetros de Puntos'}</span>
             </button>
           </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle2, AlertCircle, Info, X, Bell, Calendar, Clock, Sparkles } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Info, X, Bell, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 
@@ -18,72 +18,64 @@ export const ToastContainer: React.FC = () => {
           const isReminder = toast.title.includes('Recordatorio') || toast.title.includes('Horas');
 
           const borderBg = isSuccess
-            ? 'border-[#D4AF37]/40 bg-[#161A22]/95 text-slate-100 shadow-[#D4AF37]/10 shadow-2xl ring-1 ring-[#D4AF37]/20'
+            ? 'border-[#9A6B3B]/40 bg-white/95 text-[#161514] shadow-[0_12px_32px_rgba(22,21,20,0.12)]'
             : isError
-            ? 'border-rose-500/40 bg-rose-950/90 text-rose-100 shadow-rose-950/40 shadow-2xl ring-1 ring-rose-500/20'
+            ? 'border-rose-300 bg-white/95 text-[#161514] shadow-[0_12px_32px_rgba(185,28,28,0.12)]'
             : isWarning
-            ? 'border-amber-500/40 bg-[#1C1811]/95 text-amber-100 shadow-amber-950/40 shadow-2xl ring-1 ring-amber-500/20'
-            : 'border-blue-500/40 bg-[#121824]/95 text-blue-100 shadow-blue-950/40 shadow-2xl ring-1 ring-blue-500/20';
+            ? 'border-amber-300 bg-white/95 text-[#161514] shadow-[0_12px_32px_rgba(180,83,9,0.12)]'
+            : 'border-[#D2CBBF] bg-white/95 text-[#161514] shadow-[0_12px_32px_rgba(22,21,20,0.10)]';
 
           return (
             <motion.div
               key={toast.id}
-              initial={{ opacity: 0, y: -24, scale: 0.92 }}
+              initial={{ opacity: 0, y: -20, scale: 0.94 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.88, y: -10, transition: { duration: 0.18 } }}
-              className={`pointer-events-auto relative overflow-hidden flex items-start gap-3.5 p-4 rounded-2xl border backdrop-blur-2xl ${borderBg}`}
+              exit={{ opacity: 0, scale: 0.9, y: -8, transition: { duration: 0.16 } }}
+              className={`pointer-events-auto relative overflow-hidden flex items-start gap-3.5 p-4 rounded-2xl border backdrop-blur-xl ${borderBg}`}
             >
-              {/* Subtle gold accent light in the corner */}
-              {isBooking && (
-                <div className="absolute top-0 right-0 w-24 h-24 bg-[#D4AF37]/10 rounded-full blur-xl pointer-events-none" />
-              )}
-
-              {/* Icon */}
               <div className="mt-0.5 shrink-0 relative">
                 {isBooking ? (
-                  <div className="w-8 h-8 rounded-xl bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
-                    <Bell className="w-4 h-4 animate-bounce" />
+                  <div className="w-8 h-8 rounded-xl bg-[#F2EFE9] border border-[#9A6B3B]/35 flex items-center justify-center text-[#9A6B3B]">
+                    <Bell className="w-4 h-4" />
                   </div>
                 ) : isReminder ? (
-                  <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+                  <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700">
                     <Clock className="w-4 h-4" />
                   </div>
                 ) : isSuccess ? (
-                  <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700">
                     <CheckCircle2 className="w-4 h-4" />
                   </div>
                 ) : isError ? (
-                  <div className="w-8 h-8 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400">
+                  <div className="w-8 h-8 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-700">
                     <AlertCircle className="w-4 h-4" />
                   </div>
                 ) : (
-                  <div className="w-8 h-8 rounded-xl bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-blue-400">
+                  <div className="w-8 h-8 rounded-xl bg-[#F2EFE9] border border-[#E6E1D6] flex items-center justify-center text-[#161514]">
                     <Info className="w-4 h-4" />
                   </div>
                 )}
               </div>
 
-              {/* Content */}
               <div className="flex-1 min-w-0 pr-1">
                 <div className="flex items-center gap-2">
-                  <h4 className="text-xs font-bold text-white leading-tight tracking-wide">
+                  <h4 className="text-xs font-bold text-[#161514] leading-tight tracking-wide">
                     {toast.title}
                   </h4>
                   {isBooking && (
-                    <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30 uppercase tracking-wider">
-                      En Vivo
+                    <span className="text-[10px] font-semibold text-[#9A6B3B] uppercase tracking-wider">
+                      · En Vivo
                     </span>
                   )}
                 </div>
-                <p className="text-xs opacity-90 mt-1 text-slate-300 break-words font-normal leading-relaxed">
+                <p className="text-xs mt-1 text-[#5C5852] break-words font-normal leading-relaxed">
                   {toast.message}
                 </p>
               </div>
 
-              {/* Dismiss button */}
               <button
                 onClick={() => removeToast(toast.id)}
-                className="shrink-0 p-1.5 text-slate-400 hover:text-white rounded-xl hover:bg-white/10 transition-colors"
+                className="shrink-0 p-1.5 text-[#5C5852] hover:text-[#161514] rounded-xl hover:bg-[#F2EFE9] transition-colors"
                 title="Cerrar notificación"
               >
                 <X className="w-4 h-4" />

@@ -119,81 +119,81 @@ export const BarberMyAppointmentsView: React.FC<BarberMyAppointmentsViewProps> =
   return (
     <div className="space-y-5">
       {/* Top Header & Fast Action */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 bg-gradient-to-r from-[#181D26] to-[#12151B] border border-white/10 p-5 rounded-3xl shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 bg-white border border-[#E6E1D6] p-5 rounded-3xl shadow-xs">
         <div>
           <div className="flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-[#D4AF37]" />
-            <h1 className="text-xl font-black text-white tracking-tight">Mis Citas & Agenda</h1>
+            <Calendar className="w-5 h-5 text-[#9A6B3B]" />
+            <h1 className="font-display text-2xl font-bold text-[#161514] uppercase tracking-wide">Mis Citas & Agenda</h1>
           </div>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Citas agendadas para <strong>{activeBarber.displayName}</strong>
+          <p className="text-xs text-[#5C5852] mt-0.5">
+            Citas agendadas para <strong className="text-[#161514]">{activeBarber.displayName}</strong>
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <button
             onClick={onOpenQrScanner}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-slate-200 text-xs font-bold transition-all shadow"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-[#F2EFE9] hover:bg-[#E8E3D9] border border-[#D2CBBF] text-[#161514] text-xs font-semibold transition-all"
           >
             <span>Escanear QR</span>
           </button>
           <button
             onClick={onOpenBookingModal}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 text-xs font-bold shadow-lg hover:scale-105 active:scale-95 transition-all"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] text-xs font-semibold shadow-sm active:scale-95 transition-all"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 text-[#C69765]" />
             <span>Agendar Cita</span>
           </button>
         </div>
       </div>
 
-      {/* Daily Metrics Pill Banner */}
+      {/* Daily Metrics Banner */}
       <div className="grid grid-cols-3 gap-2.5 text-xs">
-        <div className="p-3 rounded-2xl bg-[#14171E] border border-white/10 shadow">
-          <span className="text-slate-400 block text-[10px] uppercase font-bold">Citas Hoy</span>
-          <span className="text-lg font-black text-white mt-0.5 block">{todayApps.length}</span>
+        <div className="p-3.5 rounded-2xl bg-white border border-[#E6E1D6] shadow-xs">
+          <span className="text-[#5C5852] block text-[10px] uppercase font-semibold tracking-wider">Citas Hoy</span>
+          <span className="font-mono tabular-nums text-lg font-bold text-[#161514] mt-0.5 block">{todayApps.length}</span>
         </div>
-        <div className="p-3 rounded-2xl bg-[#14171E] border border-white/10 shadow">
-          <span className="text-slate-400 block text-[10px] uppercase font-bold">Completadas</span>
-          <span className="text-lg font-black text-emerald-400 mt-0.5 block">{todayCompleted.length}</span>
+        <div className="p-3.5 rounded-2xl bg-white border border-[#E6E1D6] shadow-xs">
+          <span className="text-[#5C5852] block text-[10px] uppercase font-semibold tracking-wider">Completadas</span>
+          <span className="font-mono tabular-nums text-lg font-bold text-emerald-700 mt-0.5 block">{todayCompleted.length}</span>
         </div>
-        <div className="p-3 rounded-2xl bg-[#14171E] border border-white/10 shadow">
-          <span className="text-slate-400 block text-[10px] uppercase font-bold">Ganado Hoy</span>
-          <span className="text-lg font-black text-[#D4AF37] mt-0.5 block">{formatCurrency(todayRevenue)}</span>
+        <div className="p-3.5 rounded-2xl bg-white border border-[#E6E1D6] shadow-xs">
+          <span className="text-[#5C5852] block text-[10px] uppercase font-semibold tracking-wider">Ganado Hoy</span>
+          <span className="font-mono tabular-nums text-lg font-bold text-[#9A6B3B] mt-0.5 block">{formatCurrency(todayRevenue)}</span>
         </div>
       </div>
 
       {/* Date Filter Tabs & Custom Date Picker */}
       <div className="space-y-2.5">
-        <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-2xl bg-black/40 border border-white/10">
+        <div className="flex flex-wrap items-center gap-1.5 p-1.5 rounded-2xl bg-[#F2EFE9] border border-[#E6E1D6]">
           <button
             onClick={() => setDateFilter('today')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              dateFilter === 'today' ? 'bg-[#D4AF37] text-slate-950' : 'text-slate-400 hover:text-white'
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+              dateFilter === 'today' ? 'bg-[#161514] text-[#FAF9F6] shadow-xs' : 'text-[#5C5852] hover:text-[#161514]'
             }`}
           >
             Hoy ({todayApps.length})
           </button>
           <button
             onClick={() => setDateFilter('upcoming')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              dateFilter === 'upcoming' ? 'bg-[#D4AF37] text-slate-950' : 'text-slate-400 hover:text-white'
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+              dateFilter === 'upcoming' ? 'bg-[#161514] text-[#FAF9F6] shadow-xs' : 'text-[#5C5852] hover:text-[#161514]'
             }`}
           >
             Próximas
           </button>
           <button
             onClick={() => setDateFilter('all')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              dateFilter === 'all' ? 'bg-[#D4AF37] text-slate-950' : 'text-slate-400 hover:text-white'
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+              dateFilter === 'all' ? 'bg-[#161514] text-[#FAF9F6] shadow-xs' : 'text-[#5C5852] hover:text-[#161514]'
             }`}
           >
             Todas ({myAppointments.length})
           </button>
           <button
             onClick={() => setDateFilter('custom')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              dateFilter === 'custom' ? 'bg-[#D4AF37] text-slate-950' : 'text-slate-400 hover:text-white'
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+              dateFilter === 'custom' ? 'bg-[#161514] text-[#FAF9F6] shadow-xs' : 'text-[#5C5852] hover:text-[#161514]'
             }`}
           >
             Fecha Específica
@@ -201,13 +201,13 @@ export const BarberMyAppointmentsView: React.FC<BarberMyAppointmentsViewProps> =
         </div>
 
         {dateFilter === 'custom' && (
-          <div className="p-3 rounded-2xl bg-[#14171E] border border-white/10 flex items-center justify-between animate-in fade-in">
-            <span className="text-xs text-slate-300 font-medium">Seleccionar fecha de agenda:</span>
+          <div className="p-3 rounded-2xl bg-white border border-[#E6E1D6] flex items-center justify-between animate-in fade-in">
+            <span className="text-xs text-[#161514] font-medium">Seleccionar fecha de agenda:</span>
             <input
               type="date"
               value={customDate}
               onChange={(e) => setCustomDate(e.target.value)}
-              className="p-1.5 rounded-xl bg-slate-900 border border-white/15 text-white text-xs font-bold"
+              className="p-1.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] text-xs font-semibold focus:outline-none focus:border-[#161514]"
             />
           </div>
         )}
@@ -216,13 +216,13 @@ export const BarberMyAppointmentsView: React.FC<BarberMyAppointmentsViewProps> =
       {/* Search & Status Filters */}
       <div className="flex flex-col sm:flex-row gap-2.5">
         <div className="relative flex-1">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#8E887E]" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Buscar por cliente, teléfono o servicio..."
-            className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-[#D4AF37]"
+            className="w-full pl-9 pr-3 py-2 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] placeholder-[#8E887E] text-xs focus:outline-none focus:border-[#161514]"
           />
         </div>
 
@@ -233,8 +233,8 @@ export const BarberMyAppointmentsView: React.FC<BarberMyAppointmentsViewProps> =
               onClick={() => setStatusFilter(st)}
               className={`px-2.5 py-1.5 rounded-xl text-[11px] font-semibold uppercase tracking-wider border whitespace-nowrap transition-all ${
                 statusFilter === st
-                  ? 'bg-white/15 border-white/30 text-white'
-                  : 'bg-[#14171E] border-white/5 text-slate-400 hover:text-slate-200'
+                  ? 'bg-[#161514] border-[#161514] text-[#FAF9F6]'
+                  : 'bg-white border-[#E6E1D6] text-[#5C5852] hover:text-[#161514]'
               }`}
             >
               {st === 'all'
@@ -252,16 +252,16 @@ export const BarberMyAppointmentsView: React.FC<BarberMyAppointmentsViewProps> =
       {/* Appointments List */}
       <div className="space-y-3">
         {finalAppointments.length === 0 ? (
-          <div className="p-10 rounded-3xl bg-[#14171E] border border-white/10 text-center space-y-3">
-            <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mx-auto text-slate-500">
+          <div className="p-10 rounded-3xl bg-white border border-[#E6E1D6] text-center space-y-3">
+            <div className="w-12 h-12 rounded-full bg-[#F2EFE9] border border-[#E6E1D6] flex items-center justify-center mx-auto text-[#9A6B3B]">
               <Calendar className="w-6 h-6" />
             </div>
-            <p className="text-slate-300 text-xs font-semibold">
+            <p className="text-[#161514] text-xs font-semibold">
               No se encontraron citas con los filtros seleccionados.
             </p>
             <button
               onClick={onOpenBookingModal}
-              className="px-4 py-2 rounded-xl bg-[#D4AF37] text-slate-950 font-bold text-xs shadow hover:scale-105 transition-all"
+              className="px-4 py-2.5 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] font-semibold text-xs shadow-xs transition-all"
             >
               Agendar una Cita Ahora
             </button>
@@ -270,7 +270,6 @@ export const BarberMyAppointmentsView: React.FC<BarberMyAppointmentsViewProps> =
           finalAppointments.map((app) => {
             const isConfirmed = app.status === 'confirmed' || app.status === 'pending';
             const isCompleted = app.status === 'completed';
-            const isCancelled = app.status === 'cancelled' || app.status === 'no_show' || app.status === 'rejected';
 
             const cleanPhone = app.clientPhone ? app.clientPhone.replace(/\D/g, '') : '';
             const waPhone = cleanPhone.startsWith('52') ? cleanPhone : `52${cleanPhone}`;
@@ -278,31 +277,31 @@ export const BarberMyAppointmentsView: React.FC<BarberMyAppointmentsViewProps> =
             return (
               <div
                 key={app.id}
-                className={`p-4 rounded-2xl border transition-all shadow-lg space-y-3 ${
+                className={`p-4 rounded-2xl border transition-all shadow-xs space-y-3 ${
                   isConfirmed
-                    ? 'bg-[#14171E] border-[#D4AF37]/30 shadow-[#D4AF37]/5'
+                    ? 'bg-white border-[#9A6B3B]/45'
                     : isCompleted
-                    ? 'bg-[#12151B] border-emerald-500/20'
-                    : 'bg-[#101217] border-white/5 opacity-75'
+                    ? 'bg-white border-emerald-200'
+                    : 'bg-[#F7F5F0] border-[#E6E1D6] opacity-75'
                 }`}
               >
                 {/* Header Row */}
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-[#D4AF37] text-sm">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-mono tabular-nums font-bold text-[#9A6B3B] text-sm">
                         {formatTime12h(app.startTime)} - {formatTime12h(app.endTime)}
                       </span>
-                      <span className="text-xs text-slate-400 font-medium">
-                        • {formatDateSpanish(app.date)}
+                      <span className="text-xs text-[#5C5852] font-medium">
+                        · {formatDateSpanish(app.date)}
                       </span>
                       <span
-                        className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase ${
+                        className={`text-[10px] font-semibold px-2 py-0.5 rounded-md uppercase ${
                           isConfirmed
-                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                             : isCompleted
-                            ? 'bg-blue-500/20 text-blue-300'
-                            : 'bg-rose-500/20 text-rose-300'
+                            ? 'bg-sky-50 text-sky-800 border border-sky-200'
+                            : 'bg-rose-50 text-rose-800 border border-rose-200'
                         }`}
                       >
                         {app.status === 'confirmed'
@@ -317,25 +316,25 @@ export const BarberMyAppointmentsView: React.FC<BarberMyAppointmentsViewProps> =
                       </span>
                     </div>
 
-                    <h3 className="font-bold text-white text-base mt-1">
+                    <h3 className="font-bold text-[#161514] text-base mt-1">
                       {app.serviceNameSnapshot}
                     </h3>
                   </div>
 
-                  <span className="font-black text-[#D4AF37] text-base">
+                  <span className="font-mono tabular-nums font-bold text-[#161514] text-base">
                     {formatCurrency(app.servicePriceSnapshot)}
                   </span>
                 </div>
 
                 {/* Client Details & Contact Buttons */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-white/5 text-xs">
-                  <div className="flex items-center gap-2 text-slate-300">
-                    <User className="w-4 h-4 text-slate-400 shrink-0" />
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-[#E6E1D6] text-xs">
+                  <div className="flex items-center gap-2 text-[#5C5852]">
+                    <User className="w-4 h-4 text-[#9A6B3B] shrink-0" />
                     <span>
-                      Cliente: <strong className="text-white font-bold">{app.clientName}</strong>
+                      Cliente: <strong className="text-[#161514] font-bold">{app.clientName}</strong>
                     </span>
                     {app.clientPhone && (
-                      <span className="text-slate-400 font-mono text-[11px]">
+                      <span className="text-[#5C5852] font-mono text-[11px]">
                         ({app.clientPhone})
                       </span>
                     )}
@@ -349,14 +348,14 @@ export const BarberMyAppointmentsView: React.FC<BarberMyAppointmentsViewProps> =
                         )}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-semibold text-[11px] transition-colors"
+                        className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 font-semibold text-[11px] transition-colors"
                       >
                         <MessageCircle className="w-3.5 h-3.5" />
                         <span>WhatsApp</span>
                       </a>
                       <a
                         href={`tel:${cleanPhone}`}
-                        className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 font-semibold text-[11px] transition-colors"
+                        className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] border border-[#D2CBBF] text-[#161514] font-semibold text-[11px] transition-colors"
                       >
                         <Phone className="w-3.5 h-3.5" />
                         <span>Llamar</span>
@@ -366,30 +365,30 @@ export const BarberMyAppointmentsView: React.FC<BarberMyAppointmentsViewProps> =
                 </div>
 
                 {app.notes && (
-                  <p className="text-[11px] text-slate-400 bg-white/5 p-2 rounded-xl">
-                    <strong>Nota:</strong> {app.notes}
+                  <p className="text-[11px] text-[#5C5852] bg-[#FAF9F6] border border-[#E6E1D6] p-2 rounded-xl">
+                    <strong className="text-[#161514]">Nota:</strong> {app.notes}
                   </p>
                 )}
 
                 {/* Action Buttons for Confirmed Appointments */}
                 {isConfirmed && (
-                  <div className="pt-2 border-t border-white/10 flex flex-wrap items-center gap-2">
+                  <div className="pt-2 border-t border-[#E6E1D6] flex flex-wrap items-center gap-2">
                     <button
                       onClick={() => handleCompleteAndReward(app)}
-                      className="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow flex items-center justify-center gap-1.5 transition-all"
+                      className="flex-1 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold shadow-xs flex items-center justify-center gap-1.5 transition-all"
                     >
                       <CheckCircle2 className="w-4 h-4" />
                       <span>Completar Cita</span>
                     </button>
                     <button
                       onClick={() => handleNoShow(app.id)}
-                      className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-slate-300 text-xs font-semibold transition-colors"
+                      className="px-3 py-2 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] border border-[#D2CBBF] text-[#161514] text-xs font-semibold transition-colors"
                     >
                       No Asistió
                     </button>
                     <button
                       onClick={() => handleCancelAppointment(app.id)}
-                      className="px-3 py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 text-xs font-semibold transition-colors"
+                      className="px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-800 text-xs font-semibold transition-colors"
                     >
                       Cancelar
                     </button>

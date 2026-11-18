@@ -50,11 +50,11 @@ const MainAppContent: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0D0F12] flex flex-col items-center justify-center text-white space-y-4">
-        <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#996515] to-[#D4AF37] p-[1px] animate-spin">
-          <div className="w-full h-full bg-[#0D0F12] rounded-[15px]" />
+      <div className="min-h-screen bg-[#FAF9F6] flex flex-col items-center justify-center text-[#161514] space-y-4">
+        <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#7D542B] to-[#9A6B3B] p-[1.5px] animate-spin">
+          <div className="w-full h-full bg-[#FAF9F6] rounded-[14px]" />
         </div>
-        <p className="text-xs font-semibold uppercase tracking-widest text-[#D4AF37]">
+        <p className="font-display text-base font-semibold uppercase tracking-[0.2em] text-[#9A6B3B]">
           Cargando MONARCA BARBER...
         </p>
       </div>
@@ -62,7 +62,7 @@ const MainAppContent: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0D0F12] text-slate-100 flex flex-col selection:bg-[#D4AF37] selection:text-slate-950 font-sans w-full max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-[#FAF9F6] text-[#161514] flex flex-col selection:bg-[#9A6B3B] selection:text-[#FAF9F6] font-sans w-full max-w-full overflow-x-hidden">
       {/* Fixed Spatial Header */}
       <Header 
         onOpenProfile={() => setActiveTab('profile')} 

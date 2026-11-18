@@ -220,59 +220,59 @@ export const AdminUserDetailsModal: React.FC<AdminUserDetailsModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-[#161514]/55 backdrop-blur-sm animate-in fade-in overflow-y-auto"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl rounded-3xl bg-[#12151B] border border-white/15 p-4 sm:p-6 space-y-4 shadow-[0_20px_70px_rgba(0,0,0,0.85)] relative my-auto max-h-[92vh] flex flex-col animate-in zoom-in-95 duration-150"
+        className="w-full max-w-2xl rounded-2xl bg-[#FAF9F6] border border-[#D2CBBF] p-4 sm:p-6 space-y-4 shadow-2xl relative my-auto max-h-[92vh] flex flex-col animate-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
         {/* TOP MODAL HEADER */}
-        <div className="flex items-start justify-between gap-3 pb-3 border-b border-white/10 shrink-0">
+        <div className="flex items-start justify-between gap-3 pb-3 border-b border-[#E6E1D6] shrink-0">
           <div className="flex items-center gap-3 min-w-0">
             {user.photoUrl ? (
               <img
                 src={user.photoUrl}
                 alt={user.name}
-                className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl object-cover border-2 border-[#D4AF37] shadow-lg shrink-0"
+                className="w-13 h-13 sm:w-14 sm:h-14 rounded-xl object-cover border-2 border-[#9A6B3B] shadow-sm shrink-0"
                 referrerPolicy="no-referrer"
               />
             ) : (
-              <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-tr from-[#996515] to-[#D4AF37] text-slate-950 font-black text-xl flex items-center justify-center border border-white/20 shadow-lg shrink-0">
+              <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-xl bg-[#161514] text-[#C69765] font-black text-xl flex items-center justify-center border border-[#D2CBBF] shadow-sm shrink-0">
                 {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
               </div>
             )}
 
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-base sm:text-lg font-black text-white truncate">{user.name}</h2>
+                <h2 className="font-display text-lg sm:text-xl font-bold text-[#161514] uppercase tracking-wide truncate">{user.name}</h2>
                 <span
-                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase border ${
+                  className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase border ${
                     user.role === 'admin'
-                      ? 'bg-purple-500/20 text-purple-300 border-purple-500/40'
+                      ? 'bg-purple-50 text-purple-800 border-purple-200'
                       : user.role === 'barber'
-                      ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
-                      : 'bg-[#D4AF37]/20 text-[#D4AF37] border-[#D4AF37]/40'
+                      ? 'bg-sky-50 text-sky-800 border-sky-200'
+                      : 'bg-[#FBF6EE] text-[#7D542B] border-[#9A6B3B]/30'
                   }`}
                 >
                   {user.role === 'admin' ? 'Administrador' : user.role === 'barber' ? 'Barbero' : 'Cliente'}
                 </span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-[#D4AF37] border border-[#D4AF37]/30">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#F2EFE9] text-[#5C5852] border border-[#E6E1D6]">
                   {user.membershipTier || 'VIP'}
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-2 flex-wrap">
-                <span className="font-mono text-[#D4AF37] font-bold">
+              <p className="text-xs text-[#5C5852] mt-0.5 flex items-center gap-2 flex-wrap">
+                <span className="font-mono tabular-nums text-[#9A6B3B] font-bold">
                   No. #{user.clientNumber || 'Sin número'}
                 </span>
-                {user.phone && <span>• {user.phone}</span>}
+                {user.phone && <span className="font-mono tabular-nums">• {user.phone}</span>}
               </p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors shrink-0"
+            className="p-2 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] border border-[#D2CBBF] text-[#161514] transition-colors shrink-0"
             title="Cerrar ventana"
           >
             <X className="w-5 h-5" />
@@ -281,35 +281,35 @@ export const AdminUserDetailsModal: React.FC<AdminUserDetailsModalProps> = ({
 
         {/* SUMMARY STATS BAR */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs shrink-0">
-          <div className="p-2.5 rounded-2xl bg-white/[0.03] border border-white/10 text-center">
-            <span className="text-[10px] text-slate-400 uppercase font-bold block">Puntos VIP</span>
-            <span className="text-lg font-black text-[#D4AF37] font-mono">{user.points ?? 100}</span>
+          <div className="p-2.5 rounded-xl bg-white border border-[#E6E1D6] text-center">
+            <span className="text-[10px] text-[#5C5852] uppercase font-bold block">Puntos VIP</span>
+            <span className="text-lg font-black text-[#9A6B3B] font-mono tabular-nums">{user.points ?? 100}</span>
           </div>
 
-          <div className="p-2.5 rounded-2xl bg-white/[0.03] border border-white/10 text-center">
-            <span className="text-[10px] text-slate-400 uppercase font-bold block">Total Visitas</span>
-            <span className="text-lg font-black text-white font-mono">{totalCompletedVisits}</span>
+          <div className="p-2.5 rounded-xl bg-white border border-[#E6E1D6] text-center">
+            <span className="text-[10px] text-[#5C5852] uppercase font-bold block">Total Visitas</span>
+            <span className="text-lg font-black text-[#161514] font-mono tabular-nums">{totalCompletedVisits}</span>
           </div>
 
-          <div className="p-2.5 rounded-2xl bg-white/[0.03] border border-white/10 text-center">
-            <span className="text-[10px] text-slate-400 uppercase font-bold block">Consumo Total</span>
-            <span className="text-lg font-black text-emerald-400 font-mono">
+          <div className="p-2.5 rounded-xl bg-white border border-[#E6E1D6] text-center">
+            <span className="text-[10px] text-[#5C5852] uppercase font-bold block">Consumo Total</span>
+            <span className="text-lg font-black text-emerald-700 font-mono tabular-nums">
               {formatCurrency(totalCustomerLifetimeValue)}
             </span>
           </div>
 
-          <div className="p-2.5 rounded-2xl bg-white/[0.03] border border-white/10 text-center">
-            <span className="text-[10px] text-slate-400 uppercase font-bold block">Citas Agendadas</span>
-            <span className="text-lg font-black text-blue-400 font-mono">{userAppointments.length}</span>
+          <div className="p-2.5 rounded-xl bg-white border border-[#E6E1D6] text-center">
+            <span className="text-[10px] text-[#5C5852] uppercase font-bold block">Citas Agendadas</span>
+            <span className="text-lg font-black text-sky-700 font-mono tabular-nums">{userAppointments.length}</span>
           </div>
         </div>
 
         {/* TAB NAVIGATION */}
-        <div className="flex items-center gap-1 overflow-x-auto pb-1 border-b border-white/10 shrink-0 scrollbar-none text-xs">
+        <div className="flex items-center gap-1 overflow-x-auto pb-2 border-b border-[#E6E1D6] shrink-0 scrollbar-none text-xs">
           <button
             onClick={() => setActiveTab('profile')}
-            className={`px-3 py-2 rounded-xl font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
-              activeTab === 'profile' ? 'bg-[#D4AF37] text-slate-950' : 'text-slate-400 hover:text-white hover:bg-white/5'
+            className={`px-3 py-2 rounded-lg font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+              activeTab === 'profile' ? 'bg-[#161514] text-[#FAF9F6] shadow-sm' : 'text-[#5C5852] hover:text-[#161514] hover:bg-[#F2EFE9]'
             }`}
           >
             <User className="w-3.5 h-3.5" />
@@ -318,8 +318,8 @@ export const AdminUserDetailsModal: React.FC<AdminUserDetailsModalProps> = ({
 
           <button
             onClick={() => setActiveTab('points')}
-            className={`px-3 py-2 rounded-xl font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
-              activeTab === 'points' ? 'bg-[#D4AF37] text-slate-950' : 'text-slate-400 hover:text-white hover:bg-white/5'
+            className={`px-3 py-2 rounded-lg font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+              activeTab === 'points' ? 'bg-[#161514] text-[#FAF9F6] shadow-sm' : 'text-[#5C5852] hover:text-[#161514] hover:bg-[#F2EFE9]'
             }`}
           >
             <Sparkles className="w-3.5 h-3.5" />
@@ -328,8 +328,8 @@ export const AdminUserDetailsModal: React.FC<AdminUserDetailsModalProps> = ({
 
           <button
             onClick={() => setActiveTab('visits')}
-            className={`px-3 py-2 rounded-xl font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
-              activeTab === 'visits' ? 'bg-[#D4AF37] text-slate-950' : 'text-slate-400 hover:text-white hover:bg-white/5'
+            className={`px-3 py-2 rounded-lg font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+              activeTab === 'visits' ? 'bg-[#161514] text-[#FAF9F6] shadow-sm' : 'text-[#5C5852] hover:text-[#161514] hover:bg-[#F2EFE9]'
             }`}
           >
             <Calendar className="w-3.5 h-3.5" />
@@ -338,8 +338,8 @@ export const AdminUserDetailsModal: React.FC<AdminUserDetailsModalProps> = ({
 
           <button
             onClick={() => setActiveTab('purchases')}
-            className={`px-3 py-2 rounded-xl font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
-              activeTab === 'purchases' ? 'bg-[#D4AF37] text-slate-950' : 'text-slate-400 hover:text-white hover:bg-white/5'
+            className={`px-3 py-2 rounded-lg font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+              activeTab === 'purchases' ? 'bg-[#161514] text-[#FAF9F6] shadow-sm' : 'text-[#5C5852] hover:text-[#161514] hover:bg-[#F2EFE9]'
             }`}
           >
             <ShoppingBag className="w-3.5 h-3.5" />
@@ -348,8 +348,8 @@ export const AdminUserDetailsModal: React.FC<AdminUserDetailsModalProps> = ({
 
           <button
             onClick={() => setActiveTab('qr')}
-            className={`px-3 py-2 rounded-xl font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
-              activeTab === 'qr' ? 'bg-[#D4AF37] text-slate-950' : 'text-slate-400 hover:text-white hover:bg-white/5'
+            className={`px-3 py-2 rounded-lg font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+              activeTab === 'qr' ? 'bg-[#161514] text-[#FAF9F6] shadow-sm' : 'text-[#5C5852] hover:text-[#161514] hover:bg-[#F2EFE9]'
             }`}
           >
             <QrCode className="w-3.5 h-3.5" />
@@ -358,8 +358,8 @@ export const AdminUserDetailsModal: React.FC<AdminUserDetailsModalProps> = ({
 
           <button
             onClick={() => setActiveTab('permissions')}
-            className={`px-3 py-2 rounded-xl font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
-              activeTab === 'permissions' ? 'bg-[#D4AF37] text-slate-950' : 'text-slate-400 hover:text-white hover:bg-white/5'
+            className={`px-3 py-2 rounded-lg font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+              activeTab === 'permissions' ? 'bg-[#161514] text-[#FAF9F6] shadow-sm' : 'text-[#5C5852] hover:text-[#161514] hover:bg-[#F2EFE9]'
             }`}
           >
             <Shield className="w-3.5 h-3.5" />
@@ -373,32 +373,32 @@ export const AdminUserDetailsModal: React.FC<AdminUserDetailsModalProps> = ({
           {activeTab === 'profile' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="font-bold text-white text-sm flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-[#D4AF37]" />
+                <h3 className="font-bold text-[#161514] text-sm flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-[#9A6B3B]" />
                   <span>Datos Generales del Cliente</span>
                 </h3>
                 {!isEditing ? (
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-slate-200 font-bold transition-all"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-[#F2EFE9] border border-[#D2CBBF] text-[#161514] font-bold transition-all"
                   >
-                    <Edit2 className="w-3.5 h-3.5 text-[#D4AF37]" />
+                    <Edit2 className="w-3.5 h-3.5 text-[#9A6B3B]" />
                     <span>Editar Datos</span>
                   </button>
                 ) : (
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setIsEditing(false)}
-                      className="px-3 py-1.5 rounded-xl bg-white/5 text-slate-400 hover:text-white font-semibold"
+                      className="px-3 py-1.5 rounded-xl bg-[#F2EFE9] text-[#5C5852] hover:text-[#161514] border border-[#D2CBBF] font-semibold"
                     >
                       Cancelar
                     </button>
                     <button
                       onClick={handleSaveProfile}
                       disabled={isSaving}
-                      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#D4AF37] text-slate-950 font-bold shadow-md"
+                      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] font-bold shadow-sm"
                     >
-                      <Save className="w-3.5 h-3.5" />
+                      <Save className="w-3.5 h-3.5 text-[#C69765]" />
                       <span>{isSaving ? 'Guardando...' : 'Guardar'}</span>
                     </button>
                   </div>
@@ -407,46 +407,46 @@ export const AdminUserDetailsModal: React.FC<AdminUserDetailsModalProps> = ({
 
               {!isEditing ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/10 space-y-1">
-                    <span className="text-[10px] text-slate-400 uppercase font-bold block">Nombre Completo</span>
-                    <span className="text-white font-bold text-sm block">{user.name}</span>
+                  <div className="p-3.5 rounded-xl bg-white border border-[#E6E1D6] space-y-1">
+                    <span className="text-[10px] text-[#5C5852] uppercase font-bold block">Nombre Completo</span>
+                    <span className="text-[#161514] font-bold text-sm block">{user.name}</span>
                   </div>
 
-                  <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/10 space-y-1">
-                    <span className="text-[10px] text-slate-400 uppercase font-bold block">Número de Cliente</span>
+                  <div className="p-3.5 rounded-xl bg-white border border-[#E6E1D6] space-y-1">
+                    <span className="text-[10px] text-[#5C5852] uppercase font-bold block">Número de Cliente</span>
                     <div className="flex items-center justify-between">
-                      <span className="font-mono text-[#D4AF37] font-bold text-sm">
+                      <span className="font-mono tabular-nums text-[#9A6B3B] font-bold text-sm">
                         {user.clientNumber || 'No asignado'}
                       </span>
                       {user.clientNumber && (
                         <button
                           onClick={() => copyToClipboard(user.clientNumber!, 'Número de cliente')}
-                          className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white"
+                          className="p-1.5 rounded-lg bg-[#F2EFE9] hover:bg-[#E8E3D9] text-[#5C5852] hover:text-[#161514]"
                         >
-                          {copiedField === 'Número de cliente' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                          {copiedField === 'Número de cliente' ? <Check className="w-3.5 h-3.5 text-emerald-700" /> : <Copy className="w-3.5 h-3.5" />}
                         </button>
                       )}
                     </div>
                   </div>
 
-                  <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/10 space-y-1">
-                    <span className="text-[10px] text-slate-400 uppercase font-bold block">Teléfono / WhatsApp</span>
+                  <div className="p-3.5 rounded-xl bg-white border border-[#E6E1D6] space-y-1">
+                    <span className="text-[10px] text-[#5C5852] uppercase font-bold block">Teléfono / WhatsApp</span>
                     <div className="flex items-center justify-between">
-                      <span className="text-white font-mono">{user.phone || 'Sin registrar'}</span>
+                      <span className="text-[#161514] font-mono tabular-nums font-semibold">{user.phone || 'Sin registrar'}</span>
                       {user.phone && (
                         <div className="flex items-center gap-1">
                           <a
                             href={`https://wa.me/${user.phone.replace(/\D/g, '')}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="p-1 rounded-lg bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30"
+                            className="p-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100"
                             title="Enviar WhatsApp"
                           >
                             <MessageCircle className="w-3.5 h-3.5" />
                           </a>
                           <a
                             href={`tel:${user.phone}`}
-                            className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300"
+                            className="p-1.5 rounded-lg bg-[#F2EFE9] hover:bg-[#E8E3D9] border border-[#D2CBBF] text-[#161514]"
                             title="Llamar"
                           >
                             <Phone className="w-3.5 h-3.5" />
@@ -456,104 +456,104 @@ export const AdminUserDetailsModal: React.FC<AdminUserDetailsModalProps> = ({
                     </div>
                   </div>
 
-                  <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/10 space-y-1">
-                    <span className="text-[10px] text-slate-400 uppercase font-bold block">Correo Electrónico</span>
-                    <span className="text-slate-300 truncate block">{user.email || 'Sin correo'}</span>
+                  <div className="p-3.5 rounded-xl bg-white border border-[#E6E1D6] space-y-1">
+                    <span className="text-[10px] text-[#5C5852] uppercase font-bold block">Correo Electrónico</span>
+                    <span className="text-[#161514] truncate block">{user.email || 'Sin correo'}</span>
                   </div>
 
-                  <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/10 space-y-1">
-                    <span className="text-[10px] text-slate-400 uppercase font-bold block">Nivel de Membresía</span>
-                    <span className="text-[#D4AF37] font-bold block">{user.membershipTier || 'VIP'}</span>
+                  <div className="p-3.5 rounded-xl bg-white border border-[#E6E1D6] space-y-1">
+                    <span className="text-[10px] text-[#5C5852] uppercase font-bold block">Nivel de Membresía</span>
+                    <span className="text-[#9A6B3B] font-bold block">{user.membershipTier || 'VIP'}</span>
                   </div>
 
-                  <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/10 space-y-1">
-                    <span className="text-[10px] text-slate-400 uppercase font-bold block">PIN de Acceso Rápido</span>
-                    <span className="font-mono text-slate-300 font-bold block">{user.pin || '1234'}</span>
+                  <div className="p-3.5 rounded-xl bg-white border border-[#E6E1D6] space-y-1">
+                    <span className="text-[10px] text-[#5C5852] uppercase font-bold block">PIN de Acceso Rápido</span>
+                    <span className="font-mono tabular-nums text-[#161514] font-bold block">{user.pin || '1234'}</span>
                   </div>
 
-                  <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/10 space-y-1">
-                    <span className="text-[10px] text-slate-400 uppercase font-bold block">Cumpleaños</span>
-                    <span className="text-slate-300 block">{user.birthday || 'No registrado'}</span>
+                  <div className="p-3.5 rounded-xl bg-white border border-[#E6E1D6] space-y-1">
+                    <span className="text-[10px] text-[#5C5852] uppercase font-bold block">Cumpleaños</span>
+                    <span className="text-[#161514] block">{user.birthday || 'No registrado'}</span>
                   </div>
 
-                  <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/10 space-y-1">
-                    <span className="text-[10px] text-slate-400 uppercase font-bold block">Fecha de Registro</span>
-                    <span className="text-slate-300 block">
+                  <div className="p-3.5 rounded-xl bg-white border border-[#E6E1D6] space-y-1">
+                    <span className="text-[10px] text-[#5C5852] uppercase font-bold block">Fecha de Registro</span>
+                    <span className="text-[#161514] block">
                       {user.createdAt ? formatDateSpanish(user.createdAt.substring(0, 10)) : 'Reciente'}
                     </span>
                   </div>
 
-                  <div className="sm:col-span-2 p-3.5 rounded-2xl bg-white/[0.02] border border-white/10 space-y-1.5">
-                    <span className="text-[10px] text-slate-400 uppercase font-bold block flex items-center gap-1">
-                      <Scissors className="w-3 h-3 text-[#D4AF37]" />
+                  <div className="sm:col-span-2 p-3.5 rounded-xl bg-white border border-[#E6E1D6] space-y-1.5">
+                    <span className="text-[10px] text-[#5C5852] uppercase font-bold flex items-center gap-1">
+                      <Scissors className="w-3 h-3 text-[#9A6B3B]" />
                       Notas de Estilo, Corte y Preferencias
                     </span>
-                    <p className="text-slate-200 leading-relaxed italic">
+                    <p className="text-[#161514] leading-relaxed italic">
                       {user.notes ? `"${user.notes}"` : 'Sin notas registradas. Haz clic en "Editar Datos" para agregar preferencias de corte, navaja o productos favoritos.'}
                     </p>
                   </div>
                 </div>
               ) : (
                 /* EDIT FORM */
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white/[0.02] border border-white/15 p-4 rounded-2xl">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white border border-[#E6E1D6] p-4 rounded-2xl">
                   <div>
-                    <label className="text-slate-400 block mb-1">Nombre Completo *</label>
+                    <label className="text-[#5C5852] font-semibold block mb-1">Nombre Completo *</label>
                     <input
                       type="text"
                       value={editForm.name || ''}
                       onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                      className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                      className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] focus:outline-none focus:border-[#9A6B3B]"
                     />
                   </div>
 
                   <div>
-                    <label className="text-slate-400 block mb-1">Número de Cliente (6 dígitos)</label>
+                    <label className="text-[#5C5852] font-semibold block mb-1">Número de Cliente (6 dígitos)</label>
                     <input
                       type="text"
                       maxLength={6}
                       value={editForm.clientNumber || ''}
                       onChange={(e) => setEditForm({ ...editForm, clientNumber: e.target.value.replace(/\D/g, '') })}
-                      className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white font-mono font-bold"
+                      className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] font-mono tabular-nums font-bold focus:outline-none focus:border-[#9A6B3B]"
                     />
                   </div>
 
                   <div>
-                    <label className="text-slate-400 block mb-1">Teléfono</label>
+                    <label className="text-[#5C5852] font-semibold block mb-1">Teléfono</label>
                     <input
                       type="text"
                       value={editForm.phone || ''}
                       onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                      className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white font-mono"
+                      className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] font-mono tabular-nums focus:outline-none focus:border-[#9A6B3B]"
                     />
                   </div>
 
                   <div>
-                    <label className="text-slate-400 block mb-1">Correo Electrónico</label>
+                    <label className="text-[#5C5852] font-semibold block mb-1">Correo Electrónico</label>
                     <input
                       type="email"
                       value={editForm.email || ''}
                       onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                      className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                      className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] focus:outline-none focus:border-[#9A6B3B]"
                     />
                   </div>
 
                   <div>
-                    <label className="text-slate-400 block mb-1">PIN de Acceso (4 dígitos)</label>
+                    <label className="text-[#5C5852] font-semibold block mb-1">PIN de Acceso (4 dígitos)</label>
                     <input
                       type="text"
                       maxLength={6}
                       value={editForm.pin || ''}
                       onChange={(e) => setEditForm({ ...editForm, pin: e.target.value })}
-                      className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white font-mono"
+                      className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] font-mono tabular-nums focus:outline-none focus:border-[#9A6B3B]"
                     />
                   </div>
 
                   <div>
-                    <label className="text-slate-400 block mb-1">Nivel de Membresía</label>
+                    <label className="text-[#5C5852] font-semibold block mb-1">Nivel de Membresía</label>
                     <select
                       value={editForm.membershipTier || 'VIP'}
                       onChange={(e) => setEditForm({ ...editForm, membershipTier: e.target.value as any })}
-                      className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                      className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] focus:outline-none focus:border-[#9A6B3B]"
                     >
                       <option value="VIP">VIP</option>
                       <option value="Gold">Gold</option>
@@ -563,22 +563,22 @@ export const AdminUserDetailsModal: React.FC<AdminUserDetailsModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="text-slate-400 block mb-1">Cumpleaños (DD/MM o AAAA-MM-DD)</label>
+                    <label className="text-[#5C5852] font-semibold block mb-1">Cumpleaños (DD/MM o AAAA-MM-DD)</label>
                     <input
                       type="text"
                       value={editForm.birthday || ''}
                       onChange={(e) => setEditForm({ ...editForm, birthday: e.target.value })}
                       placeholder="Ej. 15 de Octubre"
-                      className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                      className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] placeholder:text-[#8E887E] focus:outline-none focus:border-[#9A6B3B]"
                     />
                   </div>
 
                   <div>
-                    <label className="text-slate-400 block mb-1">Estado de la cuenta</label>
+                    <label className="text-[#5C5852] font-semibold block mb-1">Estado de la cuenta</label>
                     <select
                       value={editForm.active ? 'active' : 'inactive'}
                       onChange={(e) => setEditForm({ ...editForm, active: e.target.value === 'active' })}
-                      className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                      className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] focus:outline-none focus:border-[#9A6B3B]"
                     >
                       <option value="active">Activo</option>
                       <option value="inactive">Inactivo / Bloqueado</option>
@@ -586,13 +586,13 @@ export const AdminUserDetailsModal: React.FC<AdminUserDetailsModalProps> = ({
                   </div>
 
                   <div className="sm:col-span-2">
-                    <label className="text-slate-400 block mb-1">Notas de Estilo, Corte y Preferencias</label>
+                    <label className="text-[#5C5852] font-semibold block mb-1">Notas de Estilo, Corte y Preferencias</label>
                     <textarea
                       rows={3}
                       value={editForm.notes || ''}
                       onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
                       placeholder="Ej. Le gusta degradado medio con navaja, poco producto, peinado hacia la derecha..."
-                      className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                      className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] placeholder:text-[#8E887E] focus:outline-none focus:border-[#9A6B3B]"
                     />
                   </div>
                 </div>
@@ -604,25 +604,25 @@ export const AdminUserDetailsModal: React.FC<AdminUserDetailsModalProps> = ({
           {activeTab === 'points' && (
             <div className="space-y-4">
               {/* CURRENT BALANCE BANNER */}
-              <div className="p-4 rounded-2xl bg-gradient-to-r from-[#181D26] to-[#0F1218] border border-[#D4AF37]/40 flex items-center justify-between">
+              <div className="p-4 rounded-2xl bg-[#FBF6EE] border border-[#9A6B3B]/35 flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] text-slate-400 uppercase font-bold block">Balance Actual de Puntos</span>
-                  <span className="text-2xl font-black text-[#D4AF37] font-mono tracking-wider">
+                  <span className="text-[10px] text-[#767067] uppercase tracking-widest font-bold block">Balance Actual de Puntos</span>
+                  <span className="text-2xl font-black text-[#9A6B3B] font-mono tabular-nums tracking-wider">
                     {user.points ?? 100} PTS
                   </span>
                 </div>
                 <div className="text-right">
-                  <span className="text-[10px] text-slate-400 block">Nivel</span>
-                  <span className="font-bold text-white text-xs px-2.5 py-1 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/30 text-[#D4AF37]">
+                  <span className="text-[10px] text-[#767067] uppercase tracking-wider font-semibold block mb-1">Nivel</span>
+                  <span className="font-bold text-xs px-2.5 py-1 rounded-full bg-[#161514] text-[#FAF9F6] border border-[#161514]">
                     {user.membershipTier || 'VIP'}
                   </span>
                 </div>
               </div>
 
               {/* QUICK POINTS MODIFIER */}
-              <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-3">
-                <h4 className="font-bold text-white text-xs flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <div className="p-4 rounded-2xl bg-white border border-[#E6E1D6] space-y-3 shadow-sm">
+                <h4 className="font-display font-bold text-[#161514] text-sm uppercase tracking-wide flex items-center gap-1.5">
+                  <Sparkles className="w-4 h-4 text-[#9A6B3B]" />
                   <span>Modificar o Abonar Puntos</span>
                 </h4>
 
@@ -630,76 +630,76 @@ export const AdminUserDetailsModal: React.FC<AdminUserDetailsModalProps> = ({
                   <button
                     onClick={() => handleApplyPoints('add', 50)}
                     disabled={isUpdatingPoints}
-                    className="p-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 font-bold transition-all active:scale-95"
+                    className="p-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 font-bold font-mono transition-all active:scale-95"
                   >
                     +50 Puntos
                   </button>
                   <button
                     onClick={() => handleApplyPoints('add', 100)}
                     disabled={isUpdatingPoints}
-                    className="p-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 font-bold transition-all active:scale-95"
+                    className="p-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 font-bold font-mono transition-all active:scale-95"
                   >
                     +100 Puntos
                   </button>
                   <button
                     onClick={() => handleApplyPoints('deduct', 50)}
                     disabled={isUpdatingPoints}
-                    className="p-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 font-bold transition-all active:scale-95"
+                    className="p-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-800 font-bold font-mono transition-all active:scale-95"
                   >
                     -50 Puntos
                   </button>
                   <button
                     onClick={() => handleApplyPoints('deduct', 100)}
                     disabled={isUpdatingPoints}
-                    className="p-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 font-bold transition-all active:scale-95"
+                    className="p-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-800 font-bold font-mono transition-all active:scale-95"
                   >
                     -100 Puntos
                   </button>
                 </div>
 
                 {/* Custom Points Input */}
-                <div className="pt-2 border-t border-white/5 space-y-2">
+                <div className="pt-2 border-t border-[#E6E1D6] space-y-2">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div>
-                      <label className="text-slate-400 block mb-1">Cantidad personalizada</label>
+                      <label className="text-[#5C5852] font-semibold block mb-1">Cantidad personalizada</label>
                       <input
                         type="number"
                         value={pointsDelta}
                         onChange={(e) => setPointsDelta(Number(e.target.value))}
-                        className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white font-mono font-bold"
+                        className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] font-mono font-bold focus:outline-none focus:border-[#9A6B3B]"
                       />
                     </div>
                     <div>
-                      <label className="text-slate-400 block mb-1">Motivo / Concepto</label>
+                      <label className="text-[#5C5852] font-semibold block mb-1">Motivo / Concepto</label>
                       <input
                         type="text"
                         value={pointsReason}
                         onChange={(e) => setPointsReason(e.target.value)}
                         placeholder="Ej. Cortesía por recomendación"
-                        className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                        className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] placeholder:text-[#8E887E] focus:outline-none focus:border-[#9A6B3B]"
                       />
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 pt-1">
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
                     <button
                       onClick={() => handleApplyPoints('add')}
                       disabled={isUpdatingPoints}
-                      className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition-all shadow-md"
+                      className="flex-1 py-2.5 px-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold transition-all shadow-sm"
                     >
                       Abonar (+{pointsDelta})
                     </button>
                     <button
                       onClick={() => handleApplyPoints('deduct')}
                       disabled={isUpdatingPoints}
-                      className="flex-1 py-2.5 rounded-xl bg-rose-600/80 hover:bg-rose-600 text-white font-bold transition-all shadow-md"
+                      className="flex-1 py-2.5 px-3 rounded-xl bg-rose-700 hover:bg-rose-800 text-white font-bold transition-all shadow-sm"
                     >
                       Descontar (-{pointsDelta})
                     </button>
                     <button
                       onClick={() => handleApplyPoints('set')}
                       disabled={isUpdatingPoints}
-                      className="py-2.5 px-4 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 font-bold transition-all"
+                      className="py-2.5 px-4 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] border border-[#D2CBBF] text-[#161514] font-bold transition-all"
                       title="Fijar exactamente esta cantidad"
                     >
                       Fijar Total ({pointsDelta})
@@ -710,9 +710,9 @@ export const AdminUserDetailsModal: React.FC<AdminUserDetailsModalProps> = ({
 
               {/* POINTS HISTORY LOG */}
               <div className="space-y-2">
-                <h4 className="font-bold text-white text-xs">Historial Reciente de Puntos</h4>
+                <h4 className="font-display font-bold text-[#161514] text-xs uppercase tracking-wide">Historial Reciente de Puntos</h4>
                 {(!user.pointsHistory || user.pointsHistory.length === 0) ? (
-                  <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10 text-slate-400 text-center">
+                  <div className="p-4 rounded-2xl bg-white border border-[#E6E1D6] text-[#767067] text-center">
                     No hay movimientos manuales registrados aún.
                   </div>
                 ) : (
@@ -720,17 +720,17 @@ export const AdminUserDetailsModal: React.FC<AdminUserDetailsModalProps> = ({
                     {user.pointsHistory.map((item) => (
                       <div
                         key={item.id}
-                        className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between"
+                        className="p-2.5 rounded-xl bg-white border border-[#E6E1D6] flex items-center justify-between"
                       >
                         <div>
-                          <p className="text-white font-semibold">{item.reason}</p>
-                          <span className="text-[10px] text-slate-500">
+                          <p className="text-[#161514] font-semibold">{item.reason}</p>
+                          <span className="text-[10px] text-[#767067] font-mono">
                             {formatDateSpanish(item.date.substring(0, 10))} • {item.date.substring(11, 16)}
                           </span>
                         </div>
                         <span
-                          className={`font-mono font-bold text-xs ${
-                            item.amount >= 0 ? 'text-emerald-400' : 'text-rose-400'
+                          className={`font-mono font-bold text-xs tabular-nums ${
+                            item.amount >= 0 ? 'text-emerald-700' : 'text-rose-700'
                           }`}
                         >
                           {item.amount >= 0 ? `+${item.amount}` : item.amount} pts
@@ -747,45 +747,45 @@ export const AdminUserDetailsModal: React.FC<AdminUserDetailsModalProps> = ({
           {activeTab === 'visits' && (
             <div className="space-y-4">
               {/* MANUAL VISITS ADJUSTMENT CARD */}
-              <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-3">
+              <div className="p-4 rounded-2xl bg-white border border-[#E6E1D6] space-y-3 shadow-sm">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="font-bold text-white text-xs">Ajuste de Visitas Realizadas</h4>
-                    <p className="text-[11px] text-slate-400">
-                      Citas completadas en sistema: <strong>{completedAppointments.length}</strong> + Visitas adicionales: <strong>{user.manualVisits || 0}</strong>
+                    <h4 className="font-display font-bold text-[#161514] text-sm uppercase tracking-wide">Ajuste de Visitas Realizadas</h4>
+                    <p className="text-[11px] text-[#5C5852]">
+                      Citas completadas en sistema: <strong className="text-[#161514] font-mono">{completedAppointments.length}</strong> + Visitas adicionales: <strong className="text-[#161514] font-mono">{user.manualVisits || 0}</strong>
                     </p>
                   </div>
                   <div className="text-right">
-                    <span className="text-[10px] text-slate-400 uppercase font-bold block">Total Visible</span>
-                    <span className="text-xl font-black text-white font-mono">{totalCompletedVisits} Visitas</span>
+                    <span className="text-[10px] text-[#767067] uppercase tracking-wider font-bold block">Total Visible</span>
+                    <span className="text-xl font-black text-[#161514] font-mono tabular-nums">{totalCompletedVisits} Visitas</span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 pt-1">
+                <div className="flex flex-wrap items-center gap-2 pt-1">
                   <input
                     type="number"
                     min={0}
                     value={visitsInput}
                     onChange={(e) => setVisitsInput(Number(e.target.value))}
-                    className="w-32 p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white font-mono font-bold text-center"
+                    className="w-32 p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] font-mono font-bold text-center focus:outline-none focus:border-[#9A6B3B]"
                   />
                   <button
                     onClick={handleSaveVisits}
                     disabled={isUpdatingVisits}
-                    className="px-4 py-2.5 rounded-xl bg-[#D4AF37] text-slate-950 font-bold hover:bg-[#E5B869] transition-all"
+                    className="px-4 py-2.5 rounded-xl bg-[#161514] text-[#FAF9F6] font-bold hover:bg-[#2A2826] transition-all"
                   >
                     {isUpdatingVisits ? 'Guardando...' : 'Actualizar Visitas Manuales'}
                   </button>
                   <button
                     onClick={() => setVisitsInput((prev) => prev + 1)}
-                    className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-200 font-bold"
+                    className="p-2.5 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] border border-[#D2CBBF] text-[#161514] font-bold"
                     title="+1 Visita"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => setVisitsInput((prev) => Math.max(0, prev - 1))}
-                    className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-200 font-bold"
+                    className="p-2.5 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] border border-[#D2CBBF] text-[#161514] font-bold"
                     title="-1 Visita"
                   >
                     <Minus className="w-4 h-4" />
@@ -795,9 +795,9 @@ export const AdminUserDetailsModal: React.FC<AdminUserDetailsModalProps> = ({
 
               {/* APPOINTMENT TIMELINE */}
               <div className="space-y-2">
-                <h4 className="font-bold text-white text-xs">Historial Completo de Citas</h4>
+                <h4 className="font-display font-bold text-[#161514] text-xs uppercase tracking-wide">Historial Completo de Citas</h4>
                 {userAppointments.length === 0 ? (
-                  <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10 text-slate-400 text-center">
+                  <div className="p-4 rounded-2xl bg-white border border-[#E6E1D6] text-[#767067] text-center">
                     Este usuario aún no tiene citas registradas en el sistema.
                   </div>
                 ) : (
@@ -805,32 +805,32 @@ export const AdminUserDetailsModal: React.FC<AdminUserDetailsModalProps> = ({
                     {userAppointments.map((app) => (
                       <div
                         key={app.id}
-                        className="p-3 rounded-2xl bg-white/[0.02] border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow"
+                        className="p-3 rounded-2xl bg-white border border-[#E6E1D6] flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-sm"
                       >
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-bold text-white text-xs">{app.serviceNameSnapshot}</span>
+                            <span className="font-bold text-[#161514] text-xs">{app.serviceNameSnapshot}</span>
                             <span
-                              className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase ${
+                              className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase border ${
                                 app.status === 'completed'
-                                  ? 'bg-blue-500/20 text-blue-300'
+                                  ? 'bg-sky-50 text-sky-800 border-sky-200'
                                   : app.status === 'confirmed'
-                                  ? 'bg-emerald-500/20 text-emerald-300'
-                                  : 'bg-rose-500/20 text-rose-300'
+                                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                  : 'bg-rose-50 text-rose-800 border-rose-200'
                               }`}
                             >
                               {app.status}
                             </span>
                           </div>
-                          <p className="text-[11px] text-slate-400 mt-0.5">
-                            💈 Barbero: <strong className="text-[#D4AF37]">{app.barberName}</strong> • 📅 {formatDateSpanish(app.date)} {formatTime12h(app.startTime)}
+                          <p className="text-[11px] text-[#5C5852] mt-0.5">
+                            Barbero: <strong className="text-[#9A6B3B]">{app.barberName}</strong> • {formatDateSpanish(app.date)} {formatTime12h(app.startTime)}
                           </p>
                           {app.notes && (
-                            <p className="text-[10px] text-slate-500 italic mt-0.5">Nota: "{app.notes}"</p>
+                            <p className="text-[10px] text-[#767067] italic mt-0.5">Nota: "{app.notes}"</p>
                           )}
                         </div>
 
-                        <span className="font-mono font-bold text-white text-xs self-end sm:self-auto">
+                        <span className="font-mono font-bold text-[#161514] text-xs tabular-nums self-end sm:self-auto">
                           {formatCurrency(app.servicePriceSnapshot)}
                         </span>
                       </div>
@@ -846,63 +846,63 @@ export const AdminUserDetailsModal: React.FC<AdminUserDetailsModalProps> = ({
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-bold text-white text-xs">Registro de Compras y Productos</h4>
-                  <p className="text-[11px] text-slate-400">
-                    Total gastado en productos: <strong className="text-emerald-400">{formatCurrency(totalSpentPurchases)}</strong>
+                  <h4 className="font-display font-bold text-[#161514] text-sm uppercase tracking-wide">Registro de Compras y Productos</h4>
+                  <p className="text-[11px] text-[#5C5852]">
+                    Total gastado en productos: <strong className="text-emerald-700 font-mono">{formatCurrency(totalSpentPurchases)}</strong>
                   </p>
                 </div>
 
                 <button
                   onClick={() => setIsAddingPurchase(!isAddingPurchase)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#D4AF37] text-slate-950 font-bold hover:bg-[#E5B869] transition-all"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#161514] text-[#FAF9F6] font-bold hover:bg-[#2A2826] transition-all"
                 >
-                  <Plus className="w-3.5 h-3.5" />
+                  <Plus className="w-3.5 h-3.5 text-[#C69765]" />
                   <span>Registrar Compra</span>
                 </button>
               </div>
 
               {/* NEW PURCHASE FORM */}
               {isAddingPurchase && (
-                <div className="p-4 rounded-2xl bg-white/[0.04] border border-[#D4AF37]/40 space-y-3 animate-in fade-in">
-                  <h5 className="font-bold text-white text-xs">Registrar Nuevo Producto / Venta</h5>
+                <div className="p-4 rounded-2xl bg-white border border-[#9A6B3B]/40 space-y-3 animate-in fade-in shadow-sm">
+                  <h5 className="font-display font-bold text-[#161514] text-xs uppercase tracking-wide">Registrar Nuevo Producto / Venta</h5>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <div>
-                      <label className="text-slate-400 block mb-1">Producto o Concepto *</label>
+                      <label className="text-[#5C5852] font-semibold block mb-1">Producto o Concepto *</label>
                       <input
                         type="text"
                         value={newPurchaseName}
                         onChange={(e) => setNewPurchaseName(e.target.value)}
                         placeholder="Ej. Cera Pomada Mate 100ml"
-                        className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                        className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] placeholder:text-[#8E887E] focus:outline-none focus:border-[#9A6B3B]"
                       />
                     </div>
                     <div>
-                      <label className="text-slate-400 block mb-1">Precio ($ MXN) *</label>
+                      <label className="text-[#5C5852] font-semibold block mb-1">Precio ($ MXN) *</label>
                       <input
                         type="number"
                         value={newPurchasePrice}
                         onChange={(e) => setNewPurchasePrice(Number(e.target.value))}
-                        className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white font-mono"
+                        className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] font-mono focus:outline-none focus:border-[#9A6B3B]"
                       />
                     </div>
                     <div>
-                      <label className="text-slate-400 block mb-1">Barbero que atendió (opcional)</label>
+                      <label className="text-[#5C5852] font-semibold block mb-1">Barbero que atendió (opcional)</label>
                       <input
                         type="text"
                         value={newPurchaseBarber}
                         onChange={(e) => setNewPurchaseBarber(e.target.value)}
                         placeholder="Ej. Ramón"
-                        className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                        className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] placeholder:text-[#8E887E] focus:outline-none focus:border-[#9A6B3B]"
                       />
                     </div>
                     <div>
-                      <label className="text-slate-400 block mb-1">Notas (opcional)</label>
+                      <label className="text-[#5C5852] font-semibold block mb-1">Notas (opcional)</label>
                       <input
                         type="text"
                         value={newPurchaseNotes}
                         onChange={(e) => setNewPurchaseNotes(e.target.value)}
                         placeholder="Ej. Pago con tarjeta"
-                        className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                        className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] placeholder:text-[#8E887E] focus:outline-none focus:border-[#9A6B3B]"
                       />
                     </div>
                   </div>
@@ -910,14 +910,14 @@ export const AdminUserDetailsModal: React.FC<AdminUserDetailsModalProps> = ({
                   <div className="flex items-center gap-2 pt-1">
                     <button
                       onClick={() => setIsAddingPurchase(false)}
-                      className="px-3 py-2 rounded-xl bg-white/5 text-slate-300 font-semibold"
+                      className="px-3 py-2 rounded-xl bg-[#F2EFE9] border border-[#D2CBBF] text-[#161514] font-semibold hover:bg-[#E8E3D9]"
                     >
                       Cancelar
                     </button>
                     <button
                       onClick={handleAddPurchase}
                       disabled={isSavingPurchase}
-                      className="px-4 py-2 rounded-xl bg-[#D4AF37] text-slate-950 font-bold hover:bg-[#E5B869]"
+                      className="px-4 py-2 rounded-xl bg-[#161514] text-[#FAF9F6] font-bold hover:bg-[#2A2826]"
                     >
                       {isSavingPurchase ? 'Guardando...' : 'Guardar Compra'}
                     </button>
@@ -927,7 +927,7 @@ export const AdminUserDetailsModal: React.FC<AdminUserDetailsModalProps> = ({
 
               {/* LIST OF PURCHASES */}
               {(!user.purchases || user.purchases.length === 0) ? (
-                <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/10 text-slate-400 text-center">
+                <div className="p-5 rounded-2xl bg-white border border-[#E6E1D6] text-[#767067] text-center">
                   No hay compras de productos registradas para este cliente todavía.
                 </div>
               ) : (
@@ -935,18 +935,18 @@ export const AdminUserDetailsModal: React.FC<AdminUserDetailsModalProps> = ({
                   {user.purchases.map((p) => (
                     <div
                       key={p.id}
-                      className="p-3 rounded-2xl bg-white/[0.02] border border-white/10 flex items-center justify-between"
+                      className="p-3 rounded-2xl bg-white border border-[#E6E1D6] flex items-center justify-between shadow-sm"
                     >
                       <div>
                         <div className="flex items-center gap-2">
-                          <ShoppingBag className="w-3.5 h-3.5 text-[#D4AF37]" />
-                          <span className="font-bold text-white text-xs">{p.itemName}</span>
+                          <ShoppingBag className="w-3.5 h-3.5 text-[#9A6B3B]" />
+                          <span className="font-bold text-[#161514] text-xs">{p.itemName}</span>
                         </div>
-                        <p className="text-[10px] text-slate-400 mt-0.5">
-                          📅 {formatDateSpanish(p.date.substring(0, 10))} {p.barberName ? `• Barbero: ${p.barberName}` : ''} {p.notes ? `• (${p.notes})` : ''}
+                        <p className="text-[10px] text-[#5C5852] mt-0.5">
+                          {formatDateSpanish(p.date.substring(0, 10))} {p.barberName ? `• Barbero: ${p.barberName}` : ''} {p.notes ? `• (${p.notes})` : ''}
                         </p>
                       </div>
-                      <span className="font-mono font-bold text-emerald-400 text-xs">
+                      <span className="font-mono font-bold text-emerald-700 text-xs tabular-nums">
                         {formatCurrency(p.price)}
                       </span>
                     </div>
@@ -958,14 +958,14 @@ export const AdminUserDetailsModal: React.FC<AdminUserDetailsModalProps> = ({
 
           {/* 5. TAB: QR CODE */}
           {activeTab === 'qr' && (
-            <div className="p-4 rounded-2xl bg-gradient-to-b from-[#161A22] to-[#0E1015] border-2 border-[#D4AF37]/50 text-center space-y-4 max-w-sm mx-auto shadow-2xl">
-              <div className="flex items-center justify-center gap-1.5 px-3 py-1 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/40 text-[#D4AF37] text-xs font-bold w-fit mx-auto">
+            <div className="p-5 rounded-2xl bg-[#FBF6EE] border-2 border-[#9A6B3B]/45 text-center space-y-4 max-w-sm mx-auto shadow-lg">
+              <div className="flex items-center justify-center gap-1.5 px-3 py-1 rounded-full bg-[#161514] text-[#C69765] text-xs font-bold w-fit mx-auto">
                 <Crown className="w-3.5 h-3.5" />
                 <span>PASE VIP • MONARCA</span>
               </div>
 
               {/* High Contrast QR Container */}
-              <div className="relative mx-auto max-w-[200px] bg-white rounded-2xl p-3 shadow-2xl border-2 border-[#D4AF37]/30">
+              <div className="relative mx-auto max-w-[200px] bg-white rounded-2xl p-3 shadow-md border border-[#D2CBBF]">
                 <img
                   src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&margin=4&data=${encodeURIComponent(qrData)}`}
                   alt={`QR Cliente ${user.clientNumber}`}
@@ -974,21 +974,21 @@ export const AdminUserDetailsModal: React.FC<AdminUserDetailsModalProps> = ({
               </div>
 
               <div>
-                <span className="text-[10px] text-slate-400 uppercase font-bold tracking-widest block">
+                <span className="text-[10px] text-[#767067] uppercase font-bold tracking-widest block">
                   Número de Cliente
                 </span>
-                <span className="font-mono text-2xl font-black text-[#D4AF37] tracking-[0.25em]">
+                <span className="font-mono text-2xl font-black text-[#161514] tracking-[0.25em]">
                   {user.clientNumber || '000000'}
                 </span>
-                <p className="font-bold text-white text-xs uppercase mt-1">{user.name}</p>
-                {user.phone && <p className="font-mono text-slate-400 text-xs mt-0.5">{user.phone}</p>}
+                <p className="font-bold text-[#161514] text-xs uppercase mt-1">{user.name}</p>
+                {user.phone && <p className="font-mono text-[#5C5852] text-xs mt-0.5">{user.phone}</p>}
               </div>
 
               <button
                 onClick={() => copyToClipboard(user.clientNumber || '', 'Número de cliente')}
-                className="w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs flex items-center justify-center gap-1.5"
+                className="w-full py-2.5 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
               >
-                <Copy className="w-3.5 h-3.5" />
+                <Copy className="w-3.5 h-3.5 text-[#C69765]" />
                 <span>Copiar Número de Cliente</span>
               </button>
             </div>
@@ -997,12 +997,12 @@ export const AdminUserDetailsModal: React.FC<AdminUserDetailsModalProps> = ({
           {/* 6. TAB: PERMISSIONS & ROLE MANAGEMENT */}
           {activeTab === 'permissions' && (
             <div className="space-y-4">
-              <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-3">
-                <h4 className="font-bold text-white text-xs flex items-center gap-1.5">
-                  <Shield className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <div className="p-4 rounded-2xl bg-white border border-[#E6E1D6] space-y-3 shadow-sm">
+                <h4 className="font-display font-bold text-[#161514] text-sm uppercase tracking-wide flex items-center gap-1.5">
+                  <Shield className="w-4 h-4 text-[#9A6B3B]" />
                   <span>Control de Rol y Permisos de Acceso</span>
                 </h4>
-                <p className="text-slate-300 text-xs leading-relaxed">
+                <p className="text-[#5C5852] text-xs leading-relaxed">
                   Asigna el nivel de privilegios para este usuario dentro del sistema de Monarca Barber.
                 </p>
 
@@ -1012,16 +1012,16 @@ export const AdminUserDetailsModal: React.FC<AdminUserDetailsModalProps> = ({
                     onClick={() => handleRoleChange('client')}
                     className={`p-3.5 rounded-2xl border text-left transition-all ${
                       user.role === 'client'
-                        ? 'bg-[#D4AF37]/15 border-[#D4AF37] text-white shadow-lg'
-                        : 'bg-white/[0.02] border-white/10 text-slate-400 hover:text-white hover:bg-white/5'
+                        ? 'bg-[#FBF6EE] border-[#9A6B3B] text-[#161514] shadow-sm'
+                        : 'bg-[#FAF9F6] border-[#E6E1D6] text-[#5C5852] hover:text-[#161514] hover:bg-[#F2EFE9]'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <User className={`w-4 h-4 ${user.role === 'client' ? 'text-[#D4AF37]' : 'text-slate-400'}`} />
-                      {user.role === 'client' && <CheckCircle2 className="w-4 h-4 text-[#D4AF37]" />}
+                      <User className={`w-4 h-4 ${user.role === 'client' ? 'text-[#9A6B3B]' : 'text-[#767067]'}`} />
+                      {user.role === 'client' && <CheckCircle2 className="w-4 h-4 text-[#9A6B3B]" />}
                     </div>
-                    <span className="font-bold text-white block">Cliente</span>
-                    <span className="text-[10px] text-slate-400 block mt-1">
+                    <span className="font-bold text-[#161514] block">Cliente</span>
+                    <span className="text-[10px] text-[#5C5852] block mt-1">
                       Reserva citas, acumula puntos VIP y consulta su historial.
                     </span>
                   </button>
@@ -1031,16 +1031,16 @@ export const AdminUserDetailsModal: React.FC<AdminUserDetailsModalProps> = ({
                     onClick={() => handleRoleChange('barber')}
                     className={`p-3.5 rounded-2xl border text-left transition-all ${
                       user.role === 'barber'
-                        ? 'bg-blue-500/15 border-blue-500 text-white shadow-lg'
-                        : 'bg-white/[0.02] border-white/10 text-slate-400 hover:text-white hover:bg-white/5'
+                        ? 'bg-sky-50 border-sky-600 text-[#161514] shadow-sm'
+                        : 'bg-[#FAF9F6] border-[#E6E1D6] text-[#5C5852] hover:text-[#161514] hover:bg-[#F2EFE9]'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <Scissors className={`w-4 h-4 ${user.role === 'barber' ? 'text-blue-400' : 'text-slate-400'}`} />
-                      {user.role === 'barber' && <CheckCircle2 className="w-4 h-4 text-blue-400" />}
+                      <Scissors className={`w-4 h-4 ${user.role === 'barber' ? 'text-sky-700' : 'text-[#767067]'}`} />
+                      {user.role === 'barber' && <CheckCircle2 className="w-4 h-4 text-sky-700" />}
                     </div>
-                    <span className="font-bold text-white block">Barbero</span>
-                    <span className="text-[10px] text-slate-400 block mt-1">
+                    <span className="font-bold text-[#161514] block">Barbero</span>
+                    <span className="text-[10px] text-[#5C5852] block mt-1">
                       Acceso al panel de barbero, agenda de citas y creación de servicios propios.
                     </span>
                   </button>
@@ -1050,16 +1050,16 @@ export const AdminUserDetailsModal: React.FC<AdminUserDetailsModalProps> = ({
                     onClick={() => handleRoleChange('admin')}
                     className={`p-3.5 rounded-2xl border text-left transition-all ${
                       user.role === 'admin'
-                        ? 'bg-purple-500/15 border-purple-500 text-white shadow-lg'
-                        : 'bg-white/[0.02] border-white/10 text-slate-400 hover:text-white hover:bg-white/5'
+                        ? 'bg-purple-50 border-purple-600 text-[#161514] shadow-sm'
+                        : 'bg-[#FAF9F6] border-[#E6E1D6] text-[#5C5852] hover:text-[#161514] hover:bg-[#F2EFE9]'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <Shield className={`w-4 h-4 ${user.role === 'admin' ? 'text-purple-400' : 'text-slate-400'}`} />
-                      {user.role === 'admin' && <CheckCircle2 className="w-4 h-4 text-purple-400" />}
+                      <Shield className={`w-4 h-4 ${user.role === 'admin' ? 'text-purple-700' : 'text-[#767067]'}`} />
+                      {user.role === 'admin' && <CheckCircle2 className="w-4 h-4 text-purple-700" />}
                     </div>
-                    <span className="font-bold text-white block">Administrador</span>
-                    <span className="text-[10px] text-slate-400 block mt-1">
+                    <span className="font-bold text-[#161514] block">Administrador</span>
+                    <span className="text-[10px] text-[#5C5852] block mt-1">
                       Acceso total a métricas, catálogo, equipo, configuración global y usuarios.
                     </span>
                   </button>
@@ -1070,10 +1070,10 @@ export const AdminUserDetailsModal: React.FC<AdminUserDetailsModalProps> = ({
         </div>
 
         {/* BOTTOM ACTION BAR */}
-        <div className="pt-2 border-t border-white/10 flex items-center justify-end gap-2 shrink-0">
+        <div className="pt-2 border-t border-[#E6E1D6] flex items-center justify-end gap-2 shrink-0">
           <button
             onClick={onClose}
-            className="px-5 py-2.5 rounded-2xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs transition-all"
+            className="px-5 py-2.5 rounded-2xl bg-[#F2EFE9] hover:bg-[#E8E3D9] border border-[#D2CBBF] text-[#161514] font-bold text-xs transition-all"
           >
             Cerrar
           </button>

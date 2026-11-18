@@ -223,7 +223,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           particleCount: 120,
           spread: 70,
           origin: { y: 0.6 },
-          colors: ['#D4AF37', '#F5D77F', '#FFFFFF', '#996515'],
+          colors: ['#9A6B3B', '#C69765', '#161514', '#FAF9F6'],
         });
       } catch {
         // ignore
@@ -282,19 +282,19 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       {/* 1. NOT AUTHENTICATED: LOGIN / SOY NUEVO FLOW */}
       {/* ========================================================================= */}
       {!isAuthenticated && (
-        <div className="rounded-3xl bg-[#14171E] border border-white/10 p-4 sm:p-6 space-y-5 shadow-2xl">
+        <div className="rounded-3xl bg-white border border-[#E6E1D6] p-4 sm:p-6 space-y-5 shadow-[0_12px_32px_rgba(22,21,20,0.06)]">
           {/* TAB SWITCHER */}
-          <div className="flex p-1 rounded-2xl bg-black/50 border border-white/10">
+          <div className="flex p-1 rounded-xl bg-[#F2EFE9] border border-[#E6E1D6]">
             <button
               onClick={() => {
                 setAuthTab('login');
                 setLoginStep(1);
                 setAuthError(null);
               }}
-              className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+              className={`flex-1 py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${
                 authTab === 'login'
-                  ? 'bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 shadow-md'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-[#161514] text-[#FAF9F6] shadow-sm'
+                  : 'text-[#5C5852] hover:text-[#161514]'
               }`}
             >
               <User className="w-3.5 h-3.5" />
@@ -306,10 +306,10 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 setRegisterStep(1);
                 setAuthError(null);
               }}
-              className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+              className={`flex-1 py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${
                 authTab === 'register'
-                  ? 'bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 shadow-md'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-[#161514] text-[#FAF9F6] shadow-sm'
+                  : 'text-[#5C5852] hover:text-[#161514]'
               }`}
             >
               <Sparkles className="w-3.5 h-3.5" />
@@ -319,27 +319,24 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
           {/* ERROR MESSAGE BOX */}
           {authError && (
-            <div className="p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-200 text-xs flex items-start gap-2.5 animate-in fade-in">
-              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5 animate-in fade-in">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
               <div className="flex-1">{authError}</div>
             </div>
           )}
 
-          {/* ------------------------------------------------------------- */}
-          {/* FLOW A: INICIAR SESIÓN (Phone or Client Number + 4-digit PIN) */}
-          {/* ------------------------------------------------------------- */}
+          {/* FLOW A: INICIAR SESIÓN */}
           {authTab === 'login' && (
             <div className="space-y-4">
               {loginStep === 1 ? (
-                /* STEP 1: Enter Phone or Client Number */
                 <form onSubmit={handleVerifyLoginIdentifier} className="space-y-4">
                   <div>
-                    <label className="text-xs font-semibold text-slate-200 block mb-1.5">
+                    <label className="text-xs font-semibold text-[#161514] block mb-1.5">
                       Ingresa tu Celular o Número de Cliente
                     </label>
                     <div className="relative">
-                      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-slate-400">
-                        <Phone className="w-4 h-4 text-[#D4AF37]" />
+                      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-[#5C5852]">
+                        <Phone className="w-4 h-4 text-[#9A6B3B]" />
                       </div>
                       <input
                         type="text"
@@ -347,58 +344,56 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                         value={loginIdentifier}
                         onChange={(e) => setLoginIdentifier(e.target.value)}
                         placeholder="Ej. 55 1234 5678 o 849201"
-                        className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-900/90 border border-white/15 text-white text-sm font-mono tracking-wider focus:outline-none focus:border-[#D4AF37] transition-all"
+                        className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#FAF9F6] border border-[#E6E1D6] text-[#161514] placeholder-[#5C5852]/60 text-sm font-mono tracking-wider tabular-nums focus:outline-none focus:border-[#9A6B3B] transition-all"
                         required
                         autoFocus
                       />
                     </div>
-                    <p className="text-[11px] text-slate-400 mt-1.5 flex items-center gap-1">
-                      <span>💡</span>
-                      <span>Puedes ingresar tus 10 dígitos de celular o tu No. de cliente de 6 dígitos.</span>
+                    <p className="text-[11px] text-[#5C5852] mt-1.5">
+                      Puedes ingresar tus 10 dígitos de celular o tu No. de cliente de 6 dígitos.
                     </p>
                   </div>
 
                   <button
                     type="submit"
                     disabled={!loginIdentifier.trim() || isLoadingAuth}
-                    className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-bold text-xs shadow-xl shadow-[#D4AF37]/20 hover:scale-[1.01] active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="w-full py-3.5 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] font-semibold text-xs active:scale-[0.99] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                   >
                     {isLoadingAuth ? (
                       <RefreshCw className="w-4 h-4 animate-spin" />
                     ) : (
                       <>
                         <span>Siguiente</span>
-                        <ArrowRight className="w-4 h-4" />
+                        <ArrowRight className="w-4 h-4 text-[#C69765]" />
                       </>
                     )}
                   </button>
 
-                  <div className="pt-2 text-center border-t border-white/10">
+                  <div className="pt-3 text-center border-t border-[#E6E1D6]">
                     <button
                       type="button"
                       onClick={() => {
                         setAuthTab('register');
                         setAuthError(null);
                       }}
-                      className="text-xs text-[#D4AF37] hover:underline font-semibold"
+                      className="text-xs text-[#9A6B3B] hover:text-[#161514] hover:underline font-semibold"
                     >
                       ¿Eres nuevo? Crea tu Tarjeta de Cliente Digital aquí
                     </button>
                   </div>
                 </form>
               ) : (
-                /* STEP 2: Enter 4-Digit Numeric Password */
                 <form onSubmit={handleLoginWithPin} className="space-y-4 animate-in fade-in">
-                  <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
+                  <div className="p-3.5 rounded-xl bg-[#F2EFE9] border border-[#E6E1D6] flex items-center justify-between">
                     <div>
-                      <span className="text-[10px] text-slate-400 uppercase font-semibold block">
+                      <span className="text-[10px] text-[#5C5852] uppercase font-semibold tracking-wider block">
                         Titular de la cuenta
                       </span>
-                      <p className="text-sm font-bold text-white font-serif">
+                      <p className="font-display text-lg font-bold text-[#161514] uppercase tracking-wide">
                         {matchedUser?.name || 'Cliente'}
                       </p>
                       {matchedUser?.clientNumber && (
-                        <p className="text-[11px] text-[#D4AF37] font-mono">
+                        <p className="text-[11px] text-[#9A6B3B] font-mono tabular-nums">
                           No. Cliente: {matchedUser.clientNumber}
                         </p>
                       )}
@@ -410,14 +405,14 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                         setLoginPin('');
                         setAuthError(null);
                       }}
-                      className="text-xs text-slate-400 hover:text-white px-2.5 py-1.5 rounded-xl bg-white/5 border border-white/10"
+                      className="text-xs text-[#161514] hover:bg-[#E6E1D6] px-3 py-1.5 rounded-lg bg-white border border-[#E6E1D6] font-medium"
                     >
                       Cambiar
                     </button>
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold text-slate-200 block mb-1.5 text-center">
+                    <label className="text-xs font-semibold text-[#161514] block mb-2 text-center">
                       Ingresa tu contraseña de 4 dígitos numéricos
                     </label>
                     <div className="relative max-w-[200px] mx-auto">
@@ -431,24 +426,20 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                           setLoginPin(e.target.value.replace(/\D/g, '').slice(0, 4))
                         }
                         placeholder="••••"
-                        className="w-full text-center tracking-[0.5em] text-2xl font-mono py-3 rounded-2xl bg-slate-900 border-2 border-[#D4AF37]/60 text-[#D4AF37] focus:outline-none focus:border-[#D4AF37] shadow-inner"
+                        className="w-full text-center tracking-[0.5em] text-2xl font-mono py-3 rounded-xl bg-[#FAF9F6] border-2 border-[#9A6B3B]/60 text-[#161514] focus:outline-none focus:border-[#9A6B3B] tabular-nums"
                         required
                         autoFocus
                       />
                       <button
                         type="button"
                         onClick={() => setShowLoginPin(!showLoginPin)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5C5852] hover:text-[#161514]"
                       >
-                        {showLoginPin ? (
-                          <EyeOff className="w-4 h-4" />
-                        ) : (
-                          <Eye className="w-4 h-4" />
-                        )}
+                        {showLoginPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
-                    <p className="text-[11px] text-slate-400 text-center mt-2">
-                      Teclado numérico • 4 dígitos de seguridad
+                    <p className="text-[11px] text-[#5C5852] text-center mt-2">
+                      Teclado numérico · 4 dígitos de seguridad
                     </p>
                   </div>
 
@@ -460,20 +451,20 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                         setLoginPin('');
                         setAuthError(null);
                       }}
-                      className="px-4 py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold"
+                      className="px-4 py-3 rounded-xl bg-[#F2EFE9] hover:bg-[#E6E1D6] text-[#161514] text-xs font-semibold"
                     >
                       Atrás
                     </button>
                     <button
                       type="submit"
                       disabled={loginPin.length !== 4 || isLoadingAuth}
-                      className="flex-1 py-3.5 rounded-2xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-bold text-xs shadow-xl shadow-[#D4AF37]/20 hover:scale-[1.01] active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                      className="flex-1 py-3.5 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] font-semibold text-xs active:scale-[0.99] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                       {isLoadingAuth ? (
                         <RefreshCw className="w-4 h-4 animate-spin" />
                       ) : (
                         <>
-                          <CheckCircle2 className="w-4 h-4" />
+                          <CheckCircle2 className="w-4 h-4 text-[#C69765]" />
                           <span>Iniciar Sesión</span>
                         </>
                       )}
@@ -484,13 +475,10 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             </div>
           )}
 
-          {/* ------------------------------------------------------------- */}
-          {/* FLOW B: SOY NUEVO (Digital Bank-Card Registration) */}
-          {/* ------------------------------------------------------------- */}
+          {/* FLOW B: SOY NUEVO */}
           {authTab === 'register' && (
             <div className="space-y-4">
               {registerStep === 1 ? (
-                /* STAGE 1: Beautiful Card Preview & Invitation */
                 <div className="space-y-4 text-center">
                   <div className="p-1">
                     <ClientMembershipCard
@@ -501,19 +489,19 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                     />
                   </div>
 
-                  <div className="p-3 rounded-2xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-xs text-amber-200/90 text-left space-y-1">
-                    <div className="flex items-center gap-2 font-bold text-[#D4AF37]">
+                  <div className="p-4 rounded-2xl bg-[#F2EFE9] border border-[#9A6B3B]/30 text-xs text-[#161514] text-left space-y-1.5">
+                    <div className="flex items-center gap-2 font-display text-base font-bold uppercase tracking-wide text-[#9A6B3B]">
                       <Crown className="w-4 h-4" />
                       <span>Beneficios de tu Tarjeta Monarca</span>
                     </div>
-                    <p className="text-[11px] text-slate-300">
-                      • Código QR único para identificarte y agendar al instante.
+                    <p className="text-[11px] text-[#5C5852]">
+                      · Código QR único para identificarte y agendar al instante.
                     </p>
-                    <p className="text-[11px] text-slate-300">
-                      • 100 Puntos de regalo de bienvenida.
+                    <p className="text-[11px] text-[#5C5852]">
+                      · 100 Puntos de regalo de bienvenida.
                     </p>
-                    <p className="text-[11px] text-slate-300">
-                      • Acceso rápido solo con tu celular y NIP de 4 dígitos.
+                    <p className="text-[11px] text-[#5C5852]">
+                      · Acceso rápido solo con tu celular y NIP de 4 dígitos.
                     </p>
                   </div>
 
@@ -523,18 +511,16 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                       setRegisterStep(2);
                       setAuthError(null);
                     }}
-                    className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-bold text-xs shadow-xl shadow-[#D4AF37]/25 hover:scale-[1.01] active:scale-95 transition-all flex items-center justify-center gap-2"
+                    className="w-full py-3.5 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] font-semibold text-xs active:scale-[0.99] transition-all flex items-center justify-center gap-2"
                   >
-                    <Sparkles className="w-4 h-4" />
+                    <Sparkles className="w-4 h-4 text-[#C69765]" />
                     <span>Obtener mi Tarjeta de Cliente</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <ArrowRight className="w-4 h-4 text-[#C69765]" />
                   </button>
                 </div>
               ) : (
-                /* STAGE 2: 3 Simple Fields (Name, Phone, 4-Digit Numeric PIN) */
                 <form onSubmit={handleRegisterSubmit} className="space-y-4 animate-in fade-in">
-                  {/* Live Mini Card Preview */}
-                  <div className="p-1 transform scale-90 sm:scale-100 origin-top">
+                  <div className="p-1 transform scale-95 sm:scale-100 origin-top">
                     <ClientMembershipCard
                       name={regName || 'TU NOMBRE'}
                       clientNumber={newClientNumber || '849201'}
@@ -543,32 +529,30 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                     />
                   </div>
 
-                  {/* 1. NOMBRE */}
                   <div>
-                    <label className="text-xs font-semibold text-slate-200 block mb-1">
+                    <label className="text-xs font-semibold text-[#161514] block mb-1">
                       Nombre Completo
                     </label>
                     <div className="relative">
-                      <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <User className="w-4 h-4 text-[#5C5852] absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
                         type="text"
                         value={regName}
                         onChange={(e) => setRegName(e.target.value)}
                         placeholder="Ej. Rodrigo Mendoza"
-                        className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-white/15 text-white text-xs focus:outline-none focus:border-[#D4AF37] uppercase tracking-wide"
+                        className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-[#FAF9F6] border border-[#E6E1D6] text-[#161514] text-xs focus:outline-none focus:border-[#9A6B3B] uppercase tracking-wide"
                         required
                         autoFocus
                       />
                     </div>
                   </div>
 
-                  {/* 2. CELULAR (10 DIGITS) */}
                   <div>
-                    <label className="text-xs font-semibold text-slate-200 block mb-1">
+                    <label className="text-xs font-semibold text-[#161514] block mb-1">
                       Número Celular (10 dígitos)
                     </label>
-                    <div className="flex items-center rounded-xl bg-slate-900/90 border border-white/15 overflow-hidden focus-within:border-[#D4AF37]">
-                      <div className="flex items-center gap-1 px-3 py-2.5 bg-white/5 border-r border-white/10 text-xs font-bold text-white shrink-0">
+                    <div className="flex items-center rounded-xl bg-[#FAF9F6] border border-[#E6E1D6] overflow-hidden focus-within:border-[#9A6B3B]">
+                      <div className="flex items-center gap-1 px-3 py-2.5 bg-[#F2EFE9] border-r border-[#E6E1D6] text-xs font-bold text-[#161514] shrink-0">
                         <span>🇲🇽</span>
                         <span>+52</span>
                       </div>
@@ -582,19 +566,18 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                           setRegPhone(e.target.value.replace(/\D/g, '').slice(0, 10))
                         }
                         placeholder="55 1234 5678"
-                        className="w-full px-3 py-2.5 bg-transparent text-white text-xs font-mono tracking-widest focus:outline-none"
+                        className="w-full px-3 py-2.5 bg-transparent text-[#161514] text-xs font-mono tracking-widest tabular-nums focus:outline-none"
                         required
                       />
                     </div>
                   </div>
 
-                  {/* 3. CONTRASEÑA DE 4 DÍGITOS NUMÉRICOS */}
                   <div>
-                    <label className="text-xs font-semibold text-slate-200 block mb-1">
+                    <label className="text-xs font-semibold text-[#161514] block mb-1">
                       Contraseña de 4 dígitos numéricos (NIP de acceso)
                     </label>
                     <div className="relative">
-                      <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <Lock className="w-4 h-4 text-[#5C5852] absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
                         type={showRegPin ? 'text' : 'password'}
                         inputMode="numeric"
@@ -605,22 +588,18 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                           setRegPin(e.target.value.replace(/\D/g, '').slice(0, 4))
                         }
                         placeholder="4 dígitos numéricos"
-                        className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-900/90 border border-white/15 text-white text-xs font-mono tracking-[0.3em] focus:outline-none focus:border-[#D4AF37]"
+                        className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-[#FAF9F6] border border-[#E6E1D6] text-[#161514] text-xs font-mono tracking-[0.3em] tabular-nums focus:outline-none focus:border-[#9A6B3B]"
                         required
                       />
                       <button
                         type="button"
                         onClick={() => setShowRegPin(!showRegPin)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5C5852] hover:text-[#161514]"
                       >
-                        {showRegPin ? (
-                          <EyeOff className="w-4 h-4" />
-                        ) : (
-                          <Eye className="w-4 h-4" />
-                        )}
+                        {showRegPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
-                    <p className="text-[10px] text-slate-400 mt-1">
+                    <p className="text-[10px] text-[#5C5852] mt-1">
                       Solo 4 números que recordarás fácilmente al ingresar.
                     </p>
                   </div>
@@ -629,7 +608,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                     <button
                       type="button"
                       onClick={() => setRegisterStep(1)}
-                      className="px-4 py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold"
+                      className="px-4 py-3 rounded-xl bg-[#F2EFE9] hover:bg-[#E6E1D6] text-[#161514] text-xs font-semibold"
                     >
                       Atrás
                     </button>
@@ -641,13 +620,13 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                         regPin.length !== 4 ||
                         isLoadingAuth
                       }
-                      className="flex-1 py-3.5 rounded-2xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-bold text-xs shadow-xl shadow-[#D4AF37]/20 hover:scale-[1.01] active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                      className="flex-1 py-3.5 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] font-semibold text-xs active:scale-[0.99] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                       {isLoadingAuth ? (
                         <RefreshCw className="w-4 h-4 animate-spin" />
                       ) : (
                         <>
-                          <CheckCircle2 className="w-4 h-4" />
+                          <CheckCircle2 className="w-4 h-4 text-[#C69765]" />
                           <span>Activar y Guardar mi Tarjeta</span>
                         </>
                       )}
@@ -664,8 +643,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       {/* 2. AUTHENTICATED: DIGITAL CARD & ACCOUNT DASHBOARD */}
       {/* ========================================================================= */}
       {isAuthenticated && userProfile && (
-        <div className="space-y-5">
-          {/* DIGITAL VIP MEMBERSHIP CARD */}
+        <div className="space-y-6">
           <div className="relative group cursor-pointer" onClick={() => setShowQrModal(true)}>
             <ClientMembershipCard
               name={userProfile.name}
@@ -675,19 +653,18 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               points={userProfile.points ?? 100}
               memberSince={userProfile.createdAt}
             />
-            <div className="mt-2 text-center">
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#D4AF37] hover:underline">
+            <div className="mt-2.5 text-center">
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#9A6B3B] hover:text-[#161514] hover:underline">
                 <QrIcon className="w-3.5 h-3.5" />
                 <span>Toca para ver el Código QR en grande</span>
               </span>
             </div>
           </div>
 
-          {/* USER DATA & EDIT PROFILE ACCORDION */}
-          <div className="rounded-3xl bg-[#14171E] border border-white/10 p-5 space-y-4 shadow-xl">
+          <div className="rounded-2xl bg-white border border-[#E6E1D6] p-5 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl overflow-hidden bg-slate-800 border border-[#D4AF37]/60 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-xl overflow-hidden bg-[#F2EFE9] border border-[#9A6B3B]/45 flex items-center justify-center">
                   {userProfile.photoUrl ? (
                     <img
                       src={userProfile.photoUrl}
@@ -696,12 +673,14 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                       referrerPolicy="no-referrer"
                     />
                   ) : (
-                    <User className="w-6 h-6 text-[#D4AF37]" />
+                    <User className="w-6 h-6 text-[#9A6B3B]" />
                   )}
                 </div>
                 <div>
-                  <h3 className="font-bold text-white text-sm">{userProfile.name}</h3>
-                  <p className="text-xs text-slate-400 font-mono mt-0.5">
+                  <h3 className="font-display text-xl font-bold text-[#161514] uppercase tracking-wide">
+                    {userProfile.name}
+                  </h3>
+                  <p className="text-xs text-[#5C5852] font-mono tabular-nums mt-0.5">
                     {userProfile.phone || 'Sin celular'}
                   </p>
                 </div>
@@ -709,29 +688,28 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
               <button
                 onClick={() => setIsEditing(!isEditing)}
-                className="px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-semibold text-slate-300 border border-white/10 transition-colors"
+                className="px-3.5 py-2 rounded-xl bg-[#F2EFE9] hover:bg-[#E6E1D6] text-xs font-semibold text-[#161514] border border-[#E6E1D6] transition-colors whitespace-nowrap"
               >
                 {isEditing ? 'Cerrar' : 'Editar Datos'}
               </button>
             </div>
 
-            {/* EDITING FORM */}
             {isEditing && (
-              <div className="pt-4 border-t border-white/10 space-y-3.5 animate-in fade-in">
+              <div className="pt-4 border-t border-[#E6E1D6] space-y-3.5 animate-in fade-in">
                 <div>
-                  <label className="text-xs font-medium text-slate-400 block mb-1">
+                  <label className="text-xs font-semibold text-[#5C5852] block mb-1">
                     Nombre Completo
                   </label>
                   <input
                     type="text"
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
-                    className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:outline-none focus:border-[#D4AF37]"
+                    className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#E6E1D6] text-[#161514] text-xs focus:outline-none focus:border-[#9A6B3B]"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-slate-400 block mb-1">
+                  <label className="text-xs font-semibold text-[#5C5852] block mb-1">
                     Teléfono Celular
                   </label>
                   <input
@@ -739,12 +717,12 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                     inputMode="numeric"
                     value={editPhone}
                     onChange={(e) => setEditPhone(e.target.value)}
-                    className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs font-mono focus:outline-none focus:border-[#D4AF37]"
+                    className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#E6E1D6] text-[#161514] text-xs font-mono tabular-nums focus:outline-none focus:border-[#9A6B3B]"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-slate-400 block mb-1">
+                  <label className="text-xs font-semibold text-[#5C5852] block mb-1">
                     Cambiar Contraseña / NIP (4 dígitos numéricos)
                   </label>
                   <input
@@ -756,13 +734,12 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                       setEditPin(e.target.value.replace(/\D/g, '').slice(0, 4))
                     }
                     placeholder="••••"
-                    className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-[#D4AF37] font-mono tracking-widest text-xs focus:outline-none focus:border-[#D4AF37]"
+                    className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#E6E1D6] text-[#161514] font-mono tracking-widest text-xs tabular-nums focus:outline-none focus:border-[#9A6B3B]"
                   />
                 </div>
 
-                {/* Photo upload */}
                 <div className="space-y-2">
-                  <label className="text-xs font-medium text-slate-400 block">
+                  <label className="text-xs font-semibold text-[#5C5852] block">
                     Foto de Perfil
                   </label>
                   <div className="flex items-center gap-3">
@@ -770,12 +747,12 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                       <img
                         src={editPhotoUrl}
                         alt="Preview"
-                        className="w-12 h-12 rounded-xl object-cover border border-[#D4AF37]/50"
+                        className="w-12 h-12 rounded-xl object-cover border border-[#9A6B3B]/40"
                         referrerPolicy="no-referrer"
                       />
                     )}
-                    <label className="flex-1 flex items-center justify-center gap-2 p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-slate-200 cursor-pointer transition-colors">
-                      <Upload className="w-4 h-4 text-[#D4AF37]" />
+                    <label className="flex-1 flex items-center justify-center gap-2 p-2.5 rounded-xl bg-[#F2EFE9] hover:bg-[#E6E1D6] border border-[#E6E1D6] text-xs font-semibold text-[#161514] cursor-pointer transition-colors">
+                      <Upload className="w-4 h-4 text-[#9A6B3B]" />
                       <span>
                         {isUploadingPhoto ? 'Subiendo imagen...' : 'Subir imagen desde celular'}
                       </span>
@@ -793,33 +770,32 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 <button
                   onClick={handleSaveProfile}
                   disabled={isSaving}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-bold text-xs shadow-md transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-full py-3 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] font-semibold text-xs transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  <Save className="w-4 h-4" />
+                  <Save className="w-4 h-4 text-[#C69765]" />
                   <span>{isSaving ? 'Guardando...' : 'Guardar Cambios'}</span>
                 </button>
               </div>
             )}
           </div>
 
-          {/* FAVORITE BARBERS */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between px-1">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+            <div className="flex items-center justify-between px-1 border-b border-[#E6E1D6] pb-2">
+              <h3 className="font-display text-lg font-bold uppercase tracking-wide text-[#161514]">
                 Mis Barberos Favoritos ({favoriteBarbers.length})
               </h3>
             </div>
 
             {favoriteBarbers.length === 0 ? (
-              <div className="p-4 rounded-2xl bg-[#14171E] border border-white/10 text-center text-xs text-slate-400">
+              <div className="p-4 rounded-2xl bg-white border border-[#E6E1D6] text-center text-xs text-[#5C5852]">
                 Aún no has guardado barberos en tus favoritos. Explora la lista de barberos y presiona el icono de corazón.
               </div>
             ) : (
-              <div className="grid gap-2">
+              <div className="grid gap-2.5">
                 {favoriteBarbers.map((barber) => (
                   <div
                     key={barber.id}
-                    className="flex items-center justify-between p-3 rounded-2xl bg-[#14171E] border border-white/10 hover:border-[#D4AF37]/30 transition-all"
+                    className="flex items-center justify-between p-3 rounded-2xl bg-white border border-[#E6E1D6] hover:border-[#9A6B3B]/60 transition-all"
                   >
                     <div
                       onClick={() => onOpenBarberProfile(barber)}
@@ -828,20 +804,22 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                       <img
                         src={barber.photoUrl}
                         alt={barber.displayName}
-                        className="w-10 h-10 rounded-xl object-cover border border-white/10"
+                        className="w-11 h-11 rounded-xl object-cover border border-[#E6E1D6]"
                         referrerPolicy="no-referrer"
                       />
                       <div>
-                        <h4 className="font-bold text-white text-xs">{barber.displayName}</h4>
-                        <span className="text-[11px] text-[#D4AF37] font-medium">
-                          ★ {barber.rating.toFixed(1)} • {barber.specialties[0]}
+                        <h4 className="font-display text-base font-bold text-[#161514] uppercase tracking-wide">
+                          {barber.displayName}
+                        </h4>
+                        <span className="text-[11px] text-[#9A6B3B] font-semibold tabular-nums">
+                          ★ {barber.rating.toFixed(1)} · {barber.specialties[0]}
                         </span>
                       </div>
                     </div>
 
                     <button
                       onClick={() => onStartBookingWithBarber(barber.id)}
-                      className="px-3 py-1.5 rounded-xl bg-[#D4AF37]/20 hover:bg-[#D4AF37] hover:text-slate-950 text-[#D4AF37] text-xs font-bold transition-all"
+                      className="px-3.5 py-2 rounded-xl bg-[#161514] hover:bg-[#9A6B3B] text-[#FAF9F6] text-xs font-semibold transition-colors whitespace-nowrap"
                     >
                       Reservar
                     </button>
@@ -851,11 +829,10 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             )}
           </div>
 
-          {/* LOG OUT BUTTON */}
           <div className="pt-2">
             <button
               onClick={logout}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/20 text-xs font-bold transition-all active:scale-[0.98]"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold transition-all active:scale-[0.99]"
             >
               <LogOut className="w-4 h-4" />
               <span>Cerrar Sesión</span>
@@ -864,7 +841,6 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
         </div>
       )}
 
-      {/* FULL SCREEN QR MODAL */}
       <ClientQRModal
         isOpen={showQrModal}
         onClose={() => setShowQrModal(false)}
@@ -873,3 +849,4 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
     </div>
   );
 };
+

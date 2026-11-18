@@ -2,18 +2,14 @@ import React, { useState } from 'react';
 import {
   X,
   Star,
-  Clock,
   Scissors,
-  Calendar,
   Heart,
   Instagram,
-  Phone,
   Sparkles,
   ChevronRight,
-  ShieldCheck,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Barber, Service } from '../../types';
+import { Barber } from '../../types';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { formatCurrency } from '../../utils/dateTime';
@@ -37,7 +33,6 @@ export const BarberPublicProfileModal: React.FC<BarberPublicProfileModalProps> =
 
   const isFavorite = userProfile?.favoriteBarberIds?.includes(barber.id);
 
-  // Filter services offered by this barber
   const barberServices = services.filter(
     (s) => s.active && (barber.serviceIds.length === 0 || barber.serviceIds.includes(s.id))
   );
@@ -45,78 +40,75 @@ export const BarberPublicProfileModal: React.FC<BarberPublicProfileModalProps> =
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-        {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 bg-black/80 backdrop-blur-md"
+          className="fixed inset-0 bg-[#161514]/55 backdrop-blur-sm"
         />
 
-        {/* Modal Window */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          initial={{ opacity: 0, scale: 0.96, y: 16 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-lg bg-[#14171E] border border-white/15 rounded-3xl overflow-hidden shadow-2xl z-10 max-h-[90vh] flex flex-col"
+          exit={{ opacity: 0, scale: 0.96, y: 16 }}
+          className="relative w-full max-w-lg bg-[#FAF9F6] border border-[#E6E1D6] rounded-3xl overflow-hidden shadow-[0_24px_60px_rgba(22,21,20,0.22)] z-10 max-h-[90vh] flex flex-col"
         >
-          {/* Header Cover & Close Button */}
-          <div className="relative h-44 sm:h-52 w-full bg-slate-900 overflow-hidden">
+          {/* Header Cover */}
+          <div className="relative h-44 sm:h-48 w-full bg-[#F2EFE9] overflow-hidden border-b border-[#E6E1D6]">
             <img
               src={barber.gallery?.[0] || barber.photoUrl}
               alt={barber.displayName}
-              className="w-full h-full object-cover opacity-40 blur-sm scale-110"
+              className="w-full h-full object-cover opacity-30 blur-sm scale-105"
               referrerPolicy="no-referrer"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#14171E] via-[#14171E]/60 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#FAF9F6] via-[#FAF9F6]/65 to-transparent" />
 
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 p-2 rounded-full bg-black/50 text-slate-300 hover:text-white border border-white/10 transition-colors"
+              className="absolute top-4 right-4 p-2 rounded-xl bg-white/90 text-[#161514] hover:bg-white border border-[#E6E1D6] transition-colors"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
 
-            {/* Favorite button */}
             <button
               onClick={() => toggleFavorite(barber.id)}
-              className={`absolute top-4 left-4 p-2 rounded-full border transition-all ${
+              className={`absolute top-4 left-4 p-2 rounded-xl border transition-all ${
                 isFavorite
-                  ? 'bg-rose-500/20 border-rose-500/40 text-rose-400'
-                  : 'bg-black/50 border-white/10 text-slate-300 hover:text-rose-400'
+                  ? 'bg-rose-50 border-rose-300 text-rose-600'
+                  : 'bg-white/90 border-[#E6E1D6] text-[#5C5852] hover:text-rose-600'
               }`}
             >
-              <Heart className={`w-5 h-5 ${isFavorite ? 'fill-rose-400' : ''}`} />
+              <Heart className={`w-4 h-4 ${isFavorite ? 'fill-rose-600' : ''}`} />
             </button>
 
-            {/* Profile Avatar & Primary Info */}
             <div className="absolute bottom-4 left-5 right-5 flex items-end gap-4">
               <div className="relative">
                 <img
                   src={barber.photoUrl}
                   alt={barber.displayName}
-                  className="w-20 h-20 rounded-2xl object-cover border-2 border-[#D4AF37] shadow-xl"
+                  className="w-20 h-20 rounded-2xl object-cover border-2 border-[#9A6B3B] shadow-md bg-white"
                   referrerPolicy="no-referrer"
                 />
                 {barber.featured && (
-                  <span className="absolute -top-2 -right-2 p-1 rounded-full bg-[#D4AF37] text-slate-950 shadow">
-                    <Sparkles className="w-3.5 h-3.5 fill-slate-950" />
+                  <span className="absolute -top-2 -right-2 p-1 rounded-full bg-[#161514] text-[#FAF9F6] shadow">
+                    <Sparkles className="w-3.5 h-3.5 text-[#C69765]" />
                   </span>
                 )}
               </div>
 
               <div className="flex-1 min-w-0 pb-1">
-                <h3 className="text-xl font-bold text-white tracking-tight truncate">
+                <h3 className="font-display text-2xl font-bold text-[#161514] uppercase tracking-wide truncate">
                   {barber.displayName}
                 </h3>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <div className="flex items-center gap-1 text-amber-400 text-xs font-bold bg-black/40 px-2 py-0.5 rounded-lg border border-amber-400/20">
-                    <Star className="w-3.5 h-3.5 fill-amber-400" />
+                <div className="flex items-center gap-2 mt-0.5 tabular-nums">
+                  <div className="flex items-center gap-1 text-[#161514] text-xs font-semibold">
+                    <Star className="w-3.5 h-3.5 text-[#9A6B3B] fill-[#9A6B3B]" />
                     <span>{barber.rating.toFixed(2)}</span>
-                    <span className="text-slate-400 font-normal">({barber.reviewCount})</span>
+                    <span className="text-[#5C5852] font-normal">({barber.reviewCount})</span>
                   </div>
-                  <span className="text-xs text-slate-300 font-medium">
+                  <span className="text-[#D2CBBF]" aria-hidden="true">·</span>
+                  <span className="text-xs text-[#5C5852] font-medium">
                     {barber.experienceYears || 5} años exp.
                   </span>
                 </div>
@@ -124,42 +116,36 @@ export const BarberPublicProfileModal: React.FC<BarberPublicProfileModalProps> =
             </div>
           </div>
 
-          {/* Scrollable Content */}
           <div className="flex-1 overflow-y-auto p-5 space-y-5">
-            {/* Bio */}
             <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+              <h4 className="text-[11px] font-semibold uppercase tracking-widest text-[#9A6B3B] mb-1.5">
                 Sobre el Barbero
               </h4>
-              <p className="text-xs text-slate-300 leading-relaxed font-normal">
+              <p className="text-xs text-[#5C5852] leading-relaxed font-normal">
                 {barber.bio || 'Especialista en cortes modernos y estilo masculino de alta gama.'}
               </p>
             </div>
 
-            {/* Specialties */}
             {barber.specialties && barber.specialties.length > 0 && (
               <div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+                <h4 className="text-[11px] font-semibold uppercase tracking-widest text-[#9A6B3B] mb-1.5">
                   Especialidades
                 </h4>
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-semibold text-[#161514]">
                   {barber.specialties.map((spec, i) => (
-                    <span
-                      key={i}
-                      className="text-xs font-medium px-3 py-1 rounded-full bg-white/5 text-[#D4AF37] border border-[#D4AF37]/20"
-                    >
-                      {spec}
-                    </span>
+                    <React.Fragment key={i}>
+                      {i > 0 && <span className="text-[#D2CBBF]" aria-hidden="true">/</span>}
+                      <span>{spec}</span>
+                    </React.Fragment>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Gallery (Section 13) */}
             {barber.gallery && barber.gallery.length > 0 && (
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  <h4 className="text-[11px] font-semibold uppercase tracking-widest text-[#9A6B3B]">
                     Galería de Trabajos ({barber.gallery.length})
                   </h4>
                   {barber.instagram && (
@@ -167,7 +153,7 @@ export const BarberPublicProfileModal: React.FC<BarberPublicProfileModalProps> =
                       href={`https://instagram.com/${barber.instagram.replace('@', '')}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-xs text-[#D4AF37] hover:underline"
+                      className="flex items-center gap-1 text-xs font-semibold text-[#9A6B3B] hover:text-[#161514]"
                     >
                       <Instagram className="w-3.5 h-3.5" />
                       <span>{barber.instagram}</span>
@@ -180,7 +166,7 @@ export const BarberPublicProfileModal: React.FC<BarberPublicProfileModalProps> =
                     <div
                       key={idx}
                       onClick={() => setSelectedPhoto(imgUrl)}
-                      className="aspect-square rounded-2xl overflow-hidden bg-slate-800 border border-white/10 cursor-pointer hover:opacity-80 transition-all hover:scale-105"
+                      className="aspect-square rounded-xl overflow-hidden bg-[#F2EFE9] border border-[#E6E1D6] cursor-pointer hover:opacity-90 transition-transform hover:scale-[1.02]"
                     >
                       <img
                         src={imgUrl}
@@ -194,9 +180,8 @@ export const BarberPublicProfileModal: React.FC<BarberPublicProfileModalProps> =
               </div>
             )}
 
-            {/* Services Performed */}
             <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5">
+              <h4 className="text-[11px] font-semibold uppercase tracking-widest text-[#9A6B3B] mb-2.5">
                 Servicios que realiza ({barberServices.length})
               </h4>
               <div className="space-y-2">
@@ -207,42 +192,42 @@ export const BarberPublicProfileModal: React.FC<BarberPublicProfileModalProps> =
                       onClose();
                       onBookWithBarber(barber.id, srv.id);
                     }}
-                    className="flex items-center justify-between p-3 rounded-2xl bg-white/5 hover:bg-[#D4AF37]/10 border border-white/5 hover:border-[#D4AF37]/30 transition-all cursor-pointer group"
+                    className="flex items-center justify-between p-3 rounded-xl bg-white hover:bg-[#F7F5F0] border border-[#E6E1D6] hover:border-[#9A6B3B]/60 transition-all cursor-pointer group"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       {srv.imageUrl ? (
                         <img
                           src={srv.imageUrl}
                           alt={srv.name}
-                          className="w-11 h-11 rounded-xl object-cover border border-white/10 shrink-0"
+                          className="w-11 h-11 rounded-lg object-cover border border-[#E6E1D6] shrink-0"
                           referrerPolicy="no-referrer"
                         />
                       ) : (
-                        <div className="w-11 h-11 rounded-xl bg-slate-800 flex items-center justify-center text-[#D4AF37] shrink-0 border border-white/10">
+                        <div className="w-11 h-11 rounded-lg bg-[#F2EFE9] flex items-center justify-center text-[#9A6B3B] shrink-0 border border-[#E6E1D6]">
                           <Scissors className="w-4 h-4" />
                         </div>
                       )}
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5">
-                          <h5 className="font-bold text-white text-xs group-hover:text-[#D4AF37] transition-colors truncate">
+                          <h5 className="font-display text-base font-bold text-[#161514] uppercase tracking-wide group-hover:text-[#9A6B3B] transition-colors truncate">
                             {srv.name}
                           </h5>
                           {srv.barberId && (
-                            <span className="text-[8px] font-bold px-1.5 py-0.2 rounded bg-[#D4AF37]/20 text-[#D4AF37] uppercase shrink-0">
-                              Exclusivo
+                            <span className="text-[10px] font-semibold text-[#9A6B3B] uppercase shrink-0">
+                              · Exclusivo
                             </span>
                           )}
                         </div>
-                        <span className="text-[11px] text-slate-400">
+                        <span className="text-[11px] text-[#5C5852] tabular-nums">
                           {srv.durationMinutes} min
                         </span>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-xs font-bold text-[#D4AF37]">
+                      <span className="text-xs font-mono font-bold text-[#161514] tabular-nums">
                         {formatCurrency(srv.price)}
                       </span>
-                      <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-[#D4AF37] transition-colors" />
+                      <ChevronRight className="w-4 h-4 text-[#5C5852] group-hover:text-[#9A6B3B] transition-colors" />
                     </div>
                   </div>
                 ))}
@@ -250,29 +235,27 @@ export const BarberPublicProfileModal: React.FC<BarberPublicProfileModalProps> =
             </div>
           </div>
 
-          {/* Modal Footer CTA */}
-          <div className="p-4 bg-[#101217] border-t border-white/10 flex items-center gap-3">
+          <div className="p-4 bg-white border-t border-[#E6E1D6] flex items-center gap-3">
             <button
               onClick={() => {
                 onClose();
                 onBookWithBarber(barber.id);
               }}
-              className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-bold text-sm shadow-xl shadow-[#D4AF37]/20 hover:scale-[1.02] active:scale-95 transition-all"
+              className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] font-semibold text-sm active:scale-[0.98] transition-all"
             >
-              <Scissors className="w-4 h-4 stroke-[2.5]" />
+              <Scissors className="w-4 h-4 text-[#C69765] stroke-[2.2]" />
               <span>Reservar con {barber.firstName}</span>
             </button>
           </div>
 
-          {/* Lightbox for Gallery Photo */}
           {selectedPhoto && (
             <div
-              className="fixed inset-0 z-60 bg-black/95 flex items-center justify-center p-4"
+              className="fixed inset-0 z-60 bg-[#161514]/90 flex items-center justify-center p-4"
               onClick={() => setSelectedPhoto(null)}
             >
               <button
                 onClick={() => setSelectedPhoto(null)}
-                className="absolute top-6 right-6 p-2 rounded-full bg-white/10 text-white"
+                className="absolute top-6 right-6 p-2 rounded-xl bg-white/15 text-white hover:bg-white/25"
               >
                 <X className="w-6 h-6" />
               </button>

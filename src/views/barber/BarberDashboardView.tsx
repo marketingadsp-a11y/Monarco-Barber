@@ -145,8 +145,8 @@ export const BarberDashboardView: React.FC<BarberDashboardViewProps> = ({
 
   if (!activeBarber) {
     return (
-      <div className="p-8 text-center text-slate-400 space-y-3">
-        <p>No se encontró el perfil de barbero asignado a tu cuenta.</p>
+      <div className="p-8 text-center text-[#5C5852] space-y-3 bg-white border border-[#E6E1D6] rounded-3xl">
+        <p className="text-sm font-medium">No se encontró el perfil de barbero asignado a tu cuenta.</p>
       </div>
     );
   }
@@ -242,22 +242,22 @@ export const BarberDashboardView: React.FC<BarberDashboardViewProps> = ({
   return (
     <div className="space-y-5 pb-20">
       {/* Barber Header Card with Fast Action Buttons */}
-      <div className="rounded-3xl bg-gradient-to-r from-[#181D26] to-[#12151B] border border-white/15 p-5 shadow-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="rounded-3xl bg-white border border-[#E6E1D6] p-5 shadow-[0_6px_24px_-12px_rgba(22,21,20,0.08)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
           <img
             src={activeBarber.photoUrl}
             alt={activeBarber.displayName}
-            className="w-16 h-16 rounded-2xl object-cover border-2 border-[#D4AF37] shadow-lg shrink-0"
+            className="w-16 h-16 rounded-2xl object-cover border border-[#9A6B3B]/60 shadow-sm shrink-0"
             referrerPolicy="no-referrer"
           />
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-white tracking-tight">
+              <h1 className="font-display text-2xl font-bold text-[#161514] uppercase tracking-wide">
                 {activeBarber.displayName}
               </h1>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
-              {activeBarber.specialties.slice(0, 3).join(' • ')}
+            <p className="text-xs text-[#5C5852] mt-0.5">
+              {activeBarber.specialties.slice(0, 3).join(' · ')}
             </p>
           </div>
         </div>
@@ -266,23 +266,23 @@ export const BarberDashboardView: React.FC<BarberDashboardViewProps> = ({
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <button
             onClick={() => setIsQrScannerOpen(true)}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-2xl bg-gradient-to-b from-[#222834] to-[#141820] hover:from-[#2a3240] hover:to-[#1a1f2a] border border-[#D4AF37]/50 text-white font-bold text-xs shadow-lg hover:scale-105 active:scale-95 transition-all"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-2xl bg-[#F2EFE9] hover:bg-[#E8E3D9] border border-[#D2CBBF] text-[#161514] font-semibold text-xs active:scale-95 transition-all"
             title="Escanear QR de cliente"
           >
-            <ScanLine className="w-4 h-4 text-[#D4AF37]" />
+            <ScanLine className="w-4 h-4 text-[#9A6B3B]" />
             <span>Lector QR</span>
           </button>
 
           <button
             onClick={() => setCurrentTab('pos')}
-            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-2xl border text-xs font-bold shadow-lg hover:scale-105 active:scale-95 transition-all ${
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-2xl border text-xs font-semibold active:scale-95 transition-all ${
               currentTab === 'pos'
-                ? 'bg-amber-500 text-slate-950 border-amber-400 font-extrabold'
-                : 'bg-white/5 border-amber-500/30 text-amber-300 hover:bg-amber-500/10'
+                ? 'bg-[#9A6B3B] text-white border-[#9A6B3B] font-bold shadow-sm'
+                : 'bg-white border-[#D2CBBF] text-[#161514] hover:bg-[#FAF7F0] hover:border-[#9A6B3B]/50'
             }`}
             title="Abrir terminal de punto de venta POS"
           >
-            <ShoppingBag className="w-4 h-4 text-[#D4AF37]" />
+            <ShoppingBag className={`w-4 h-4 ${currentTab === 'pos' ? 'text-white' : 'text-[#9A6B3B]'}`} />
             <span>Punto de Venta POS</span>
           </button>
 
@@ -291,43 +291,43 @@ export const BarberDashboardView: React.FC<BarberDashboardViewProps> = ({
               setPreselectedClientForBooking(null);
               setIsBookingModalOpen(true);
             }}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-bold text-xs shadow-lg hover:scale-105 active:scale-95 transition-all"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] font-semibold text-xs shadow-sm active:scale-95 transition-all"
             title="Agendar cita para mi silla"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 text-[#C69765]" />
             <span>Agendar Cita</span>
           </button>
         </div>
       </div>
 
       {/* Navigation Sub-Tabs */}
-      <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-black/40 border border-white/10 overflow-x-auto">
+      <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-[#F2EFE9] border border-[#E6E1D6] overflow-x-auto">
         <button
           onClick={() => setCurrentTab('home')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+          className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
             currentTab === 'home'
-              ? 'bg-[#D4AF37] text-slate-950 shadow'
-              : 'text-slate-400 hover:text-white'
+              ? 'bg-[#161514] text-[#FAF9F6] shadow-xs'
+              : 'text-[#5C5852] hover:text-[#161514]'
           }`}
         >
           Resumen Hoy
         </button>
         <button
           onClick={() => setCurrentTab('appointments')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+          className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
             currentTab === 'appointments'
-              ? 'bg-[#D4AF37] text-slate-950 shadow'
-              : 'text-slate-400 hover:text-white'
+              ? 'bg-[#161514] text-[#FAF9F6] shadow-xs'
+              : 'text-[#5C5852] hover:text-[#161514]'
           }`}
         >
           Mis Citas ({barberAppointments.length})
         </button>
         <button
           onClick={() => setCurrentTab('pos')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+          className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
             currentTab === 'pos'
-              ? 'bg-[#D4AF37] text-slate-950 shadow'
-              : 'text-slate-400 hover:text-white'
+              ? 'bg-[#161514] text-[#FAF9F6] shadow-xs'
+              : 'text-[#5C5852] hover:text-[#161514]'
           }`}
         >
           <ShoppingBag className="w-3.5 h-3.5" />
@@ -335,10 +335,10 @@ export const BarberDashboardView: React.FC<BarberDashboardViewProps> = ({
         </button>
         <button
           onClick={() => setCurrentTab('products')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+          className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
             currentTab === 'products'
-              ? 'bg-[#D4AF37] text-slate-950 shadow'
-              : 'text-slate-400 hover:text-white'
+              ? 'bg-[#161514] text-[#FAF9F6] shadow-xs'
+              : 'text-[#5C5852] hover:text-[#161514]'
           }`}
         >
           <Package className="w-3.5 h-3.5" />
@@ -346,30 +346,30 @@ export const BarberDashboardView: React.FC<BarberDashboardViewProps> = ({
         </button>
         <button
           onClick={() => setCurrentTab('profile')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+          className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
             currentTab === 'profile'
-              ? 'bg-[#D4AF37] text-slate-950 shadow'
-              : 'text-slate-400 hover:text-white'
+              ? 'bg-[#161514] text-[#FAF9F6] shadow-xs'
+              : 'text-[#5C5852] hover:text-[#161514]'
           }`}
         >
           Mi Perfil & Foto
         </button>
         <button
           onClick={() => setCurrentTab('services')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+          className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
             currentTab === 'services'
-              ? 'bg-[#D4AF37] text-slate-950 shadow'
-              : 'text-slate-400 hover:text-white'
+              ? 'bg-[#161514] text-[#FAF9F6] shadow-xs'
+              : 'text-[#5C5852] hover:text-[#161514]'
           }`}
         >
           Mis Servicios ({activeBarber.serviceIds?.length || 0})
         </button>
         <button
           onClick={() => setCurrentTab('schedule')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+          className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
             currentTab === 'schedule'
-              ? 'bg-[#D4AF37] text-slate-950 shadow'
-              : 'text-slate-400 hover:text-white'
+              ? 'bg-[#161514] text-[#FAF9F6] shadow-xs'
+              : 'text-[#5C5852] hover:text-[#161514]'
           }`}
         >
           Horarios & Descansos
@@ -382,19 +382,19 @@ export const BarberDashboardView: React.FC<BarberDashboardViewProps> = ({
                 const res = await requestBrowserNotifications();
                 setBrowserPerm(res);
               }}
-              className="px-2.5 py-1 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-[11px] font-bold flex items-center gap-1.5 transition-all"
+              className="px-2.5 py-1 rounded-xl bg-[#FBF6EE] hover:bg-[#F5EBD9] border border-[#9A6B3B]/35 text-[#7D542B] text-[11px] font-semibold flex items-center gap-1.5 transition-all"
               title="Habilitar notificaciones en tiempo real en este dispositivo"
             >
-              <Bell className="w-3 h-3 animate-bounce" />
+              <Bell className="w-3 h-3 text-[#9A6B3B]" />
               <span>Activar Alertas</span>
             </button>
           ) : (
             <button
               onClick={() => testNotification('barber_new_booking')}
-              className="px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-[11px] font-semibold flex items-center gap-1.5 transition-all"
+              className="px-2.5 py-1 rounded-xl bg-white hover:bg-[#FAF7F0] border border-[#E6E1D6] text-[#5C5852] hover:text-[#161514] text-[11px] font-semibold flex items-center gap-1.5 transition-all"
               title="Probar sonido y toast de nueva reserva"
             >
-              <Volume2 className="w-3 h-3 text-[#D4AF37]" />
+              <Volume2 className="w-3 h-3 text-[#9A6B3B]" />
               <span>Probar Alerta</span>
             </button>
           )}
@@ -406,47 +406,49 @@ export const BarberDashboardView: React.FC<BarberDashboardViewProps> = ({
         <div className="space-y-5">
           {/* Quick Metrics */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-            <div className="p-3.5 rounded-2xl bg-[#14171E] border border-white/10 shadow-lg">
-              <span className="text-slate-400 block text-[10px] uppercase font-bold">Citas Hoy</span>
-              <span className="text-xl font-black text-white mt-1 block">{todayAppointments.length}</span>
+            <div className="p-4 rounded-2xl bg-white border border-[#E6E1D6] shadow-xs">
+              <span className="text-[#5C5852] block text-[10px] uppercase font-semibold tracking-wider">Citas Hoy</span>
+              <span className="font-mono tabular-nums text-xl font-bold text-[#161514] mt-1 block">{todayAppointments.length}</span>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-[#14171E] border border-white/10 shadow-lg">
-              <span className="text-slate-400 block text-[10px] uppercase font-bold">Completadas</span>
-              <span className="text-xl font-black text-emerald-400 mt-1 block">{completedToday.length}</span>
+            <div className="p-4 rounded-2xl bg-white border border-[#E6E1D6] shadow-xs">
+              <span className="text-[#5C5852] block text-[10px] uppercase font-semibold tracking-wider">Completadas</span>
+              <span className="font-mono tabular-nums text-xl font-bold text-emerald-700 mt-1 block">{completedToday.length}</span>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-[#14171E] border border-white/10 shadow-lg">
-              <span className="text-slate-400 block text-[10px] uppercase font-bold">Ingresos Hoy</span>
-              <span className="text-xl font-black text-[#D4AF37] mt-1 block">{formatCurrency(totalRevenueToday)}</span>
+            <div className="p-4 rounded-2xl bg-white border border-[#E6E1D6] shadow-xs">
+              <span className="text-[#5C5852] block text-[10px] uppercase font-semibold tracking-wider">Ingresos Hoy</span>
+              <span className="font-mono tabular-nums text-xl font-bold text-[#9A6B3B] mt-1 block">{formatCurrency(totalRevenueToday)}</span>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-[#14171E] border border-white/10 shadow-lg">
-              <span className="text-slate-400 block text-[10px] uppercase font-bold">Calificación</span>
-              <span className="text-xl font-black text-amber-400 mt-1 block">★ {activeBarber.rating.toFixed(2)}</span>
+            <div className="p-4 rounded-2xl bg-white border border-[#E6E1D6] shadow-xs">
+              <span className="text-[#5C5852] block text-[10px] uppercase font-semibold tracking-wider">Calificación</span>
+              <span className="font-mono tabular-nums text-xl font-bold text-[#161514] mt-1 block">
+                <span className="text-[#9A6B3B]">★</span> {activeBarber.rating.toFixed(2)}
+              </span>
             </div>
           </div>
 
           {/* Today's Appointments List */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[#5C5852]">
                 Agenda de Hoy ({todayAppointments.length} citas)
               </h3>
               <button
                 onClick={() => setCurrentTab('appointments')}
-                className="text-xs font-bold text-[#D4AF37] hover:underline"
+                className="text-xs font-semibold text-[#9A6B3B] hover:text-[#7D542B] hover:underline"
               >
                 Ver Todas Mis Citas &rarr;
               </button>
             </div>
 
             {todayAppointments.length === 0 ? (
-              <div className="p-8 rounded-3xl bg-[#14171E] border border-white/10 text-center space-y-2">
-                <p className="text-slate-400 text-xs">No tienes citas programadas para hoy.</p>
+              <div className="p-8 rounded-3xl bg-white border border-[#E6E1D6] text-center space-y-3">
+                <p className="text-[#5C5852] text-xs">No tienes citas programadas para hoy.</p>
                 <button
                   onClick={() => setIsBookingModalOpen(true)}
-                  className="px-4 py-2 rounded-xl bg-[#D4AF37] text-slate-950 font-bold text-xs shadow hover:scale-105 transition-all"
+                  className="px-4 py-2.5 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] font-semibold text-xs shadow-xs transition-all"
                 >
                   Agendar una Cita
                 </button>
@@ -459,60 +461,60 @@ export const BarberDashboardView: React.FC<BarberDashboardViewProps> = ({
                 return (
                   <div
                     key={app.id}
-                    className={`p-4 rounded-2xl border transition-all shadow space-y-2.5 ${
+                    className={`p-4 rounded-2xl border transition-all shadow-xs space-y-2.5 ${
                       isConfirmed
-                        ? 'bg-[#14171E] border-[#D4AF37]/30'
+                        ? 'bg-white border-[#9A6B3B]/45'
                         : isCompleted
-                        ? 'bg-[#12151B] border-emerald-500/20'
-                        : 'bg-[#101217] border-white/5 opacity-70'
+                        ? 'bg-white border-emerald-200'
+                        : 'bg-[#F7F5F0] border-[#E6E1D6] opacity-75'
                     }`}
                   >
                     <div className="flex items-start justify-between">
                       <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-[#D4AF37] text-sm">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-mono tabular-nums font-bold text-[#9A6B3B] text-sm">
                             {formatTime12h(app.startTime)} - {formatTime12h(app.endTime)}
                           </span>
                           <span
-                            className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase ${
+                            className={`text-[10px] font-semibold px-2 py-0.5 rounded-md uppercase ${
                               isConfirmed
-                                ? 'bg-emerald-500/20 text-emerald-300'
+                                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                                 : isCompleted
-                                ? 'bg-blue-500/20 text-blue-300'
-                                : 'bg-rose-500/20 text-rose-300'
+                                ? 'bg-sky-50 text-sky-800 border border-sky-200'
+                                : 'bg-rose-50 text-rose-800 border border-rose-200'
                             }`}
                           >
                             {app.status}
                           </span>
                         </div>
-                        <h4 className="font-bold text-white text-base mt-1">
+                        <h4 className="font-bold text-[#161514] text-base mt-1">
                           {app.serviceNameSnapshot}
                         </h4>
-                        <p className="text-xs text-slate-300">
-                          Cliente: <strong className="text-white">{app.clientName}</strong> ({app.clientPhone || 'Sin teléfono'})
+                        <p className="text-xs text-[#5C5852]">
+                          Cliente: <strong className="text-[#161514]">{app.clientName}</strong> ({app.clientPhone || 'Sin teléfono'})
                         </p>
                       </div>
 
-                      <span className="font-black text-[#D4AF37] text-base">
+                      <span className="font-mono tabular-nums font-bold text-[#161514] text-base">
                         {formatCurrency(app.servicePriceSnapshot)}
                       </span>
                     </div>
 
                     {isConfirmed && (
-                      <div className="pt-2 border-t border-white/10 flex items-center gap-2">
+                      <div className="pt-2 border-t border-[#E6E1D6] flex items-center gap-2">
                         <button
                           onClick={() => {
                             updateAppointmentStatus(app.id, 'completed');
                             showToast('success', 'Cita Completada', `Has completado el servicio con ${app.clientName}.`);
                           }}
-                          className="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow flex items-center justify-center gap-1.5"
+                          className="flex-1 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold shadow-xs flex items-center justify-center gap-1.5 transition-colors"
                         >
                           <CheckCircle2 className="w-3.5 h-3.5" />
                           <span>Completar Cita</span>
                         </button>
                         <button
                           onClick={() => updateAppointmentStatus(app.id, 'no_show')}
-                          className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-slate-300 text-xs font-semibold"
+                          className="px-3 py-2 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] border border-[#D2CBBF] text-[#5C5852] hover:text-[#161514] text-xs font-semibold transition-colors"
                         >
                           No Asistió
                         </button>
@@ -544,10 +546,10 @@ export const BarberDashboardView: React.FC<BarberDashboardViewProps> = ({
       {/* VIEW 4: SERVICES MANAGEMENT */}
       {currentTab === 'services' && (
         <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#14171E] border border-white/10 p-4 rounded-3xl">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white border border-[#E6E1D6] p-4 rounded-3xl shadow-xs">
             <div>
-              <h3 className="text-base font-bold text-white">Servicios en Mi Perfil</h3>
-              <p className="text-xs text-slate-400">
+              <h3 className="font-display text-lg font-bold text-[#161514] uppercase tracking-wide">Servicios en Mi Perfil</h3>
+              <p className="text-xs text-[#5C5852]">
                 Gestiona los servicios oficiales y exclusivos que ofreces a los clientes
               </p>
             </div>
@@ -565,21 +567,21 @@ export const BarberDashboardView: React.FC<BarberDashboardViewProps> = ({
                   createdByType: 'barber',
                 })
               }
-              className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 text-xs font-bold shadow-lg hover:scale-105 active:scale-95 transition-all"
+              className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] text-xs font-semibold shadow-sm active:scale-95 transition-all"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4 text-[#C69765]" />
               <span>Crear Mi Servicio Personalizado</span>
             </button>
           </div>
 
           {/* Custom Services */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-[#D4AF37] px-1">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[#9A6B3B] px-1">
               Servicios Exclusivos Creados por Ti ({myCustomServices.length})
             </h4>
 
             {myCustomServices.length === 0 ? (
-              <div className="p-6 rounded-2xl bg-[#14171E] border border-white/10 text-center text-xs text-slate-400">
+              <div className="p-6 rounded-2xl bg-white border border-[#E6E1D6] text-center text-xs text-[#5C5852]">
                 Aún no has creado servicios personalizados. Presiona <strong>"Crear Mi Servicio Personalizado"</strong> para agregar tus paquetes exclusivos.
               </div>
             ) : (
@@ -587,24 +589,24 @@ export const BarberDashboardView: React.FC<BarberDashboardViewProps> = ({
                 {myCustomServices.map((service) => (
                   <div
                     key={service.id}
-                    className="rounded-2xl bg-[#14171E] border border-[#D4AF37]/30 p-4 flex items-center justify-between gap-3 shadow-lg"
+                    className="rounded-2xl bg-white border border-[#9A6B3B]/40 p-4 flex items-center justify-between gap-3 shadow-xs"
                   >
                     <div className="flex items-center gap-3.5 min-w-0">
                       <img
                         src={service.imageUrl || 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=600&q=80'}
                         alt={service.name}
-                        className="w-14 h-14 rounded-xl object-cover border border-[#D4AF37]/50 shrink-0"
+                        className="w-14 h-14 rounded-xl object-cover border border-[#E6E1D6] shrink-0"
                         referrerPolicy="no-referrer"
                       />
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <h4 className="font-bold text-white text-sm truncate">{service.name}</h4>
-                          <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-[#D4AF37]/20 text-[#D4AF37]">
+                          <h4 className="font-bold text-[#161514] text-sm truncate">{service.name}</h4>
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#FBF6EE] text-[#7D542B] border border-[#9A6B3B]/30 uppercase">
                             Exclusivo
                           </span>
                         </div>
-                        <p className="text-xs text-slate-400 mt-0.5">
-                          {service.durationMinutes} min • <strong className="text-[#D4AF37]">{formatCurrency(service.price)}</strong>
+                        <p className="text-xs text-[#5C5852] mt-0.5 font-mono tabular-nums">
+                          {service.durationMinutes} min · <strong className="text-[#9A6B3B]">{formatCurrency(service.price)}</strong>
                         </p>
                       </div>
                     </div>
@@ -612,21 +614,21 @@ export const BarberDashboardView: React.FC<BarberDashboardViewProps> = ({
                     <div className="flex items-center gap-2 shrink-0">
                       <button
                         onClick={() => toggleServiceActive(service.id, !service.active)}
-                        className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300"
+                        className="p-2 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] text-[#5C5852]"
                         title={service.active ? 'Desactivar' : 'Activar'}
                       >
-                        {service.active ? <ToggleRight className="w-5 h-5 text-emerald-400" /> : <ToggleLeft className="w-5 h-5 text-slate-500" />}
+                        {service.active ? <ToggleRight className="w-5 h-5 text-emerald-700" /> : <ToggleLeft className="w-5 h-5 text-[#8E887E]" />}
                       </button>
                       <button
                         onClick={() => setEditingCustomService(service)}
-                        className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300"
+                        className="p-2 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] text-[#161514]"
                         title="Editar"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => deleteService(service.id)}
-                        className="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300"
+                        className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200"
                         title="Eliminar"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -640,7 +642,7 @@ export const BarberDashboardView: React.FC<BarberDashboardViewProps> = ({
 
           {/* Global Services checklist */}
           <div className="space-y-3 pt-2">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300 px-1">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[#5C5852] px-1">
               Servicios Oficiales de la Barbería (Activa los que ofreces)
             </h4>
 
@@ -653,34 +655,34 @@ export const BarberDashboardView: React.FC<BarberDashboardViewProps> = ({
                     onClick={() => handleToggleGlobalService(service.id)}
                     className={`rounded-2xl border p-3.5 flex items-center justify-between gap-3 cursor-pointer transition-all ${
                       isOffered
-                        ? 'bg-[#14171E] border-[#D4AF37] shadow-lg shadow-[#D4AF37]/5'
-                        : 'bg-[#101217] border-white/5 opacity-70 hover:opacity-100'
+                        ? 'bg-[#FAF7F0] border-[#161514] shadow-xs'
+                        : 'bg-white border-[#E6E1D6] opacity-75 hover:opacity-100'
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <img
                         src={service.imageUrl || 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=600&q=80'}
                         alt={service.name}
-                        className="w-12 h-12 rounded-xl object-cover border border-white/10 shrink-0"
+                        className="w-12 h-12 rounded-xl object-cover border border-[#E6E1D6] shrink-0"
                         referrerPolicy="no-referrer"
                       />
                       <div>
-                        <h4 className="font-bold text-white text-xs">{service.name}</h4>
-                        <p className="text-[11px] text-slate-400">
-                          {service.durationMinutes} min • {formatCurrency(service.price)}
+                        <h4 className="font-bold text-[#161514] text-xs">{service.name}</h4>
+                        <p className="text-[11px] text-[#5C5852] font-mono tabular-nums">
+                          {service.durationMinutes} min · {formatCurrency(service.price)}
                         </p>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <span className={`text-[11px] font-semibold ${isOffered ? 'text-[#D4AF37]' : 'text-slate-500'}`}>
+                      <span className={`text-[11px] font-semibold ${isOffered ? 'text-[#9A6B3B]' : 'text-[#8E887E]'}`}>
                         {isOffered ? 'En mi menú' : 'No ofrecido'}
                       </span>
                       <div
                         className={`w-6 h-6 rounded-full flex items-center justify-center border transition-colors ${
                           isOffered
-                            ? 'bg-[#D4AF37] border-[#D4AF37] text-slate-950'
-                            : 'border-white/20 bg-transparent'
+                            ? 'bg-[#161514] border-[#161514] text-[#FAF9F6]'
+                            : 'border-[#D2CBBF] bg-white'
                         }`}
                       >
                         {isOffered && <Check className="w-3.5 h-3.5 stroke-[3]" />}
@@ -697,50 +699,50 @@ export const BarberDashboardView: React.FC<BarberDashboardViewProps> = ({
       {/* VIEW 5: SCHEDULE & BLOCKED SLOTS */}
       {currentTab === 'schedule' && (
         <div className="space-y-5">
-          <div className="rounded-3xl bg-[#14171E] border border-white/10 p-5 space-y-4 shadow-xl">
+          <div className="rounded-3xl bg-white border border-[#E6E1D6] p-5 space-y-4 shadow-xs">
             <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-[#D4AF37]" />
-              <h3 className="text-xs font-bold uppercase tracking-wider text-white">
+              <Clock className="w-4 h-4 text-[#9A6B3B]" />
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[#161514]">
                 Bloquear Horario o Descanso
               </h3>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
               <div>
-                <label className="text-slate-400 block mb-1">Fecha</label>
+                <label className="text-[#5C5852] font-semibold block mb-1">Fecha</label>
                 <input
                   type="date"
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                  className="w-full p-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] focus:outline-none focus:border-[#161514]"
                 />
               </div>
               <div>
-                <label className="text-slate-400 block mb-1">Hora Inicio</label>
+                <label className="text-[#5C5852] font-semibold block mb-1">Hora Inicio</label>
                 <input
                   type="time"
                   value={blockStart}
                   onChange={(e) => setBlockStart(e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                  className="w-full p-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] focus:outline-none focus:border-[#161514]"
                 />
               </div>
               <div>
-                <label className="text-slate-400 block mb-1">Hora Fin</label>
+                <label className="text-[#5C5852] font-semibold block mb-1">Hora Fin</label>
                 <input
                   type="time"
                   value={blockEnd}
                   onChange={(e) => setBlockEnd(e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                  className="w-full p-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] focus:outline-none focus:border-[#161514]"
                 />
               </div>
               <div>
-                <label className="text-slate-400 block mb-1">Motivo</label>
+                <label className="text-[#5C5852] font-semibold block mb-1">Motivo</label>
                 <input
                   type="text"
                   value={blockReason}
                   onChange={(e) => setBlockReason(e.target.value)}
                   placeholder="Ej. Comida / Descanso"
-                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                  className="w-full p-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] placeholder:text-[#8E887E] focus:outline-none focus:border-[#161514]"
                 />
               </div>
             </div>
@@ -748,35 +750,35 @@ export const BarberDashboardView: React.FC<BarberDashboardViewProps> = ({
             <button
               onClick={handleCreateBlockedSlot}
               disabled={isAddingBlock}
-              className="w-full py-2.5 rounded-xl bg-[#D4AF37] text-slate-950 font-bold text-xs shadow transition-all disabled:opacity-50"
+              className="w-full py-2.5 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] font-semibold text-xs shadow-xs transition-all disabled:opacity-50"
             >
               {isAddingBlock ? 'Bloqueando...' : 'Aplicar Bloqueo de Horario'}
             </button>
           </div>
 
           <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[#5C5852] px-1">
               Bloqueos de Horario para {formatDateSpanish(selectedDate)}
             </h4>
             {dateBlockedSlots.length === 0 ? (
-              <div className="p-4 rounded-2xl bg-[#14171E] border border-white/10 text-center text-xs text-slate-400">
+              <div className="p-4 rounded-2xl bg-white border border-[#E6E1D6] text-center text-xs text-[#5C5852]">
                 No hay bloqueos activos para esta fecha.
               </div>
             ) : (
               dateBlockedSlots.map((block) => (
                 <div
                   key={block.id}
-                  className="flex items-center justify-between p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-xs"
+                  className="flex items-center justify-between p-3 rounded-2xl bg-rose-50 border border-rose-200 text-xs"
                 >
                   <div>
-                    <span className="font-bold text-white">
+                    <span className="font-mono tabular-nums font-bold text-[#161514]">
                       {formatTime12h(block.startTime)} - {formatTime12h(block.endTime)}
                     </span>
-                    <p className="text-slate-300 text-[11px]">{block.reason || 'Sin motivo'}</p>
+                    <p className="text-[#5C5852] text-[11px]">{block.reason || 'Sin motivo'}</p>
                   </div>
                   <button
                     onClick={() => deleteBlockedSlot(block.id)}
-                    className="p-1.5 rounded-lg bg-rose-500/20 text-rose-300 hover:bg-rose-500/40"
+                    className="p-1.5 rounded-lg bg-white border border-rose-200 text-rose-700 hover:bg-rose-100"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>

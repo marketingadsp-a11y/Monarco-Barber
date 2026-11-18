@@ -148,58 +148,60 @@ export const AdminUsersSection: React.FC<AdminUsersSectionProps> = ({ appointmen
   return (
     <div className="space-y-4">
       {/* HEADER & METRIC SUMMARY */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#14171E] border border-white/10 p-4 rounded-2xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white border border-[#E6E1D6] p-4 rounded-2xl shadow-sm">
         <div>
-          <div className="flex items-center gap-2">
-            <Users className="w-5 h-5 text-[#D4AF37]" />
-            <h3 className="text-base font-bold text-white">Directorio de Usuarios Registrados</h3>
-            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Users className="w-5 h-5 text-[#9A6B3B]" />
+            <h3 className="font-display text-lg font-bold text-[#161514] uppercase tracking-wide">
+              Directorio de Usuarios Registrados
+            </h3>
+            <span className="text-xs font-mono tabular-nums font-bold px-2 py-0.5 rounded bg-[#FBF6EE] text-[#7D542B] border border-[#9A6B3B]/30">
               {users.length} total
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-[#5C5852] mt-0.5">
             Consulta expedientes de clientes, historial de visitas, compras, códigos QR, modifica puntos y asigna permisos de barbero o administrador.
           </p>
         </div>
 
         {/* QUICK STATS PILLS */}
         <div className="flex items-center gap-2 flex-wrap">
-          <div className="px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs">
-            <span className="text-slate-400">Clientes: </span>
-            <strong className="text-white">{totalClients}</strong>
+          <div className="px-3 py-1.5 rounded-xl bg-[#FAF9F6] border border-[#E6E1D6] text-xs">
+            <span className="text-[#5C5852]">Clientes: </span>
+            <strong className="font-mono tabular-nums text-[#161514]">{totalClients}</strong>
           </div>
-          <div className="px-3 py-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs">
-            <span className="text-blue-300">Barberos: </span>
-            <strong className="text-white">{totalBarbers}</strong>
+          <div className="px-3 py-1.5 rounded-xl bg-sky-50 border border-sky-200 text-xs">
+            <span className="text-sky-800">Barberos: </span>
+            <strong className="font-mono tabular-nums text-[#161514]">{totalBarbers}</strong>
           </div>
-          <div className="px-3 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-xs">
-            <span className="text-purple-300">Admins: </span>
-            <strong className="text-white">{totalAdmins}</strong>
+          <div className="px-3 py-1.5 rounded-xl bg-purple-50 border border-purple-200 text-xs">
+            <span className="text-purple-800">Admins: </span>
+            <strong className="font-mono tabular-nums text-[#161514]">{totalAdmins}</strong>
           </div>
-          <div className="px-3 py-1.5 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/25 text-xs">
-            <span className="text-[#D4AF37]">Puntos Activos: </span>
-            <strong className="text-white font-mono">{totalCirculatingPoints} pts</strong>
+          <div className="px-3 py-1.5 rounded-xl bg-[#FBF6EE] border border-[#9A6B3B]/30 text-xs">
+            <span className="text-[#7D542B]">Puntos Activos: </span>
+            <strong className="text-[#161514] font-mono tabular-nums">{totalCirculatingPoints} pts</strong>
           </div>
         </div>
       </div>
 
       {/* SEARCH AND FILTER BAR */}
-      <div className="p-3.5 rounded-2xl bg-[#14171E] border border-white/10 space-y-3">
+      <div className="p-3.5 rounded-2xl bg-white border border-[#E6E1D6] shadow-sm space-y-3">
         <div className="flex flex-col sm:flex-row items-center gap-2.5">
           {/* Search Input */}
           <div className="relative flex-1 w-full">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-[#767067] absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Buscar por nombre, teléfono, correo o No. de Cliente #849201..."
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-900 border border-white/10 text-white text-xs placeholder:text-slate-500 focus:border-[#D4AF37] transition-all"
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] text-xs placeholder:text-[#8E887E] focus:outline-none focus:border-[#9A6B3B] transition-all"
             />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs font-bold"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5C5852] hover:text-[#161514] text-xs font-bold"
               >
                 ✕
               </button>
@@ -210,7 +212,7 @@ export const AdminUsersSection: React.FC<AdminUsersSectionProps> = ({ appointmen
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value as any)}
-            className="w-full sm:w-auto px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white text-xs"
+            className="w-full sm:w-auto px-3 py-2 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] text-xs font-medium focus:outline-none focus:border-[#9A6B3B]"
           >
             <option value="all">Todos los Roles</option>
             <option value="client">Solo Clientes</option>
@@ -222,7 +224,7 @@ export const AdminUsersSection: React.FC<AdminUsersSectionProps> = ({ appointmen
           <select
             value={tierFilter}
             onChange={(e) => setTierFilter(e.target.value)}
-            className="w-full sm:w-auto px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white text-xs"
+            className="w-full sm:w-auto px-3 py-2 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] text-xs font-medium focus:outline-none focus:border-[#9A6B3B]"
           >
             <option value="all">Todas las Membresías</option>
             <option value="VIP">Membresía VIP</option>
@@ -235,7 +237,7 @@ export const AdminUsersSection: React.FC<AdminUsersSectionProps> = ({ appointmen
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
-            className="w-full sm:w-auto px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white text-xs"
+            className="w-full sm:w-auto px-3 py-2 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] text-xs font-medium focus:outline-none focus:border-[#9A6B3B]"
           >
             <option value="newest">Más Recientes</option>
             <option value="points">Mayor Puntos VIP</option>
@@ -247,15 +249,15 @@ export const AdminUsersSection: React.FC<AdminUsersSectionProps> = ({ appointmen
 
       {/* USERS LIST TABLE / CARDS */}
       {isLoading ? (
-        <div className="p-12 rounded-3xl bg-[#14171E] border border-white/10 text-center space-y-2">
-          <RefreshCw className="w-6 h-6 text-[#D4AF37] animate-spin mx-auto" />
-          <p className="text-xs text-slate-400">Cargando directorio de usuarios...</p>
+        <div className="p-12 rounded-2xl bg-white border border-[#E6E1D6] text-center space-y-2">
+          <RefreshCw className="w-6 h-6 text-[#9A6B3B] animate-spin mx-auto" />
+          <p className="text-xs text-[#5C5852]">Cargando directorio de usuarios...</p>
         </div>
       ) : filteredUsers.length === 0 ? (
-        <div className="p-10 rounded-3xl bg-[#14171E] border border-white/10 text-center space-y-2">
-          <Users className="w-8 h-8 text-slate-500 mx-auto" />
-          <p className="text-sm font-bold text-white">No se encontraron usuarios</p>
-          <p className="text-xs text-slate-400">
+        <div className="p-10 rounded-2xl bg-white border border-[#E6E1D6] text-center space-y-2">
+          <Users className="w-8 h-8 text-[#8E887E] mx-auto" />
+          <p className="text-sm font-bold text-[#161514]">No se encontraron usuarios</p>
+          <p className="text-xs text-[#5C5852]">
             Intenta cambiar los filtros de búsqueda o restablecer el término ingresado.
           </p>
         </div>
@@ -271,7 +273,7 @@ export const AdminUsersSection: React.FC<AdminUsersSectionProps> = ({ appointmen
               <div
                 key={user.id}
                 onClick={() => handleOpenUserModal(user)}
-                className="group rounded-2xl bg-[#14171E] hover:bg-[#181D26] border border-white/10 hover:border-[#D4AF37]/50 p-4 transition-all duration-150 cursor-pointer shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+                className="group rounded-2xl bg-white hover:bg-[#FAF7F0] border border-[#E6E1D6] hover:border-[#9A6B3B]/60 p-4 transition-all duration-150 cursor-pointer shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
               >
                 {/* User Identity Column */}
                 <div className="flex items-center gap-3.5 min-w-0">
@@ -279,56 +281,56 @@ export const AdminUsersSection: React.FC<AdminUsersSectionProps> = ({ appointmen
                     <img
                       src={user.photoUrl}
                       alt={user.name}
-                      className="w-12 h-12 rounded-2xl object-cover border border-[#D4AF37]/50 shrink-0"
+                      className="w-12 h-12 rounded-xl object-cover border border-[#D2CBBF] shrink-0"
                       referrerPolicy="no-referrer"
                     />
                   ) : (
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#996515] to-[#D4AF37] text-slate-950 font-black text-lg flex items-center justify-center border border-white/10 shadow shrink-0">
+                    <div className="w-12 h-12 rounded-xl bg-[#161514] text-[#C69765] font-black text-lg flex items-center justify-center border border-[#D2CBBF] shadow-sm shrink-0">
                       {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
                     </div>
                   )}
 
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h4 className="font-bold text-white text-sm group-hover:text-[#D4AF37] transition-colors truncate">
+                      <h4 className="font-bold text-[#161514] text-sm group-hover:text-[#9A6B3B] transition-colors truncate">
                         {user.name}
                       </h4>
 
-                      {/* Role Pill */}
+                      {/* Role Tag */}
                       <span
-                        className={`text-[9px] font-bold px-2 py-0.2 rounded-full uppercase border ${
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase border ${
                           user.role === 'admin'
-                            ? 'bg-purple-500/20 text-purple-300 border-purple-500/40'
+                            ? 'bg-purple-50 text-purple-800 border-purple-200'
                             : user.role === 'barber'
-                            ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
-                            : 'bg-[#D4AF37]/15 text-[#D4AF37] border-[#D4AF37]/30'
+                            ? 'bg-sky-50 text-sky-800 border-sky-200'
+                            : 'bg-[#FBF6EE] text-[#7D542B] border-[#9A6B3B]/30'
                         }`}
                       >
                         {user.role === 'admin' ? 'Admin' : user.role === 'barber' ? 'Barbero' : 'Cliente'}
                       </span>
 
-                      {/* Tier Pill */}
-                      <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-white/5 text-amber-300 border border-white/10">
+                      {/* Tier Tag */}
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#F2EFE9] text-[#5C5852] border border-[#E6E1D6]">
                         {user.membershipTier || 'VIP'}
                       </span>
 
                       {!user.active && (
-                        <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300">
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-rose-50 text-rose-800 border border-rose-200">
                           Inactivo
                         </span>
                       )}
                     </div>
 
-                    <div className="flex items-center gap-2 text-xs text-slate-400 mt-1 flex-wrap font-mono">
-                      <span className="text-[#D4AF37] font-bold">
+                    <div className="flex items-center gap-2 text-xs text-[#5C5852] mt-1 flex-wrap font-mono tabular-nums">
+                      <span className="text-[#9A6B3B] font-bold">
                         #{user.clientNumber || 'Sin número'}
                       </span>
-                      {user.phone && <span className="text-slate-300">• 📱 {user.phone}</span>}
-                      {user.email && <span className="text-slate-400 truncate max-w-[200px]">• ✉️ {user.email}</span>}
+                      {user.phone && <span className="text-[#161514]">• {user.phone}</span>}
+                      {user.email && <span className="text-[#767067] font-sans truncate max-w-[200px]">• {user.email}</span>}
                     </div>
 
                     {user.notes && (
-                      <p className="text-[11px] text-slate-400 italic line-clamp-1 mt-1">
+                      <p className="text-[11px] text-[#767067] italic line-clamp-1 mt-1">
                         "{user.notes}"
                       </p>
                     )}
@@ -336,24 +338,24 @@ export const AdminUsersSection: React.FC<AdminUsersSectionProps> = ({ appointmen
                 </div>
 
                 {/* Metrics Column */}
-                <div className="flex items-center gap-4 text-xs shrink-0 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 pt-3 md:pt-0 border-white/5">
+                <div className="flex items-center gap-4 text-xs shrink-0 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 pt-3 md:pt-0 border-[#E6E1D6]">
                   <div className="text-left md:text-right">
-                    <span className="text-[10px] text-slate-400 uppercase font-bold block">Puntos VIP</span>
-                    <span className="font-mono font-black text-[#D4AF37] text-sm block">
+                    <span className="text-[10px] text-[#5C5852] uppercase font-bold block">Puntos VIP</span>
+                    <span className="font-mono tabular-nums font-black text-[#9A6B3B] text-sm block">
                       {user.points ?? 100} pts
                     </span>
                   </div>
 
                   <div className="text-left md:text-right">
-                    <span className="text-[10px] text-slate-400 uppercase font-bold block">Visitas</span>
-                    <span className="font-mono font-bold text-white text-sm block">
+                    <span className="text-[10px] text-[#5C5852] uppercase font-bold block">Visitas</span>
+                    <span className="font-mono tabular-nums font-bold text-[#161514] text-sm block">
                       {totalVisits}
                     </span>
                   </div>
 
                   <div className="text-left md:text-right">
-                    <span className="text-[10px] text-slate-400 uppercase font-bold block">Total Consumo</span>
-                    <span className="font-mono font-bold text-emerald-400 text-sm block">
+                    <span className="text-[10px] text-[#5C5852] uppercase font-bold block">Total Consumo</span>
+                    <span className="font-mono tabular-nums font-bold text-emerald-700 text-sm block">
                       {formatCurrency(totalSpent)}
                     </span>
                   </div>
@@ -366,7 +368,7 @@ export const AdminUsersSection: React.FC<AdminUsersSectionProps> = ({ appointmen
                         e.stopPropagation();
                         setQuickQrUser(user);
                       }}
-                      className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-[#D4AF37] hover:scale-105 transition-all"
+                      className="p-2 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] border border-[#D2CBBF] text-[#9A6B3B] transition-all"
                       title="Ver Código QR del Cliente"
                     >
                       <QrCode className="w-4 h-4" />
@@ -376,7 +378,7 @@ export const AdminUsersSection: React.FC<AdminUsersSectionProps> = ({ appointmen
                     <select
                       value={user.role}
                       onChange={(e) => handleQuickRoleChange(user, e.target.value as UserRole, e as any)}
-                      className="px-2 py-1.5 rounded-xl bg-slate-900 border border-white/15 text-white text-[11px] font-bold"
+                      className="px-2.5 py-1.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] text-[11px] font-bold focus:outline-none focus:border-[#9A6B3B]"
                       title="Cambiar rol"
                     >
                       <option value="client">Cliente</option>
@@ -387,7 +389,7 @@ export const AdminUsersSection: React.FC<AdminUsersSectionProps> = ({ appointmen
                     {/* Open Details Button */}
                     <button
                       onClick={() => handleOpenUserModal(user)}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#D4AF37] hover:bg-[#E5B869] text-slate-950 font-bold text-xs shadow-md transition-all active:scale-95"
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] font-bold text-xs shadow-sm transition-all active:scale-95"
                     >
                       <span>Expediente</span>
                     </button>
@@ -413,19 +415,19 @@ export const AdminUsersSection: React.FC<AdminUsersSectionProps> = ({ appointmen
       {/* QUICK QR PREVIEW MODAL */}
       {quickQrUser && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#161514]/55 backdrop-blur-sm animate-in fade-in"
           onClick={() => setQuickQrUser(null)}
         >
           <div
-            className="w-full max-w-sm rounded-3xl bg-[#14171E] border-2 border-[#D4AF37]/60 p-6 space-y-4 text-center shadow-2xl animate-in zoom-in-95"
+            className="w-full max-w-sm rounded-2xl bg-[#FAF9F6] border-2 border-[#9A6B3B]/60 p-6 space-y-4 text-center shadow-2xl animate-in zoom-in-95"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-center gap-1.5 px-3 py-1 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/40 text-[#D4AF37] text-xs font-bold w-fit mx-auto">
+            <div className="flex items-center justify-center gap-1.5 px-3 py-1 rounded-full bg-[#161514] text-[#C69765] text-xs font-bold w-fit mx-auto">
               <Crown className="w-3.5 h-3.5" />
               <span>PASE VIP MONARCA BARBER</span>
             </div>
 
-            <div className="bg-white p-3 rounded-2xl max-w-[200px] mx-auto shadow-xl">
+            <div className="bg-white p-3 rounded-2xl max-w-[200px] mx-auto shadow-md border border-[#E6E1D6]">
               <img
                 src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&margin=4&data=${encodeURIComponent(
                   JSON.stringify({
@@ -440,19 +442,19 @@ export const AdminUsersSection: React.FC<AdminUsersSectionProps> = ({ appointmen
             </div>
 
             <div>
-              <span className="text-[10px] text-slate-400 uppercase font-bold tracking-widest block">
+              <span className="text-[10px] text-[#5C5852] uppercase font-bold tracking-widest block">
                 Número de Cliente
               </span>
-              <span className="font-mono text-2xl font-black text-[#D4AF37] tracking-[0.25em]">
+              <span className="font-mono tabular-nums text-2xl font-black text-[#9A6B3B] tracking-[0.25em]">
                 #{quickQrUser.clientNumber || '000000'}
               </span>
-              <h3 className="font-bold text-white text-sm mt-1">{quickQrUser.name}</h3>
-              <p className="text-xs text-slate-400">{quickQrUser.phone || 'Sin teléfono'}</p>
+              <h3 className="font-bold text-[#161514] text-sm mt-1">{quickQrUser.name}</h3>
+              <p className="text-xs text-[#5C5852] font-mono tabular-nums">{quickQrUser.phone || 'Sin teléfono'}</p>
             </div>
 
             <button
               onClick={() => setQuickQrUser(null)}
-              className="w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs"
+              className="w-full py-2.5 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] font-bold text-xs"
             >
               Cerrar
             </button>

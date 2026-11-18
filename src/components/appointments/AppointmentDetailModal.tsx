@@ -1,18 +1,10 @@
 import React, { useState } from 'react';
 import {
   X,
-  Calendar,
-  Clock,
-  User,
-  Scissors,
   AlertTriangle,
   CalendarPlus,
   RefreshCw,
   XCircle,
-  CheckCircle2,
-  Phone,
-  MessageCircle,
-  FileText,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Appointment, AvailableTimeSlot, UserRole } from '../../types';
@@ -38,7 +30,6 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
   userRole = 'client',
 }) => {
   const {
-    services,
     barbers,
     schedules,
     appointments,
@@ -46,14 +37,12 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
     businessSettings,
     cancelAppointment,
     rescheduleAppointment,
-    updateAppointmentStatus,
   } = useBarbershop();
 
   const [mode, setMode] = useState<'view' | 'cancel' | 'reschedule'>('view');
   const [cancelReason, setCancelReason] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Reschedule state
   const [rescheduleDate, setRescheduleDate] = useState<string>(appointment?.date || getTodayDateString());
   const [selectedSlot, setSelectedSlot] = useState<AvailableTimeSlot | null>(null);
 
@@ -61,9 +50,7 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
 
   const upcomingDays = getUpcomingDays(14);
   const barber = barbers.find((b) => b.id === appointment.barberId);
-  const service = services.find((s) => s.id === appointment.serviceId);
 
-  // Reschedule slots calculation
   const availableRescheduleSlots = getAvailableSlots({
     barberId: appointment.barberId,
     serviceDurationMinutes: appointment.serviceDurationSnapshot,
@@ -149,139 +136,133 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 bg-black/80 backdrop-blur-md"
+          className="fixed inset-0 bg-[#161514]/55 backdrop-blur-sm"
         />
 
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          initial={{ opacity: 0, scale: 0.96, y: 16 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-md bg-[#14171E] border border-white/15 rounded-3xl overflow-hidden shadow-2xl z-10 p-5 space-y-5"
+          exit={{ opacity: 0, scale: 0.96, y: 16 }}
+          className="relative w-full max-w-md bg-[#FAF9F6] border border-[#E6E1D6] rounded-3xl overflow-hidden shadow-[0_24px_60px_rgba(22,21,20,0.22)] z-10 p-5 sm:p-6 space-y-5"
         >
-          {/* Header */}
-          <div className="flex items-center justify-between pb-3 border-b border-white/10">
+          <div className="flex items-center justify-between pb-3 border-b border-[#E6E1D6]">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#D4AF37]">
+              <span className="text-[11px] font-semibold uppercase tracking-widest text-[#9A6B3B]">
                 Detalle de Cita
               </span>
-              <h3 className="text-base font-bold text-white tracking-tight">
+              <h3 className="font-display text-xl font-bold text-[#161514] tracking-wide uppercase tabular-nums">
                 Folio: #{appointment.id.substring(0, 8)}
               </h3>
             </div>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-full bg-white/5 text-slate-400 hover:text-white"
+              className="p-2 rounded-xl bg-white hover:bg-[#F2EFE9] border border-[#E6E1D6] text-[#5C5852] hover:text-[#161514] transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
-          {/* VIEW MODE */}
           {mode === 'view' && (
             <div className="space-y-4">
-              {/* Status Badge Banner */}
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5">
-                <span className="text-xs text-slate-400">Estado actual:</span>
+              <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-[#E6E1D6]">
+                <span className="text-xs text-[#5C5852]">Estado actual</span>
                 <span
-                  className={`text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wide ${
+                  className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg border uppercase tracking-wider ${
                     isCancelled
-                      ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                      ? 'bg-rose-50 text-rose-800 border-rose-200'
                       : isCompleted
-                      ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
-                      : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                      ? 'bg-sky-50 text-sky-800 border-sky-200'
+                      : 'bg-emerald-50 text-emerald-800 border-emerald-200'
                   }`}
                 >
-                  {appointment.status === 'confirmed' && '● Confirmada'}
-                  {appointment.status === 'pending' && '● Pendiente'}
-                  {appointment.status === 'completed' && '✓ Completada'}
-                  {appointment.status === 'cancelled' && '✕ Cancelada'}
+                  {appointment.status === 'confirmed' && 'Confirmada'}
+                  {appointment.status === 'pending' && 'Pendiente'}
+                  {appointment.status === 'completed' && 'Completada'}
+                  {appointment.status === 'cancelled' && 'Cancelada'}
                   {appointment.status === 'no_show' && 'No Asistió'}
                 </span>
               </div>
 
-              {/* Service & Barber Info Card */}
-              <div className="rounded-2xl bg-[#181D26] border border-white/10 p-4 space-y-3">
-                <div className="flex items-start justify-between">
+              <div className="rounded-2xl bg-white border border-[#E6E1D6] p-4 space-y-3">
+                <div className="flex items-start justify-between gap-2">
                   <div>
-                    <h4 className="font-bold text-white text-base">
+                    <h4 className="font-display text-xl font-bold text-[#161514] uppercase tracking-wide">
                       {appointment.serviceNameSnapshot}
                     </h4>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-[#5C5852] tabular-nums">
                       {appointment.serviceDurationSnapshot} minutos
                     </p>
                   </div>
-                  <span className="text-base font-black text-[#D4AF37]">
+                  <span className="font-mono text-base font-bold text-[#9A6B3B] tabular-nums">
                     {formatCurrency(appointment.servicePriceSnapshot)}
                   </span>
                 </div>
 
-                <div className="pt-3 border-t border-white/5 flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <img
-                      src={appointment.barberPhoto || barber?.photoUrl}
-                      alt={appointment.barberName}
-                      className="w-10 h-10 rounded-xl object-cover border border-white/15"
-                      referrerPolicy="no-referrer"
-                    />
-                    <div>
-                      <span className="text-[10px] text-slate-400 block">Barbero</span>
-                      <span className="text-xs font-bold text-white">{appointment.barberName}</span>
-                    </div>
+                <div className="pt-3 border-t border-[#E6E1D6] flex items-center gap-2.5">
+                  <img
+                    src={appointment.barberPhoto || barber?.photoUrl}
+                    alt={appointment.barberName}
+                    className="w-10 h-10 rounded-xl object-cover border border-[#E6E1D6]"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div>
+                    <span className="text-[10px] text-[#5C5852] uppercase tracking-wider block">
+                      Barbero
+                    </span>
+                    <span className="text-xs font-bold text-[#161514]">
+                      {appointment.barberName}
+                    </span>
                   </div>
                 </div>
               </div>
 
-              {/* Schedule Info */}
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="p-3 rounded-2xl bg-white/5 border border-white/5">
-                  <span className="text-[10px] text-slate-400 block uppercase">Fecha</span>
-                  <span className="font-bold text-white block mt-0.5">
+              <div className="grid grid-cols-2 gap-2.5 text-xs">
+                <div className="p-3 rounded-xl bg-white border border-[#E6E1D6]">
+                  <span className="text-[10px] text-[#5C5852] block uppercase tracking-wider">Fecha</span>
+                  <span className="font-bold text-[#161514] block mt-0.5">
                     {formatDateSpanish(appointment.date)}
                   </span>
                 </div>
-                <div className="p-3 rounded-2xl bg-white/5 border border-white/5">
-                  <span className="text-[10px] text-slate-400 block uppercase">Horario</span>
-                  <span className="font-bold text-[#D4AF37] block mt-0.5">
+                <div className="p-3 rounded-xl bg-white border border-[#E6E1D6]">
+                  <span className="text-[10px] text-[#5C5852] block uppercase tracking-wider">Horario</span>
+                  <span className="font-mono font-bold text-[#9A6B3B] block mt-0.5 tabular-nums">
                     {formatTime12h(appointment.startTime)} - {formatTime12h(appointment.endTime)}
                   </span>
                 </div>
               </div>
 
-              {/* Client notes if any */}
               {appointment.notes && (
-                <div className="p-3 rounded-2xl bg-white/5 border border-white/5 text-xs">
-                  <span className="text-[10px] text-slate-400 uppercase tracking-wider block mb-0.5">
+                <div className="p-3 rounded-xl bg-white border border-[#E6E1D6] text-xs">
+                  <span className="text-[10px] text-[#5C5852] uppercase tracking-wider block mb-0.5">
                     Notas del cliente
                   </span>
-                  <p className="text-slate-300 font-normal">{appointment.notes}</p>
+                  <p className="text-[#161514] font-normal">{appointment.notes}</p>
                 </div>
               )}
 
-              {/* Cancel info if cancelled */}
               {isCancelled && appointment.cancelReason && (
-                <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-300">
+                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800">
                   <span className="font-semibold block">Motivo de cancelación:</span>
                   <p className="mt-0.5">{appointment.cancelReason}</p>
                 </div>
               )}
 
-              {/* Actions Footer */}
               <div className="space-y-2 pt-2">
                 {!isCancelled && !isCompleted && (
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setMode('reschedule')}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-semibold border border-white/10 transition-colors"
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] text-xs font-semibold transition-colors"
                     >
-                      <RefreshCw className="w-3.5 h-3.5 text-[#D4AF37]" />
+                      <RefreshCw className="w-3.5 h-3.5 text-[#C69765]" />
                       <span>Reprogramar</span>
                     </button>
 
                     <button
                       onClick={() => setMode('cancel')}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-semibold border border-rose-500/20 transition-colors"
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold border border-rose-200 transition-colors"
                     >
-                      <XCircle className="w-3.5 h-3.5 text-rose-400" />
+                      <XCircle className="w-3.5 h-3.5 text-rose-600" />
                       <span>Cancelar Cita</span>
                     </button>
                   </div>
@@ -289,30 +270,29 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
 
                 <button
                   onClick={downloadIcs}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-medium border border-white/10 transition-colors"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white hover:bg-[#F2EFE9] text-[#161514] text-xs font-semibold border border-[#E6E1D6] transition-colors"
                 >
-                  <CalendarPlus className="w-4 h-4 text-[#D4AF37]" />
+                  <CalendarPlus className="w-4 h-4 text-[#9A6B3B]" />
                   <span>Descargar Recordatorio (.ICS)</span>
                 </button>
               </div>
             </div>
           )}
 
-          {/* CANCEL MODE */}
           {mode === 'cancel' && (
             <div className="space-y-4">
-              <div className="p-3 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-xs text-rose-200 flex items-start gap-2.5">
-                <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+              <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-900 flex items-start gap-2.5">
+                <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                 <div>
                   <h5 className="font-bold">¿Deseas cancelar esta cita?</h5>
-                  <p className="opacity-90 mt-0.5">
+                  <p className="text-rose-800 mt-0.5">
                     El horario quedará liberado para otros clientes de inmediato.
                   </p>
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-medium text-slate-300 block mb-1">
+                <label className="text-xs font-semibold text-[#161514] block mb-1.5">
                   Motivo de cancelación (opcional)
                 </label>
                 <textarea
@@ -320,7 +300,7 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
                   onChange={(e) => setCancelReason(e.target.value)}
                   placeholder="Ej. Cambio de planes imprevisto"
                   rows={3}
-                  className="w-full p-3 rounded-2xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-rose-400"
+                  className="w-full p-3 rounded-xl bg-white border border-[#E6E1D6] text-[#161514] placeholder-[#5C5852]/60 text-xs focus:outline-none focus:border-rose-500"
                 />
               </div>
 
@@ -328,14 +308,14 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
                 <button
                   onClick={() => setMode('view')}
                   disabled={isProcessing}
-                  className="flex-1 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold"
+                  className="flex-1 py-2.5 rounded-xl bg-[#F2EFE9] hover:bg-[#E6E1D6] text-[#161514] text-xs font-semibold"
                 >
                   Atrás
                 </button>
                 <button
                   onClick={handleCancelSubmit}
                   disabled={isProcessing}
-                  className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow-lg shadow-rose-600/30 transition-all disabled:opacity-50"
+                  className="flex-1 py-2.5 rounded-xl bg-rose-700 hover:bg-rose-800 text-white text-xs font-semibold transition-all disabled:opacity-50"
                 >
                   {isProcessing ? 'Cancelando...' : 'Confirmar Cancelación'}
                 </button>
@@ -343,11 +323,10 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
             </div>
           )}
 
-          {/* RESCHEDULE MODE */}
           {mode === 'reschedule' && (
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-medium text-slate-300 block mb-1">
+                <label className="text-xs font-semibold text-[#161514] block mb-1.5">
                   Selecciona la nueva fecha
                 </label>
                 <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
@@ -358,13 +337,13 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
                         setRescheduleDate(d.dateStr);
                         setSelectedSlot(null);
                       }}
-                      className={`flex flex-col items-center px-3 py-2 rounded-xl border text-xs min-w-16 transition-all ${
+                      className={`flex flex-col items-center px-3 py-2 rounded-xl border text-xs min-w-16 transition-all tabular-nums ${
                         rescheduleDate === d.dateStr
-                          ? 'bg-[#D4AF37] text-slate-950 font-bold border-[#D4AF37]'
-                          : 'bg-white/5 text-slate-300 border-white/10'
+                          ? 'bg-[#161514] text-[#FAF9F6] font-bold border-[#161514]'
+                          : 'bg-white text-[#5C5852] border-[#E6E1D6] hover:border-[#9A6B3B]'
                       }`}
                     >
-                      <span className="text-[10px]">{d.dayName}</span>
+                      <span className="text-[10px] uppercase">{d.dayName}</span>
                       <span className="text-sm font-bold">{d.dayNumber}</span>
                     </button>
                   ))}
@@ -372,7 +351,7 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
               </div>
 
               <div>
-                <label className="text-xs font-medium text-slate-300 block mb-1">
+                <label className="text-xs font-semibold text-[#161514] block mb-1.5">
                   Selecciona nuevo horario
                 </label>
                 <div className="grid grid-cols-3 gap-2 max-h-44 overflow-y-auto pr-1">
@@ -382,10 +361,10 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
                       <button
                         key={s.startTime}
                         onClick={() => setSelectedSlot(s)}
-                        className={`p-2 rounded-xl border text-xs text-center transition-all ${
+                        className={`p-2 rounded-xl border text-xs font-mono text-center transition-all tabular-nums ${
                           selectedSlot?.startTime === s.startTime
-                            ? 'bg-[#D4AF37] text-slate-950 font-bold border-[#D4AF37]'
-                            : 'bg-white/5 hover:bg-white/10 text-white border-white/10'
+                            ? 'bg-[#161514] text-[#FAF9F6] font-bold border-[#161514]'
+                            : 'bg-white hover:bg-[#F2EFE9] text-[#161514] border-[#E6E1D6]'
                         }`}
                       >
                         {formatTime12h(s.startTime)}
@@ -398,14 +377,14 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
                 <button
                   onClick={() => setMode('view')}
                   disabled={isProcessing}
-                  className="flex-1 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold"
+                  className="flex-1 py-2.5 rounded-xl bg-[#F2EFE9] hover:bg-[#E6E1D6] text-[#161514] text-xs font-semibold"
                 >
                   Atrás
                 </button>
                 <button
                   onClick={handleRescheduleSubmit}
                   disabled={!selectedSlot || isProcessing}
-                  className="flex-1 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#E5B869] text-slate-950 text-xs font-bold shadow-lg shadow-[#D4AF37]/20 transition-all disabled:opacity-50"
+                  className="flex-1 py-2.5 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] text-xs font-semibold transition-all disabled:opacity-50"
                 >
                   {isProcessing ? 'Reprogramando...' : 'Confirmar Cambio'}
                 </button>

@@ -287,7 +287,7 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
           particleCount: 40,
           spread: 60,
           origin: { y: 0.6 },
-          colors: ['#D4AF37', '#FFFFFF', '#E5B869'],
+          colors: ['#9A6B3B', '#161514', '#C69765'],
         });
       } catch {
         // ignore
@@ -504,7 +504,7 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
           particleCount: 80,
           spread: 70,
           origin: { y: 0.5 },
-          colors: ['#10B981', '#D4AF37', '#FFFFFF'],
+          colors: ['#047857', '#9A6B3B', '#161514'],
         });
       } catch {
         // ignore
@@ -532,22 +532,22 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in">
-      <div className="bg-[#12151B] border border-white/15 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col my-auto max-h-[94vh]">
+    <div className="fixed inset-0 z-50 bg-[#161514]/55 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in">
+      <div className="bg-[#FAF9F6] border border-[#D2CBBF] rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col my-auto max-h-[94vh]">
         {/* Modal Header */}
-        <div className="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between bg-gradient-to-r from-[#181D26] to-[#12151B]">
+        <div className="p-4 sm:p-5 border-b border-[#E6E1D6] flex items-center justify-between bg-white">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#996515] via-[#D4AF37] to-[#F3E5AB] flex items-center justify-center text-slate-950 shadow-lg shadow-[#D4AF37]/20">
-              <QrCode className="w-5 h-5 stroke-[2.4]" />
+            <div className="w-10 h-10 rounded-xl bg-[#161514] flex items-center justify-center text-[#C69765] shadow-sm">
+              <QrCode className="w-5 h-5 stroke-[2.2]" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
+              <h2 className="font-display text-lg font-bold text-[#161514] uppercase tracking-wide flex items-center gap-2">
                 <span>Lector QR & Cobro</span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30">
+                <span className="font-sans normal-case text-[11px] font-bold px-2 py-0.5 rounded bg-[#FBF6EE] text-[#7D542B] border border-[#9A6B3B]/30">
                   {activeBarber.displayName.split(' ')[0]}
                 </span>
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-[#5C5852]">
                 Escanear cliente para cobro, servicios, productos y puntos
               </p>
             </div>
@@ -555,7 +555,7 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
 
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 flex items-center justify-center transition-colors"
+            className="w-9 h-9 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] border border-[#E6E1D6] text-[#161514] flex items-center justify-center transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -566,8 +566,8 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
           {!scannedClient ? (
             /* 1. CAMERA SCANNER & MANUAL SEARCH VIEW */
             <div className="space-y-4">
-              {/* Camera Viewfinder */}
-              <div className="relative aspect-square max-h-[290px] w-full rounded-2xl overflow-hidden bg-black/90 border border-white/15 flex items-center justify-center shadow-inner">
+              {/* Camera Viewfinder (kept dark behind live video for QR scan contrast) */}
+              <div className="relative aspect-square max-h-[290px] w-full rounded-2xl overflow-hidden bg-[#161514] border border-[#D2CBBF] flex items-center justify-center shadow-inner">
                 <video
                   ref={videoRef}
                   className="w-full h-full object-cover"
@@ -579,31 +579,31 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                 {/* Scanning Frame Overlay */}
                 {cameraActive && (
                   <div className="absolute inset-0 pointer-events-none flex items-center justify-center p-8">
-                    <div className="relative w-48 h-48 sm:w-56 sm:h-56 border-2 border-[#D4AF37] rounded-3xl shadow-[0_0_25px_rgba(212,175,55,0.4)]">
-                      <div className="absolute top-0 left-0 w-4 h-4 border-t-4 border-l-4 border-white rounded-tl-lg" />
-                      <div className="absolute top-0 right-0 w-4 h-4 border-t-4 border-r-4 border-white rounded-tr-lg" />
-                      <div className="absolute bottom-0 left-0 w-4 h-4 border-b-4 border-l-4 border-white rounded-bl-lg" />
-                      <div className="absolute bottom-0 right-0 w-4 h-4 border-b-4 border-r-4 border-white rounded-br-lg" />
-                      <div className="absolute left-2 right-2 h-0.5 bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent animate-pulse top-1/2 -translate-y-1/2 shadow-[0_0_12px_#D4AF37]" />
+                    <div className="relative w-48 h-48 sm:w-56 sm:h-56 border-2 border-[#C69765] rounded-2xl shadow-[0_0_25px_rgba(198,151,101,0.35)]">
+                      <div className="absolute top-0 left-0 w-4 h-4 border-t-4 border-l-4 border-[#FAF9F6] rounded-tl-lg" />
+                      <div className="absolute top-0 right-0 w-4 h-4 border-t-4 border-r-4 border-[#FAF9F6] rounded-tr-lg" />
+                      <div className="absolute bottom-0 left-0 w-4 h-4 border-b-4 border-l-4 border-[#FAF9F6] rounded-bl-lg" />
+                      <div className="absolute bottom-0 right-0 w-4 h-4 border-b-4 border-r-4 border-[#FAF9F6] rounded-br-lg" />
+                      <div className="absolute left-2 right-2 h-0.5 bg-gradient-to-r from-transparent via-[#C69765] to-transparent top-1/2 -translate-y-1/2 shadow-[0_0_10px_#C69765]" />
                     </div>
                   </div>
                 )}
 
                 {/* Camera Fallback / Error State */}
                 {!cameraActive && (
-                  <div className="absolute inset-0 p-6 flex flex-col items-center justify-center text-center space-y-3 bg-[#0D0F12]/95">
-                    <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#D4AF37]">
+                  <div className="absolute inset-0 p-6 flex flex-col items-center justify-center text-center space-y-3 bg-[#161514]/95">
+                    <div className="w-12 h-12 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center text-[#C69765]">
                       <Camera className="w-6 h-6" />
                     </div>
-                    <p className="text-slate-300 font-medium text-xs max-w-xs">
+                    <p className="text-[#FAF9F6]/85 font-medium text-xs max-w-xs">
                       {cameraError || 'Iniciando cámara del dispositivo...'}
                     </p>
                     <button
                       type="button"
                       onClick={startCamera}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs transition-colors"
+                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-[#FAF9F6] font-bold text-xs transition-colors"
                     >
-                      <RefreshCw className="w-3.5 h-3.5 text-[#D4AF37]" />
+                      <RefreshCw className="w-3.5 h-3.5 text-[#C69765]" />
                       <span>Reintentar Cámara</span>
                     </button>
                   </div>
@@ -612,8 +612,8 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                 {/* Live Scanner Indicator */}
                 {cameraActive && (
                   <div className="absolute bottom-3 inset-x-4 flex justify-center">
-                    <span className="px-3 py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/10 text-slate-200 text-[11px] font-medium flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                    <span className="px-3 py-1 rounded-full bg-[#161514]/85 backdrop-blur-md border border-white/15 text-[#FAF9F6] text-[11px] font-medium flex items-center gap-1.5">
+                      <QrCode className="w-3 h-3 text-[#C69765]" />
                       Apunta al código QR del cliente
                     </span>
                   </div>
@@ -622,36 +622,36 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
 
               {/* Divider */}
               <div className="relative flex py-1 items-center">
-                <div className="flex-grow border-t border-white/10" />
-                <span className="flex-shrink mx-3 text-slate-500 text-[11px] uppercase tracking-wider font-semibold">
+                <div className="flex-grow border-t border-[#E6E1D6]" />
+                <span className="flex-shrink mx-3 text-[#767067] text-[11px] uppercase tracking-wider font-semibold">
                   O búsqueda manual directa
                 </span>
-                <div className="flex-grow border-t border-white/10" />
+                <div className="flex-grow border-t border-[#E6E1D6]" />
               </div>
 
               {/* Manual Search Form */}
-              <form onSubmit={handleManualSearch} className="space-y-2">
-                <label className="text-slate-300 font-medium block">
+              <form onSubmit={handleManualSearch} className="space-y-2 bg-white p-3.5 rounded-2xl border border-[#E6E1D6]">
+                <label className="text-[#161514] font-semibold block">
                   Ingresa No. de Cliente (6 dígitos) o Teléfono celular:
                 </label>
                 <div className="flex items-center gap-2">
                   <div className="relative flex-1">
-                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#767067]" />
                     <input
                       type="text"
                       value={manualInput}
                       onChange={(e) => setManualInput(e.target.value)}
                       placeholder="Ej. 849201 o 3411975639"
-                      className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white placeholder-slate-500 focus:outline-none focus:border-[#D4AF37] font-mono text-xs"
+                      className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] placeholder-[#8E887E] focus:outline-none focus:border-[#9A6B3B] font-mono text-xs"
                     />
                   </div>
                   <button
                     type="submit"
                     disabled={isSearching || !manualInput.trim()}
-                    className="px-4 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#E5B869] text-slate-950 font-bold text-xs shadow-md transition-all disabled:opacity-50 flex items-center gap-1"
+                    className="px-4 py-2.5 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] font-bold text-xs shadow-sm transition-all disabled:opacity-50 flex items-center gap-1"
                   >
                     {isSearching ? (
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#C69765]" />
                     ) : (
                       <span>Buscar</span>
                     )}
@@ -662,54 +662,54 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
           ) : actionSuccessData ? (
             /* SUCCESS CONFIRMATION RECEIPT */
             <div className="space-y-4 text-center py-4 animate-in zoom-in-95">
-              <div className="w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-400 text-emerald-400 flex items-center justify-center mx-auto shadow-[0_0_25px_rgba(16,185,129,0.3)]">
+              <div className="w-16 h-16 rounded-full bg-emerald-50 border-2 border-emerald-600 text-emerald-700 flex items-center justify-center mx-auto shadow-sm">
                 <Check className="w-8 h-8 stroke-[3]" />
               </div>
 
               <div>
-                <h3 className="text-lg font-bold text-white tracking-tight">
+                <h3 className="font-display text-2xl font-bold text-[#161514] uppercase tracking-wide">
                   ¡Cobro y Registro Exitoso!
                 </h3>
-                <p className="text-xs text-slate-300 mt-1">
-                  Atención completada para <strong className="text-[#D4AF37]">{actionSuccessData.clientName}</strong>
+                <p className="text-xs text-[#5C5852] mt-1">
+                  Atención completada para <strong className="text-[#9A6B3B]">{actionSuccessData.clientName}</strong>
                 </p>
               </div>
 
               {/* Receipt Summary Card */}
-              <div className="p-4 rounded-2xl bg-[#181D26] border border-white/10 space-y-2 text-left">
-                <div className="flex justify-between items-center py-1 border-b border-white/5">
-                  <span className="text-slate-400">Monto Total Cobrado:</span>
-                  <strong className="text-emerald-400 text-sm font-black">
+              <div className="p-4 rounded-2xl bg-white border border-[#E6E1D6] space-y-2 text-left shadow-sm">
+                <div className="flex justify-between items-center py-1.5 border-b border-[#E6E1D6]">
+                  <span className="text-[#5C5852]">Monto Total Cobrado:</span>
+                  <strong className="font-mono tabular-nums text-emerald-800 text-sm font-black">
                     {formatCurrency(actionSuccessData.totalCharged)}
                   </strong>
                 </div>
-                <div className="flex justify-between items-center py-1 border-b border-white/5">
-                  <span className="text-slate-400">Puntos Sumados:</span>
-                  <strong className="text-[#D4AF37] font-black">
+                <div className="flex justify-between items-center py-1.5 border-b border-[#E6E1D6]">
+                  <span className="text-[#5C5852]">Puntos Sumados:</span>
+                  <strong className="font-mono tabular-nums text-[#7D542B] font-black">
                     +{actionSuccessData.pointsEarned} pts
                   </strong>
                 </div>
-                <div className="flex justify-between items-center py-1 border-b border-white/5">
-                  <span className="text-slate-400">Nuevo Saldo de Puntos:</span>
-                  <span className="text-white font-bold">{actionSuccessData.newTotalPoints} pts</span>
+                <div className="flex justify-between items-center py-1.5 border-b border-[#E6E1D6]">
+                  <span className="text-[#5C5852]">Nuevo Saldo de Puntos:</span>
+                  <span className="font-mono tabular-nums text-[#161514] font-bold">{actionSuccessData.newTotalPoints} pts</span>
                 </div>
                 <div className="flex justify-between items-center py-1">
-                  <span className="text-slate-400">Total Visitas Acumuladas:</span>
-                  <span className="text-teal-400 font-bold">{actionSuccessData.newTotalVisits} visitas</span>
+                  <span className="text-[#5C5852]">Total Visitas Acumuladas:</span>
+                  <span className="font-mono tabular-nums text-emerald-700 font-bold">{actionSuccessData.newTotalVisits} visitas</span>
                 </div>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-2 pt-2">
                 <button
                   onClick={handleScanAnother}
-                  className="flex-1 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#E5B869] text-slate-950 font-bold text-xs shadow transition-all flex items-center justify-center gap-1.5"
+                  className="flex-1 py-2.5 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-1.5"
                 >
-                  <RefreshCw className="w-3.5 h-3.5" />
+                  <RefreshCw className="w-3.5 h-3.5 text-[#C69765]" />
                   <span>Escanear Otro Cliente</span>
                 </button>
                 <button
                   onClick={onClose}
-                  className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-semibold text-xs transition-all"
+                  className="px-4 py-2.5 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] border border-[#D2CBBF] text-[#161514] font-semibold text-xs transition-all"
                 >
                   Finalizar
                 </button>
@@ -719,9 +719,9 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
             /* 2. REDESIGNED ULTRA-CLEAN & FUNCTIONAL CLIENT CHECKOUT PANEL */
             <div className="space-y-3.5 animate-in fade-in">
               {/* COMPACT CLIENT HEADER */}
-              <div className="p-3 rounded-2xl bg-[#161B24] border border-[#D4AF37]/30 flex items-center justify-between gap-3 shadow-md">
+              <div className="p-3 rounded-2xl bg-white border border-[#9A6B3B]/40 flex items-center justify-between gap-3 shadow-sm">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-[#996515] to-[#D4AF37] p-0.5 shrink-0 shadow">
+                  <div className="w-11 h-11 rounded-xl bg-[#161514] p-0.5 shrink-0 shadow-sm">
                     {scannedClient.photoUrl ? (
                       <img
                         src={scannedClient.photoUrl}
@@ -730,20 +730,20 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                         referrerPolicy="no-referrer"
                       />
                     ) : (
-                      <div className="w-full h-full bg-[#14171E] rounded-[10px] flex items-center justify-center text-[#D4AF37] font-black text-sm">
+                      <div className="w-full h-full bg-[#FAF7F0] rounded-[10px] flex items-center justify-center text-[#9A6B3B] font-black text-sm">
                         {scannedClient.name.charAt(0).toUpperCase()}
                       </div>
                     )}
                   </div>
 
                   <div className="min-w-0">
-                    <h3 className="font-bold text-white text-sm truncate">{scannedClient.name}</h3>
-                    <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
-                      <span className="text-[#D4AF37] font-mono font-semibold">#{scannedClient.clientNumber || 'VIP'}</span>
+                    <h3 className="font-bold text-[#161514] text-sm truncate">{scannedClient.name}</h3>
+                    <div className="flex items-center gap-2 text-[11px] text-[#5C5852] mt-0.5">
+                      <span className="text-[#7D542B] font-mono font-semibold tabular-nums">#{scannedClient.clientNumber || 'VIP'}</span>
                       {scannedClient.phone && (
                         <>
                           <span>•</span>
-                          <span className="truncate">{scannedClient.phone}</span>
+                          <span className="truncate font-mono tabular-nums">{scannedClient.phone}</span>
                         </>
                       )}
                     </div>
@@ -753,19 +753,19 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                 {/* Badges + Change Client Button */}
                 <div className="flex items-center gap-2 shrink-0">
                   <div className="text-right">
-                    <div className="text-[10px] font-bold text-[#D4AF37] flex items-center justify-end gap-1">
-                      <Sparkles className="w-3 h-3 text-[#D4AF37]" />
+                    <div className="text-[11px] font-mono tabular-nums font-bold text-[#7D542B] flex items-center justify-end gap-1">
+                      <Sparkles className="w-3 h-3 text-[#9A6B3B]" />
                       <span>{scannedClient.points || 0} pts</span>
                     </div>
-                    <div className="text-[10px] font-bold text-emerald-400 flex items-center justify-end gap-1">
-                      <Award className="w-3 h-3 text-emerald-400" />
+                    <div className="text-[11px] font-mono tabular-nums font-bold text-emerald-700 flex items-center justify-end gap-1">
+                      <Award className="w-3 h-3 text-emerald-700" />
                       <span>{clientVisitsCount} vis.</span>
                     </div>
                   </div>
 
                   <button
                     onClick={handleScanAnother}
-                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
+                    className="p-2 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] border border-[#D2CBBF] text-[#161514] transition-colors"
                     title="Escanear otro cliente"
                   >
                     <RefreshCw className="w-3.5 h-3.5" />
@@ -774,8 +774,8 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
               </div>
 
               {/* 1. SERVICIO REALIZADO */}
-              <div className="p-3.5 rounded-2xl bg-[#14171E] border border-white/10 space-y-2.5">
-                <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
+              <div className="p-3.5 rounded-2xl bg-white border border-[#E6E1D6] space-y-2.5">
+                <label className="text-[11px] font-bold text-[#5C5852] uppercase tracking-wider block">
                   1. Servicio Realizado
                 </label>
 
@@ -785,26 +785,26 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                       onClick={() => setServiceOption('booked')}
                       className={`p-2.5 rounded-xl border cursor-pointer flex items-center justify-between transition-all ${
                         serviceOption === 'booked'
-                          ? 'bg-[#D4AF37]/10 border-[#D4AF37] ring-1 ring-[#D4AF37]/40'
-                          : 'bg-white/5 border-white/10 text-slate-400'
+                          ? 'bg-[#FAF7F0] border-[#9A6B3B] ring-1 ring-[#9A6B3B]/30'
+                          : 'bg-[#FAF9F6] border-[#E6E1D6] text-[#5C5852]'
                       }`}
                     >
                       <div className="flex items-center gap-2 min-w-0">
-                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                          serviceOption === 'booked' ? 'border-[#D4AF37] bg-[#D4AF37]' : 'border-slate-500'
+                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
+                          serviceOption === 'booked' ? 'border-[#9A6B3B] bg-[#9A6B3B]' : 'border-[#D2CBBF] bg-white'
                         }`}>
-                          {serviceOption === 'booked' && <Check className="w-2.5 h-2.5 text-slate-950 stroke-[3]" />}
+                          {serviceOption === 'booked' && <Check className="w-2.5 h-2.5 text-white stroke-[3]" />}
                         </div>
                         <div className="min-w-0">
-                          <span className="font-bold text-white text-xs block truncate">
+                          <span className="font-bold text-[#161514] text-xs block truncate">
                             Cita Agendada: {clientTodayAppointment.serviceNameSnapshot}
                           </span>
-                          <span className="text-[10px] text-emerald-400 font-semibold">
+                          <span className="text-[11px] text-emerald-700 font-semibold font-mono tabular-nums">
                             Hoy {formatTime12h(clientTodayAppointment.startTime)}
                           </span>
                         </div>
                       </div>
-                      <span className="font-black text-[#D4AF37] text-xs shrink-0">
+                      <span className="font-mono tabular-nums font-black text-[#9A6B3B] text-xs shrink-0">
                         {formatCurrency(clientTodayAppointment.servicePriceSnapshot || 0)}
                       </span>
                     </div>
@@ -815,8 +815,8 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                         onClick={() => setServiceOption('custom')}
                         className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-semibold border transition-all ${
                           serviceOption === 'custom'
-                            ? 'bg-[#D4AF37]/15 border-[#D4AF37] text-white font-bold'
-                            : 'bg-white/5 border-white/10 text-slate-400 hover:text-white'
+                            ? 'bg-[#161514] border-[#161514] text-[#FAF9F6] font-bold'
+                            : 'bg-[#F2EFE9] border-[#D2CBBF] text-[#5C5852] hover:text-[#161514]'
                         }`}
                       >
                         Otro Servicio
@@ -826,8 +826,8 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                         onClick={() => setServiceOption('none')}
                         className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-semibold border transition-all ${
                           serviceOption === 'none'
-                            ? 'bg-white/15 border-white/30 text-white font-bold'
-                            : 'bg-white/5 border-white/10 text-slate-400 hover:text-white'
+                            ? 'bg-[#161514] border-[#161514] text-[#FAF9F6] font-bold'
+                            : 'bg-[#F2EFE9] border-[#D2CBBF] text-[#5C5852] hover:text-[#161514]'
                         }`}
                       >
                         Sin Servicio
@@ -838,7 +838,7 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                       <select
                         value={selectedServiceId}
                         onChange={(e) => setSelectedServiceId(e.target.value)}
-                        className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/15 text-white font-medium text-xs focus:outline-none focus:border-[#D4AF37]"
+                        className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] font-medium text-xs focus:outline-none focus:border-[#9A6B3B]"
                       >
                         {services.map((s) => (
                           <option key={s.id} value={s.id}>
@@ -849,12 +849,12 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                     )}
 
                     {serviceOption === 'booked' && (
-                      <label className="flex items-center gap-2 pt-1 text-[11px] text-slate-300 cursor-pointer">
+                      <label className="flex items-center gap-2 pt-1 text-[11px] text-[#5C5852] cursor-pointer">
                         <input
                           type="checkbox"
                           checked={markAppointmentCompleted}
                           onChange={(e) => setMarkAppointmentCompleted(e.target.checked)}
-                          className="rounded border-white/20 text-[#D4AF37] focus:ring-[#D4AF37]"
+                          className="rounded border-[#D2CBBF] text-[#9A6B3B] focus:ring-[#9A6B3B]"
                         />
                         <span>Marcar cita en agenda como completada</span>
                       </label>
@@ -871,7 +871,7 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                         setSelectedServiceId(e.target.value);
                       }
                     }}
-                    className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/15 text-white font-medium text-xs focus:outline-none focus:border-[#D4AF37]"
+                    className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] font-medium text-xs focus:outline-none focus:border-[#9A6B3B]"
                   >
                     <option value="none">-- Sin servicio (Solo registrar visita o productos) --</option>
                     {services.map((s) => (
@@ -886,25 +886,25 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
               {/* 2. VISITAS & PRODUCTOS COMPACT ROW */}
               <div className="grid grid-cols-2 gap-2.5">
                 {/* VISITA COUNTER */}
-                <div className="p-3 rounded-2xl bg-[#14171E] border border-white/10 flex flex-col justify-between">
-                  <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
+                <div className="p-3 rounded-2xl bg-white border border-[#E6E1D6] flex flex-col justify-between">
+                  <span className="text-[11px] font-bold text-[#5C5852] uppercase tracking-wider block">
                     Visitas a Sumar
                   </span>
                   <div className="flex items-center justify-between mt-2">
                     <button
                       type="button"
                       onClick={() => setVisitsToAdd(Math.max(0, visitsToAdd - 1))}
-                      className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-bold"
+                      className="w-7 h-7 rounded-lg bg-[#F2EFE9] hover:bg-[#E8E3D9] border border-[#D2CBBF] text-[#161514] flex items-center justify-center font-bold"
                     >
                       <Minus className="w-3.5 h-3.5" />
                     </button>
-                    <span className="font-mono font-bold text-sm text-emerald-400">
+                    <span className="font-mono tabular-nums font-bold text-sm text-emerald-700">
                       +{visitsToAdd} Visita
                     </span>
                     <button
                       type="button"
                       onClick={() => setVisitsToAdd(visitsToAdd + 1)}
-                      className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-bold"
+                      className="w-7 h-7 rounded-lg bg-[#F2EFE9] hover:bg-[#E8E3D9] border border-[#D2CBBF] text-[#161514] flex items-center justify-center font-bold"
                     >
                       <Plus className="w-3.5 h-3.5" />
                     </button>
@@ -912,13 +912,13 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                 </div>
 
                 {/* PRODUCTOS TOGGLE BUTTON */}
-                <div className="p-3 rounded-2xl bg-[#14171E] border border-white/10 flex flex-col justify-between">
+                <div className="p-3 rounded-2xl bg-white border border-[#E6E1D6] flex flex-col justify-between">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider">
+                    <span className="text-[11px] font-bold text-[#5C5852] uppercase tracking-wider">
                       Productos
                     </span>
                     {totalProductsPrice > 0 && (
-                      <span className="text-[11px] font-black text-[#D4AF37]">
+                      <span className="font-mono tabular-nums text-[11px] font-black text-[#9A6B3B]">
                         {formatCurrency(totalProductsPrice)}
                       </span>
                     )}
@@ -928,11 +928,11 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                     onClick={() => setIsProductCatalogExpanded(!isProductCatalogExpanded)}
                     className={`mt-2 py-1.5 px-2 rounded-xl border text-[11px] font-bold flex items-center justify-center gap-1 transition-all ${
                       cartItems.length > 0 || isProductCatalogExpanded
-                        ? 'bg-[#D4AF37] text-slate-950 border-[#D4AF37]'
-                        : 'bg-white/5 border-white/10 text-slate-300 hover:text-white'
+                        ? 'bg-[#161514] text-[#FAF9F6] border-[#161514]'
+                        : 'bg-[#F2EFE9] border-[#D2CBBF] text-[#161514] hover:bg-[#E8E3D9]'
                     }`}
                   >
-                    <Package className="w-3 h-3" />
+                    <Package className={`w-3 h-3 ${cartItems.length > 0 || isProductCatalogExpanded ? 'text-[#C69765]' : 'text-[#9A6B3B]'}`} />
                     <span>{cartItems.length > 0 ? `${cartItems.length} prod.` : '+ Agregar'}</span>
                     <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isProductCatalogExpanded ? 'rotate-180' : ''}`} />
                   </button>
@@ -941,9 +941,9 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
 
               {/* EXPANDABLE PRODUCTS MINI-CATALOG */}
               {isProductCatalogExpanded && (
-                <div className="p-3 rounded-2xl bg-[#101318] border border-[#D4AF37]/30 space-y-2 animate-in fade-in">
+                <div className="p-3 rounded-2xl bg-[#F2EFE9] border border-[#D2CBBF] space-y-2 animate-in fade-in">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-slate-300">Seleccionar Productos:</span>
+                    <span className="font-bold text-[#161514]">Seleccionar Productos:</span>
                     {onOpenPosForClient && (
                       <button
                         type="button"
@@ -951,17 +951,17 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                           onClose();
                           onOpenPosForClient(scannedClient);
                         }}
-                        className="text-[10px] text-[#D4AF37] font-bold hover:underline flex items-center gap-1"
+                        className="text-[11px] text-[#7D542B] font-bold hover:underline flex items-center gap-1"
                       >
                         <span>Abrir POS</span>
-                        <ArrowRight className="w-2.5 h-2.5" />
+                        <ArrowRight className="w-3 h-3" />
                       </button>
                     )}
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-44 overflow-y-auto pr-1">
                     {activeProducts.length === 0 ? (
-                      <p className="text-slate-500 text-center col-span-2 py-2 text-xs">
+                      <p className="text-[#767067] text-center col-span-2 py-2 text-xs">
                         No hay productos disponibles.
                       </p>
                     ) : (
@@ -972,19 +972,19 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                           <div
                             key={prod.id}
                             className={`p-2 rounded-xl border flex items-center justify-between gap-2 transition-all ${
-                              inCart > 0 ? 'bg-[#181D26] border-[#D4AF37]' : 'bg-[#14171E] border-white/5'
+                              inCart > 0 ? 'bg-[#FAF7F0] border-[#9A6B3B]' : 'bg-white border-[#E6E1D6]'
                             }`}
                           >
                             <div className="flex items-center gap-2 min-w-0 flex-1">
                               <img
                                 src={imgUrl}
                                 alt={prod.name}
-                                className="w-8 h-8 rounded-lg object-cover shrink-0 border border-white/10 bg-slate-900"
+                                className="w-8 h-8 rounded-lg object-cover shrink-0 border border-[#E6E1D6] bg-[#F2EFE9]"
                                 referrerPolicy="no-referrer"
                               />
                               <div className="min-w-0 flex-1">
-                                <h5 className="font-bold text-white text-[11px] truncate">{prod.name}</h5>
-                                <span className="text-[10px] text-[#D4AF37] font-semibold">
+                                <h5 className="font-bold text-[#161514] text-[11px] truncate">{prod.name}</h5>
+                                <span className="font-mono tabular-nums text-[10px] text-[#9A6B3B] font-semibold">
                                   {formatCurrency(prod.price)}
                                 </span>
                               </div>
@@ -995,11 +995,11 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                                   <button
                                     type="button"
                                     onClick={() => handleRemoveProduct(prod.id)}
-                                    className="w-5 h-5 rounded bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-bold text-xs"
+                                    className="w-5 h-5 rounded bg-[#F2EFE9] hover:bg-[#E8E3D9] border border-[#D2CBBF] text-[#161514] flex items-center justify-center font-bold text-xs"
                                   >
                                     -
                                   </button>
-                                  <span className="font-bold text-xs text-white w-3.5 text-center">
+                                  <span className="font-mono tabular-nums font-bold text-xs text-[#161514] w-3.5 text-center">
                                     {inCart}
                                   </span>
                                 </>
@@ -1007,7 +1007,7 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                               <button
                                 type="button"
                                 onClick={() => handleAddProduct(prod.id)}
-                                className="w-5 h-5 rounded bg-[#D4AF37] text-slate-950 flex items-center justify-center font-bold text-xs"
+                                className="w-5 h-5 rounded bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] flex items-center justify-center font-bold text-xs"
                               >
                                 +
                               </button>
@@ -1021,8 +1021,8 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
               )}
 
               {/* 3. MÉTODO DE PAGO */}
-              <div className="p-3 rounded-2xl bg-[#14171E] border border-white/10 space-y-2">
-                <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
+              <div className="p-3 rounded-2xl bg-white border border-[#E6E1D6] space-y-2">
+                <span className="text-[11px] font-bold text-[#5C5852] uppercase tracking-wider block">
                   2. Método de Pago
                 </span>
                 <div className="grid grid-cols-3 gap-2">
@@ -1033,13 +1033,13 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                       onClick={() => setPaymentMethod(m)}
                       className={`py-2 px-2 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
                         paymentMethod === m
-                          ? 'bg-[#D4AF37] text-slate-950 border-[#D4AF37] shadow'
-                          : 'bg-white/5 border-white/10 text-slate-400 hover:text-white'
+                          ? 'bg-[#161514] text-[#FAF9F6] border-[#161514] shadow-sm'
+                          : 'bg-[#FAF9F6] border-[#D2CBBF] text-[#5C5852] hover:text-[#161514]'
                       }`}
                     >
-                      {m === 'cash' && <Banknote className="w-3.5 h-3.5" />}
-                      {m === 'card' && <CreditCard className="w-3.5 h-3.5" />}
-                      {m === 'transfer' && <Receipt className="w-3.5 h-3.5" />}
+                      {m === 'cash' && <Banknote className={`w-3.5 h-3.5 ${paymentMethod === m ? 'text-[#C69765]' : ''}`} />}
+                      {m === 'card' && <CreditCard className={`w-3.5 h-3.5 ${paymentMethod === m ? 'text-[#C69765]' : ''}`} />}
+                      {m === 'transfer' && <Receipt className={`w-3.5 h-3.5 ${paymentMethod === m ? 'text-[#C69765]' : ''}`} />}
                       <span>{m === 'cash' ? 'Efectivo' : m === 'card' ? 'Tarjeta' : 'Transfer'}</span>
                     </button>
                   ))}
@@ -1047,16 +1047,16 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
               </div>
 
               {/* 4. TOTAL A COBRAR CON DESGLOSE DETALLADO */}
-              <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-br from-[#181D26] to-[#12151B] border border-white/15 space-y-3 shadow-lg">
+              <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-[#D2CBBF] space-y-3 shadow-sm">
                 {/* Header with Title */}
-                <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                <div className="flex items-center justify-between border-b border-[#E6E1D6] pb-2">
                   <div className="flex items-center gap-1.5">
-                    <Receipt className="w-4 h-4 text-[#D4AF37]" />
-                    <span className="text-[11px] font-bold text-white uppercase tracking-wider">
+                    <Receipt className="w-4 h-4 text-[#9A6B3B]" />
+                    <span className="text-[11px] font-bold text-[#161514] uppercase tracking-wider">
                       Detalle de Cobro
                     </span>
                   </div>
-                  <span className="text-[10px] text-slate-400 font-semibold">
+                  <span className="text-[11px] text-[#5C5852] font-semibold font-mono tabular-nums">
                     {cartItems.length + (serviceOption !== 'none' && servicePrice > 0 ? 1 : 0)} concepto(s)
                   </span>
                 </div>
@@ -1065,19 +1065,19 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                 <div className="space-y-1.5 text-xs">
                   {/* Service Line Item if selected */}
                   {serviceOption !== 'none' && servicePrice > 0 ? (
-                    <div className="flex items-center justify-between p-2 rounded-xl bg-black/40 border border-white/5">
+                    <div className="flex items-center justify-between p-2 rounded-xl bg-[#FAF9F6] border border-[#E6E1D6]">
                       <div className="flex items-center gap-2 min-w-0 pr-2">
-                        <Scissors className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
+                        <Scissors className="w-3.5 h-3.5 text-[#9A6B3B] shrink-0" />
                         <div className="min-w-0">
-                          <span className="font-semibold text-slate-200 block truncate text-[11px]">
+                          <span className="font-semibold text-[#161514] block truncate text-[11px]">
                             {serviceName || 'Servicio en Silla'}
                           </span>
-                          <span className="text-[10px] text-slate-400">
+                          <span className="text-[10px] text-[#5C5852]">
                             1x Servicio {servicePointsEarned > 0 ? `(+${servicePointsEarned} pts)` : ''}
                           </span>
                         </div>
                       </div>
-                      <span className="font-mono font-bold text-white shrink-0 text-xs">
+                      <span className="font-mono tabular-nums font-bold text-[#161514] shrink-0 text-xs">
                         {formatCurrency(servicePrice)}
                       </span>
                     </div>
@@ -1085,19 +1085,19 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
 
                   {/* Product Line Items */}
                   {cartItems.map((item) => (
-                    <div key={item.productId} className="flex items-center justify-between p-2 rounded-xl bg-black/40 border border-white/5">
+                    <div key={item.productId} className="flex items-center justify-between p-2 rounded-xl bg-[#FAF9F6] border border-[#E6E1D6]">
                       <div className="flex items-center gap-2 min-w-0 pr-2">
-                        <Package className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                        <Package className="w-3.5 h-3.5 text-[#9A6B3B] shrink-0" />
                         <div className="min-w-0">
-                          <span className="font-semibold text-slate-200 block truncate text-[11px]">
+                          <span className="font-semibold text-[#161514] block truncate text-[11px]">
                             {item.productName}
                           </span>
-                          <span className="text-[10px] text-slate-400">
+                          <span className="text-[10px] text-[#5C5852] font-mono tabular-nums">
                             {item.quantity}x a {formatCurrency(item.price)}
                           </span>
                         </div>
                       </div>
-                      <span className="font-mono font-bold text-white shrink-0 text-xs">
+                      <span className="font-mono tabular-nums font-bold text-[#161514] shrink-0 text-xs">
                         {formatCurrency(item.subtotal)}
                       </span>
                     </div>
@@ -1105,29 +1105,29 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
 
                   {/* Fallback if no service and no products */}
                   {serviceOption === 'none' && cartItems.length === 0 && (
-                    <div className="p-2.5 rounded-xl bg-black/20 border border-dashed border-white/10 text-center text-slate-400 text-xs">
+                    <div className="p-2.5 rounded-xl bg-[#FAF9F6] border border-dashed border-[#D2CBBF] text-center text-[#5C5852] text-xs">
                       <span>Solo registro de visita • Sin cobro de servicio ni productos ($0)</span>
                     </div>
                   )}
                 </div>
 
                 {/* Total Row */}
-                <div className="pt-2 border-t border-white/10 flex items-baseline justify-between">
+                <div className="pt-2 border-t border-[#E6E1D6] flex items-baseline justify-between">
                   <div>
-                    <span className="text-[11px] text-slate-400 block font-semibold uppercase tracking-wider">
+                    <span className="text-[11px] text-[#5C5852] block font-semibold uppercase tracking-wider">
                       Total a Cobrar:
                     </span>
-                    <span className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                    <span className="font-mono tabular-nums text-xl sm:text-2xl font-black text-[#161514] tracking-tight">
                       {formatCurrency(totalAmountToCharge)}
                     </span>
                   </div>
 
                   <div className="text-right space-y-0.5">
-                    <div className="text-xs font-black text-[#D4AF37] flex items-center justify-end gap-1">
-                      <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
+                    <div className="font-mono tabular-nums text-xs font-black text-[#7D542B] flex items-center justify-end gap-1">
+                      <Sparkles className="w-3.5 h-3.5 text-[#9A6B3B]" />
                       <span>+{finalPointsToAdd} pts VIP</span>
                     </div>
-                    <span className="text-[10px] text-emerald-400 font-semibold block">
+                    <span className="font-mono tabular-nums text-[11px] text-emerald-700 font-semibold block">
                       +{visitsToAdd} Visita al cliente
                     </span>
                   </div>
@@ -1136,9 +1136,9 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                 <button
                   onClick={handleExecuteCheckout}
                   disabled={isSubmittingAction}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] hover:opacity-95 text-slate-950 font-black text-xs sm:text-sm shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 active:scale-98"
+                  className="w-full py-3 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] font-bold text-xs sm:text-sm shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 active:scale-98"
                 >
-                  <Check className="w-4 h-4 stroke-[3]" />
+                  <Check className="w-4 h-4 stroke-[3] text-[#C69765]" />
                   <span>
                     {isSubmittingAction
                       ? 'Procesando...'
@@ -1156,9 +1156,9 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
                     onClose();
                     onBookForClient(scannedClient);
                   }}
-                  className="w-full py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-400 hover:text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-all"
+                  className="w-full py-2.5 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] border border-[#D2CBBF] text-[#161514] font-semibold text-xs flex items-center justify-center gap-1.5 transition-all"
                 >
-                  <Calendar className="w-3 h-3 text-[#D4AF37]" />
+                  <Calendar className="w-3.5 h-3.5 text-[#9A6B3B]" />
                   <span>Agendar Próxima Cita</span>
                 </button>
               )}
@@ -1167,14 +1167,14 @@ export const BarberQRScannerModal: React.FC<BarberQRScannerModalProps> = ({
         </div>
 
         {/* Modal Footer */}
-        <div className="p-3.5 sm:p-4 border-t border-white/10 bg-[#0D0F12] flex items-center justify-between">
-          <span className="text-[11px] text-slate-400">
+        <div className="p-3.5 sm:p-4 border-t border-[#E6E1D6] bg-white flex items-center justify-between">
+          <span className="text-[11px] text-[#5C5852]">
             {scannedClient ? `Cliente: ${scannedClient.name}` : 'Alinea el código QR dentro del recuadro'}
           </span>
 
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 text-xs font-semibold transition-colors"
+            className="px-4 py-2 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] border border-[#D2CBBF] text-[#161514] text-xs font-semibold transition-colors"
           >
             Cerrar
           </button>

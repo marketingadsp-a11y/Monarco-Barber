@@ -247,7 +247,7 @@ export const AdminDashboardView: React.FC = () => {
   return (
     <div className="space-y-6 pb-24">
       {/* Admin Header */}
-      <div className="rounded-3xl bg-gradient-to-r from-[#181D26] to-[#12151B] border border-white/15 p-4 sm:p-5 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="rounded-3xl bg-white border border-[#E6E1D6] p-4 sm:p-5 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3 shrink-0">
           {businessSettings.logoUrl ? (
             <img
@@ -257,19 +257,19 @@ export const AdminDashboardView: React.FC = () => {
               referrerPolicy="no-referrer"
             />
           ) : (
-            <div className="flex items-center gap-2 text-[#D4AF37]">
+            <div className="flex items-center gap-2 text-[#9A6B3B]">
               <Shield className="w-6 h-6" />
-              <span className="font-black text-white text-base tracking-wider">MONARCA</span>
+              <span className="font-display font-black text-[#161514] text-lg tracking-wider uppercase">MONARCA</span>
             </div>
           )}
         </div>
 
         {/* Navigation Section Pills & Logout */}
-        <div className="flex flex-wrap items-center p-1 rounded-2xl bg-black/40 border border-white/10 w-full sm:w-auto gap-1">
+        <div className="flex flex-wrap items-center p-1 rounded-2xl bg-[#F2EFE9] border border-[#E6E1D6] w-full sm:w-auto gap-1">
           <button
             onClick={() => setActiveSection('overview')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              activeSection === 'overview' ? 'bg-[#D4AF37] text-slate-950 shadow' : 'text-slate-400 hover:text-white'
+              activeSection === 'overview' ? 'bg-[#161514] text-[#FAF9F6] shadow-sm' : 'text-[#5C5852] hover:text-[#161514]'
             }`}
           >
             Métricas
@@ -277,7 +277,7 @@ export const AdminDashboardView: React.FC = () => {
           <button
             onClick={() => setActiveSection('users')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-              activeSection === 'users' ? 'bg-[#D4AF37] text-slate-950 shadow' : 'text-slate-400 hover:text-white'
+              activeSection === 'users' ? 'bg-[#161514] text-[#FAF9F6] shadow-sm' : 'text-[#5C5852] hover:text-[#161514]'
             }`}
           >
             <Users className="w-3.5 h-3.5" />
@@ -286,7 +286,7 @@ export const AdminDashboardView: React.FC = () => {
           <button
             onClick={() => setActiveSection('appointments')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              activeSection === 'appointments' ? 'bg-[#D4AF37] text-slate-950 shadow' : 'text-slate-400 hover:text-white'
+              activeSection === 'appointments' ? 'bg-[#161514] text-[#FAF9F6] shadow-sm' : 'text-[#5C5852] hover:text-[#161514]'
             }`}
           >
             Citas ({appointments.length})
@@ -294,7 +294,7 @@ export const AdminDashboardView: React.FC = () => {
           <button
             onClick={() => setActiveSection('services')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              activeSection === 'services' ? 'bg-[#D4AF37] text-slate-950 shadow' : 'text-slate-400 hover:text-white'
+              activeSection === 'services' ? 'bg-[#161514] text-[#FAF9F6] shadow-sm' : 'text-[#5C5852] hover:text-[#161514]'
             }`}
           >
             Servicios ({services.length})
@@ -302,7 +302,7 @@ export const AdminDashboardView: React.FC = () => {
           <button
             onClick={() => setActiveSection('barbers')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              activeSection === 'barbers' ? 'bg-[#D4AF37] text-slate-950 shadow' : 'text-slate-400 hover:text-white'
+              activeSection === 'barbers' ? 'bg-[#161514] text-[#FAF9F6] shadow-sm' : 'text-[#5C5852] hover:text-[#161514]'
             }`}
           >
             Barberos ({barbers.length})
@@ -310,7 +310,7 @@ export const AdminDashboardView: React.FC = () => {
           <button
             onClick={() => setActiveSection('products')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-              activeSection === 'products' ? 'bg-[#D4AF37] text-slate-950 shadow' : 'text-slate-400 hover:text-white'
+              activeSection === 'products' ? 'bg-[#161514] text-[#FAF9F6] shadow-sm' : 'text-[#5C5852] hover:text-[#161514]'
             }`}
           >
             <Package className="w-3.5 h-3.5" />
@@ -319,7 +319,7 @@ export const AdminDashboardView: React.FC = () => {
           <button
             onClick={() => setActiveSection('notifications')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-              activeSection === 'notifications' ? 'bg-[#D4AF37] text-slate-950 shadow' : 'text-slate-400 hover:text-white'
+              activeSection === 'notifications' ? 'bg-[#161514] text-[#FAF9F6] shadow-sm' : 'text-[#5C5852] hover:text-[#161514]'
             }`}
           >
             <Bell className="w-3.5 h-3.5" />
@@ -328,7 +328,7 @@ export const AdminDashboardView: React.FC = () => {
           <button
             onClick={() => setActiveSection('settings')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              activeSection === 'settings' ? 'bg-[#D4AF37] text-slate-950 shadow' : 'text-slate-400 hover:text-white'
+              activeSection === 'settings' ? 'bg-[#161514] text-[#FAF9F6] shadow-sm' : 'text-[#5C5852] hover:text-[#161514]'
             }`}
           >
             Logo & Ajustes
@@ -338,7 +338,7 @@ export const AdminDashboardView: React.FC = () => {
               await logout();
               showToast('info', 'Sesión cerrada', 'Has cerrado sesión del panel de administración.');
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 transition-all ml-auto sm:ml-1"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition-all ml-auto sm:ml-1"
             title="Cerrar sesión de administrador"
           >
             <LogOut className="w-3.5 h-3.5" />
@@ -353,25 +353,25 @@ export const AdminDashboardView: React.FC = () => {
           {/* Quick Access to Users Banner */}
           <div
             onClick={() => setActiveSection('users')}
-            className="p-4 rounded-3xl bg-gradient-to-r from-[#181D27] via-[#141720] to-[#101217] border border-[#D4AF37]/30 hover:border-[#D4AF37] p-5 cursor-pointer shadow-xl transition-all duration-150 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 group"
+            className="rounded-3xl bg-[#FBF6EE] border border-[#9A6B3B]/35 hover:border-[#9A6B3B] p-5 cursor-pointer shadow-sm transition-all duration-150 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 group"
           >
             <div className="flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-2xl bg-[#D4AF37]/15 border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37] group-hover:scale-105 transition-transform">
+              <div className="w-12 h-12 rounded-2xl bg-[#161514] border border-[#161514] flex items-center justify-center text-[#C69765] group-hover:scale-105 transition-transform">
                 <Users className="w-6 h-6" />
               </div>
               <div>
-                <h4 className="font-bold text-white text-sm group-hover:text-[#D4AF37] transition-colors">
+                <h4 className="font-display font-bold text-[#161514] text-base uppercase tracking-wide group-hover:text-[#9A6B3B] transition-colors">
                   Directorio y Expedientes de Clientes
                 </h4>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-[#5C5852]">
                   Ver usuarios registrados, consultar QR, modificar puntos, ajustar visitas o asignar roles de barbero/admin.
                 </p>
               </div>
             </div>
 
-            <button className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#D4AF37] text-slate-950 font-bold text-xs shadow-md group-hover:bg-[#E5B869] transition-colors self-end sm:self-auto">
+            <button className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#161514] text-[#FAF9F6] font-bold text-xs shadow-sm group-hover:bg-[#2A2826] transition-colors self-end sm:self-auto">
               <span>Abrir Directorio</span>
-              <ChevronRight className="w-3.5 h-3.5" />
+              <ChevronRight className="w-3.5 h-3.5 text-[#C69765]" />
             </button>
           </div>
 
@@ -394,17 +394,17 @@ export const AdminDashboardView: React.FC = () => {
       {/* SECTION: APPOINTMENTS LIST */}
       {activeSection === 'appointments' && (
         <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-[#14171E] border border-white/10 p-3.5 rounded-2xl">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white border border-[#E6E1D6] p-3.5 rounded-2xl shadow-sm">
             <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-[#D4AF37]" />
-              <span className="text-xs font-bold text-white">Filtros de Citas</span>
+              <Calendar className="w-4 h-4 text-[#9A6B3B]" />
+              <span className="font-display text-sm font-bold text-[#161514] uppercase tracking-wide">Filtros de Citas</span>
             </div>
 
             <div className="flex items-center gap-2 w-full sm:w-auto">
               <select
                 value={appointmentFilterBarber}
                 onChange={(e) => setAppointmentFilterBarber(e.target.value)}
-                className="px-3 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs"
+                className="px-3 py-1.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] text-xs focus:outline-none focus:border-[#9A6B3B]"
               >
                 <option value="all">Todos los Barberos</option>
                 {barbers.map((b) => (
@@ -417,7 +417,7 @@ export const AdminDashboardView: React.FC = () => {
               <select
                 value={appointmentFilterStatus}
                 onChange={(e) => setAppointmentFilterStatus(e.target.value)}
-                className="px-3 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs"
+                className="px-3 py-1.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] text-xs focus:outline-none focus:border-[#9A6B3B]"
               >
                 <option value="all">Todos los Estados</option>
                 <option value="confirmed">Confirmadas</option>
@@ -430,55 +430,55 @@ export const AdminDashboardView: React.FC = () => {
 
           <div className="space-y-2.5">
             {filteredAppointments.length === 0 ? (
-              <div className="p-8 rounded-3xl bg-[#14171E] border border-white/10 text-center text-xs text-slate-400">
+              <div className="p-8 rounded-3xl bg-white border border-[#E6E1D6] text-center text-xs text-[#767067] shadow-sm">
                 No se encontraron citas con los filtros seleccionados.
               </div>
             ) : (
               filteredAppointments.map((app) => (
                 <div
                   key={app.id}
-                  className="rounded-2xl bg-[#14171E] border border-white/10 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg"
+                  className="rounded-2xl bg-white border border-[#E6E1D6] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm"
                 >
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-white text-sm">
+                      <span className="font-bold text-[#161514] text-sm">
                         {app.serviceNameSnapshot}
                       </span>
                       <span
-                        className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase ${
+                        className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase border ${
                           app.status === 'confirmed'
-                            ? 'bg-emerald-500/20 text-emerald-300'
+                            ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                             : app.status === 'completed'
-                            ? 'bg-blue-500/20 text-blue-300'
-                            : 'bg-rose-500/20 text-rose-300'
+                            ? 'bg-sky-50 text-sky-800 border-sky-200'
+                            : 'bg-rose-50 text-rose-800 border-rose-200'
                         }`}
                       >
                         {app.status}
                       </span>
                     </div>
 
-                    <div className="text-xs text-slate-400 mt-1 flex flex-wrap gap-3">
-                      <span>👤 Cliente: <strong className="text-slate-200">{app.clientName}</strong></span>
-                      <span>💈 Barbero: <strong className="text-[#D4AF37]">{app.barberName}</strong></span>
-                      <span>📅 {formatDateSpanish(app.date)} • {formatTime12h(app.startTime)}</span>
+                    <div className="text-xs text-[#5C5852] mt-1 flex flex-wrap gap-3">
+                      <span>Cliente: <strong className="text-[#161514]">{app.clientName}</strong></span>
+                      <span>Barbero: <strong className="text-[#9A6B3B]">{app.barberName}</strong></span>
+                      <span className="font-mono">{formatDateSpanish(app.date)} • {formatTime12h(app.startTime)}</span>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="font-black text-white text-sm mr-2">
+                    <span className="font-mono font-black text-[#161514] text-sm mr-2 tabular-nums">
                       {formatCurrency(app.servicePriceSnapshot)}
                     </span>
                     {app.status === 'confirmed' && (
                       <>
                         <button
                           onClick={() => updateAppointmentStatus(app.id, 'completed')}
-                          className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all"
+                          className="px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold transition-all"
                         >
                           Completar
                         </button>
                         <button
                           onClick={() => updateAppointmentStatus(app.id, 'cancelled', { cancelledBy: 'admin', cancelReason: 'Cancelada por administración' })}
-                          className="px-2.5 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs font-semibold"
+                          className="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 text-xs font-semibold"
                         >
                           Cancelar
                         </button>
@@ -497,8 +497,8 @@ export const AdminDashboardView: React.FC = () => {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-base font-bold text-white">Catálogo de Servicios</h3>
-              <p className="text-xs text-slate-400">
+              <h3 className="font-display text-xl font-bold text-[#161514] uppercase tracking-wide">Catálogo de Servicios</h3>
+              <p className="text-xs text-[#5C5852]">
                 Gestiona precios, duraciones, fotografías y beneficios de cada servicio
               </p>
             </div>
@@ -516,9 +516,9 @@ export const AdminDashboardView: React.FC = () => {
                   createdByType: 'admin',
                 })
               }
-              className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-[#D4AF37] text-slate-950 text-xs font-bold shadow-lg hover:bg-[#E5B869] transition-all"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-[#161514] text-[#FAF9F6] text-xs font-bold shadow-sm hover:bg-[#2A2826] transition-all"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4 text-[#C69765]" />
               <span>Nuevo Servicio</span>
             </button>
           </div>
@@ -527,54 +527,54 @@ export const AdminDashboardView: React.FC = () => {
             {services.map((service) => (
               <div
                 key={service.id}
-                className="rounded-2xl bg-[#14171E] border border-white/10 p-4 flex items-center justify-between gap-3 shadow-lg"
+                className="rounded-2xl bg-white border border-[#E6E1D6] p-4 flex items-center justify-between gap-3 shadow-sm"
               >
                 <div className="flex items-center gap-3.5 min-w-0">
                   <img
                     src={service.imageUrl || 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=600&q=80'}
                     alt={service.name}
-                    className="w-14 h-14 rounded-xl object-cover border border-white/15 shrink-0"
+                    className="w-14 h-14 rounded-xl object-cover border border-[#E6E1D6] shrink-0"
                     referrerPolicy="no-referrer"
                   />
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <h4 className="font-bold text-white text-sm truncate">{service.name}</h4>
+                      <h4 className="font-bold text-[#161514] text-sm truncate">{service.name}</h4>
                       {service.isPopular && (
-                        <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-500/20 text-[#D4AF37]">
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#FBF6EE] border border-[#9A6B3B]/30 text-[#7D542B]">
                           VIP
                         </span>
                       )}
                       {service.barberId && (
-                        <span className="text-[9px] font-semibold px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-300">
+                        <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-sky-50 border border-sky-200 text-sky-800">
                           Personalizado por Barbero
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      {service.durationMinutes} min • <strong className="text-[#D4AF37]">{formatCurrency(service.price)}</strong>
+                    <p className="text-xs text-[#5C5852] mt-0.5 font-mono tabular-nums">
+                      {service.durationMinutes} min • <strong className="text-[#9A6B3B]">{formatCurrency(service.price)}</strong>
                     </p>
-                    <p className="text-[11px] text-slate-500 line-clamp-1">{service.description}</p>
+                    <p className="text-[11px] text-[#767067] line-clamp-1">{service.description}</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={() => toggleServiceActive(service.id, !service.active)}
-                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300"
+                    className="p-2 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] text-[#5C5852]"
                     title={service.active ? 'Desactivar' : 'Activar'}
                   >
-                    {service.active ? <ToggleRight className="w-5 h-5 text-emerald-400" /> : <ToggleLeft className="w-5 h-5 text-slate-500" />}
+                    {service.active ? <ToggleRight className="w-5 h-5 text-emerald-700" /> : <ToggleLeft className="w-5 h-5 text-[#8E887E]" />}
                   </button>
                   <button
                     onClick={() => setEditingService(service)}
-                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300"
+                    className="p-2 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] text-[#5C5852] hover:text-[#161514]"
                     title="Editar"
                   >
                     <Edit2 className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDeleteServiceSubmit(service.id)}
-                    className="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300"
+                    className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700"
                     title="Eliminar"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -586,28 +586,28 @@ export const AdminDashboardView: React.FC = () => {
 
           {/* Service Edit / Create Modal (with Photo Upload) */}
           {editingService && (
-            <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in">
-              <div className="bg-[#14171E] border border-white/15 rounded-3xl p-5 w-full max-w-md space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl">
-                <h3 className="text-base font-bold text-white">
+            <div className="fixed inset-0 z-50 bg-[#161514]/55 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in">
+              <div className="bg-[#FAF9F6] border border-[#D2CBBF] rounded-3xl p-5 w-full max-w-md space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl">
+                <h3 className="font-display text-lg font-bold text-[#161514] uppercase tracking-wide">
                   {editingService.id ? 'Editar Servicio' : 'Crear Nuevo Servicio'}
                 </h3>
 
                 <div className="space-y-3.5 text-xs">
                   {/* Photo of Service */}
                   <div className="space-y-2">
-                    <label className="text-slate-300 font-semibold block">Fotografía del Servicio</label>
+                    <label className="text-[#161514] font-semibold block">Fotografía del Servicio</label>
                     <div className="flex items-center gap-3">
                       {editingService.imageUrl && (
                         <img
                           src={editingService.imageUrl}
                           alt="Preview servicio"
-                          className="w-16 h-16 rounded-2xl object-cover border-2 border-[#D4AF37]"
+                          className="w-16 h-16 rounded-2xl object-cover border-2 border-[#9A6B3B]"
                           referrerPolicy="no-referrer"
                         />
                       )}
                       <div className="flex-1 space-y-1.5">
-                        <label className="flex items-center justify-center gap-2 p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-slate-200 cursor-pointer font-bold transition-all">
-                          <Upload className="w-4 h-4 text-[#D4AF37]" />
+                        <label className="flex items-center justify-center gap-2 p-2.5 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] border border-[#D2CBBF] text-[#161514] cursor-pointer font-bold transition-all">
+                          <Upload className="w-4 h-4 text-[#9A6B3B]" />
                           <span>{isUploadingServicePhoto ? 'Subiendo imagen...' : 'Subir Foto'}</span>
                           <input
                             type="file"
@@ -623,52 +623,52 @@ export const AdminDashboardView: React.FC = () => {
                           value={editingService.imageUrl || ''}
                           onChange={(e) => setEditingService({ ...editingService, imageUrl: e.target.value })}
                           placeholder="O escribe URL de imagen"
-                          className="w-full p-2 rounded-xl bg-slate-900 border border-white/10 text-white text-[11px]"
+                          className="w-full p-2 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] placeholder:text-[#8E887E] text-[11px] focus:outline-none focus:border-[#9A6B3B]"
                         />
                       </div>
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-slate-400 block mb-1">Nombre del Servicio *</label>
+                    <label className="text-[#5C5852] font-semibold block mb-1">Nombre del Servicio *</label>
                     <input
                       type="text"
                       value={editingService.name || ''}
                       onChange={(e) => setEditingService({ ...editingService, name: e.target.value })}
                       placeholder="Ej. Corte Imperial & Ritual Navaja"
-                      className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                      className="w-full p-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] placeholder:text-[#8E887E] focus:outline-none focus:border-[#9A6B3B]"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="text-slate-400 block mb-1">Precio ($ MXN) *</label>
+                      <label className="text-[#5C5852] font-semibold block mb-1">Precio ($ MXN) *</label>
                       <input
                         type="number"
                         value={editingService.price || 0}
                         onChange={(e) => setEditingService({ ...editingService, price: Number(e.target.value) })}
-                        className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                        className="w-full p-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] font-mono focus:outline-none focus:border-[#9A6B3B]"
                       />
                     </div>
                     <div>
-                      <label className="text-slate-400 block mb-1">Duración (minutos) *</label>
+                      <label className="text-[#5C5852] font-semibold block mb-1">Duración (minutos) *</label>
                       <input
                         type="number"
                         value={editingService.durationMinutes || 30}
                         onChange={(e) => setEditingService({ ...editingService, durationMinutes: Number(e.target.value) })}
-                        className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                        className="w-full p-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] font-mono focus:outline-none focus:border-[#9A6B3B]"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-slate-400 block mb-1">Descripción detallada</label>
+                    <label className="text-[#5C5852] font-semibold block mb-1">Descripción detallada</label>
                     <textarea
                       value={editingService.description || ''}
                       onChange={(e) => setEditingService({ ...editingService, description: e.target.value })}
                       rows={3}
                       placeholder="Describe qué incluye el servicio..."
-                      className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                      className="w-full p-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] placeholder:text-[#8E887E] focus:outline-none focus:border-[#9A6B3B]"
                     />
                   </div>
 
@@ -678,9 +678,9 @@ export const AdminDashboardView: React.FC = () => {
                         type="checkbox"
                         checked={editingService.isPopular || false}
                         onChange={(e) => setEditingService({ ...editingService, isPopular: e.target.checked })}
-                        className="rounded"
+                        className="rounded accent-[#9A6B3B]"
                       />
-                      <span className="text-white">Destacado VIP</span>
+                      <span className="text-[#161514] font-semibold">Destacado VIP</span>
                     </label>
 
                     <label className="flex items-center gap-2 cursor-pointer">
@@ -688,9 +688,9 @@ export const AdminDashboardView: React.FC = () => {
                         type="checkbox"
                         checked={editingService.includesWash || false}
                         onChange={(e) => setEditingService({ ...editingService, includesWash: e.target.checked })}
-                        className="rounded"
+                        className="rounded accent-[#9A6B3B]"
                       />
-                      <span className="text-white">Incluye Lavado</span>
+                      <span className="text-[#161514] font-semibold">Incluye Lavado</span>
                     </label>
                   </div>
                 </div>
@@ -698,14 +698,14 @@ export const AdminDashboardView: React.FC = () => {
                 <div className="flex items-center gap-2 pt-2">
                   <button
                     onClick={() => setEditingService(null)}
-                    className="flex-1 py-2.5 rounded-xl bg-white/5 text-slate-300 text-xs font-semibold"
+                    className="flex-1 py-2.5 rounded-xl bg-[#F2EFE9] border border-[#D2CBBF] text-[#161514] text-xs font-semibold hover:bg-[#E8E3D9]"
                   >
                     Cancelar
                   </button>
                   <button
                     onClick={handleSaveServiceSubmit}
                     disabled={isSavingService || isUploadingServicePhoto}
-                    className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 text-xs font-bold shadow-md"
+                    className="flex-1 py-2.5 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] text-xs font-bold shadow-sm"
                   >
                     {isSavingService ? 'Guardando...' : 'Guardar Servicio'}
                   </button>
@@ -721,8 +721,8 @@ export const AdminDashboardView: React.FC = () => {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-base font-bold text-white">Equipo de Barberos</h3>
-              <p className="text-xs text-slate-400">
+              <h3 className="font-display text-xl font-bold text-[#161514] uppercase tracking-wide">Equipo de Barberos</h3>
+              <p className="text-xs text-[#5C5852]">
                 Gestiona perfiles, estados y asignación de servicios
               </p>
             </div>
@@ -744,9 +744,9 @@ export const AdminDashboardView: React.FC = () => {
                   gallery: [],
                 })
               }
-              className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-[#D4AF37] text-slate-950 text-xs font-bold shadow-lg hover:bg-[#E5B869] transition-all"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-[#161514] text-[#FAF9F6] text-xs font-bold shadow-sm hover:bg-[#2A2826] transition-all"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4 text-[#C69765]" />
               <span>Nuevo Barbero</span>
             </button>
           </div>
@@ -755,19 +755,19 @@ export const AdminDashboardView: React.FC = () => {
             {barbers.map((barber) => (
               <div
                 key={barber.id}
-                className="rounded-2xl bg-[#14171E] border border-white/10 p-4 flex items-center justify-between gap-3 shadow-lg"
+                className="rounded-2xl bg-white border border-[#E6E1D6] p-4 flex items-center justify-between gap-3 shadow-sm"
               >
                 <div className="flex items-center gap-3.5 min-w-0">
                   <img
                     src={barber.photoUrl}
                     alt={barber.displayName}
-                    className="w-12 h-12 rounded-xl object-cover border border-white/15"
+                    className="w-12 h-12 rounded-xl object-cover border border-[#E6E1D6]"
                     referrerPolicy="no-referrer"
                   />
                   <div>
-                    <h4 className="font-bold text-white text-sm">{barber.displayName}</h4>
-                    <p className="text-xs text-[#D4AF37]">
-                      ★ {barber.rating.toFixed(1)} ({barber.reviewCount} citas) • {barber.specialties.join(', ')}
+                    <h4 className="font-bold text-[#161514] text-sm">{barber.displayName}</h4>
+                    <p className="text-xs text-[#9A6B3B] font-semibold">
+                      ★ {barber.rating.toFixed(1)} ({barber.reviewCount} citas) • <span className="text-[#5C5852] font-normal">{barber.specialties.join(', ')}</span>
                     </p>
                   </div>
                 </div>
@@ -775,21 +775,21 @@ export const AdminDashboardView: React.FC = () => {
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={() => toggleBarberActive(barber.id, !barber.active)}
-                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 transition-all"
+                    className="p-2 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] text-[#5C5852] transition-all"
                     title={barber.active ? 'Desactivar barbero' : 'Activar barbero'}
                   >
-                    {barber.active ? <ToggleRight className="w-5 h-5 text-emerald-400" /> : <ToggleLeft className="w-5 h-5 text-slate-500" />}
+                    {barber.active ? <ToggleRight className="w-5 h-5 text-emerald-700" /> : <ToggleLeft className="w-5 h-5 text-[#8E887E]" />}
                   </button>
                   <button
                     onClick={() => setEditingBarber(barber)}
-                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-all"
+                    className="p-2 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] text-[#5C5852] hover:text-[#161514] transition-all"
                     title="Editar datos del barbero"
                   >
                     <Edit2 className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDeleteBarberSubmit(barber.id, barber.displayName)}
-                    className="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 transition-all"
+                    className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 transition-all"
                     title="Eliminar barbero del equipo"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -801,28 +801,28 @@ export const AdminDashboardView: React.FC = () => {
 
           {/* Barber Edit Modal */}
           {editingBarber && (
-            <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in">
-              <div className="bg-[#14171E] border border-white/15 rounded-3xl p-5 w-full max-w-md space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl">
-                <h3 className="text-base font-bold text-white">
+            <div className="fixed inset-0 z-50 bg-[#161514]/55 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in">
+              <div className="bg-[#FAF9F6] border border-[#D2CBBF] rounded-3xl p-5 w-full max-w-md space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl">
+                <h3 className="font-display text-lg font-bold text-[#161514] uppercase tracking-wide">
                   {editingBarber.id ? 'Editar Barbero' : 'Nuevo Barbero'}
                 </h3>
 
                 <div className="space-y-3.5 text-xs">
                   {/* Photo of Barber */}
                   <div className="space-y-2">
-                    <label className="text-slate-300 font-semibold block">Fotografía del Barbero</label>
+                    <label className="text-[#161514] font-semibold block">Fotografía del Barbero</label>
                     <div className="flex items-center gap-3">
                       {editingBarber.photoUrl && (
                         <img
                           src={editingBarber.photoUrl}
                           alt="Preview barbero"
-                          className="w-16 h-16 rounded-2xl object-cover border-2 border-[#D4AF37] shadow-md shrink-0"
+                          className="w-16 h-16 rounded-2xl object-cover border-2 border-[#9A6B3B] shadow-sm shrink-0"
                           referrerPolicy="no-referrer"
                         />
                       )}
                       <div className="flex-1 space-y-1.5">
-                        <label className="flex items-center justify-center gap-2 p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-slate-200 cursor-pointer font-bold transition-all">
-                          <Upload className="w-4 h-4 text-[#D4AF37]" />
+                        <label className="flex items-center justify-center gap-2 p-2.5 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] border border-[#D2CBBF] text-[#161514] cursor-pointer font-bold transition-all">
+                          <Upload className="w-4 h-4 text-[#9A6B3B]" />
                           <span>{isUploadingBarberPhoto ? 'Subiendo foto...' : 'Subir Foto'}</span>
                           <input
                             type="file"
@@ -838,14 +838,14 @@ export const AdminDashboardView: React.FC = () => {
                           value={editingBarber.photoUrl || ''}
                           onChange={(e) => setEditingBarber({ ...editingBarber, photoUrl: e.target.value })}
                           placeholder="O escribe URL de foto"
-                          className="w-full p-2 rounded-xl bg-slate-900 border border-white/10 text-white text-[11px]"
+                          className="w-full p-2 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] placeholder:text-[#8E887E] text-[11px] focus:outline-none focus:border-[#9A6B3B]"
                         />
                       </div>
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-slate-400 block mb-1">Nombre Completo *</label>
+                    <label className="text-[#5C5852] font-semibold block mb-1">Nombre Completo *</label>
                     <input
                       type="text"
                       value={editingBarber.displayName || ''}
@@ -857,12 +857,12 @@ export const AdminDashboardView: React.FC = () => {
                         })
                       }
                       placeholder="Ej. Carlos Mendoza"
-                      className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                      className="w-full p-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] placeholder:text-[#8E887E] focus:outline-none focus:border-[#9A6B3B]"
                     />
                   </div>
 
                   <div>
-                    <label className="text-slate-400 block mb-1">Especialidades (separadas por coma)</label>
+                    <label className="text-[#5C5852] font-semibold block mb-1">Especialidades (separadas por coma)</label>
                     <input
                       type="text"
                       value={(editingBarber.specialties || []).join(', ')}
@@ -876,12 +876,12 @@ export const AdminDashboardView: React.FC = () => {
                         })
                       }
                       placeholder="Ej. Corte Clásico, Fade, Barba Perfilada"
-                      className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                      className="w-full p-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] placeholder:text-[#8E887E] focus:outline-none focus:border-[#9A6B3B]"
                     />
                   </div>
 
                   <div>
-                    <label className="text-slate-400 block mb-1">Años de Experiencia</label>
+                    <label className="text-[#5C5852] font-semibold block mb-1">Años de Experiencia</label>
                     <input
                       type="number"
                       min={0}
@@ -893,18 +893,18 @@ export const AdminDashboardView: React.FC = () => {
                           experienceYears: Number(e.target.value) || 0,
                         })
                       }
-                      className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                      className="w-full p-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] font-mono focus:outline-none focus:border-[#9A6B3B]"
                     />
                   </div>
 
                   <div>
-                    <label className="text-slate-400 block mb-1">Biografía</label>
+                    <label className="text-[#5C5852] font-semibold block mb-1">Biografía</label>
                     <textarea
                       value={editingBarber.bio || ''}
                       onChange={(e) => setEditingBarber({ ...editingBarber, bio: e.target.value })}
                       rows={2}
                       placeholder="Breve reseña del estilo y trayectoria del barbero..."
-                      className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                      className="w-full p-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] placeholder:text-[#8E887E] focus:outline-none focus:border-[#9A6B3B]"
                     />
                   </div>
                 </div>
@@ -912,14 +912,14 @@ export const AdminDashboardView: React.FC = () => {
                 <div className="flex items-center gap-2 pt-2">
                   <button
                     onClick={() => setEditingBarber(null)}
-                    className="flex-1 py-2.5 rounded-xl bg-white/5 text-slate-300 text-xs font-semibold"
+                    className="flex-1 py-2.5 rounded-xl bg-[#F2EFE9] border border-[#D2CBBF] text-[#161514] text-xs font-semibold hover:bg-[#E8E3D9]"
                   >
                     Cancelar
                   </button>
                   <button
                     onClick={handleSaveBarberSubmit}
                     disabled={isSavingBarber || isUploadingBarberPhoto}
-                    className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 text-xs font-bold"
+                    className="flex-1 py-2.5 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] text-xs font-bold"
                   >
                     {isSavingBarber ? 'Guardando...' : 'Guardar Barbero'}
                   </button>
@@ -937,23 +937,23 @@ export const AdminDashboardView: React.FC = () => {
 
       {/* SECTION: NOTIFICATIONS & REMINDERS CONTROL CENTER */}
       {activeSection === 'notifications' && (
-        <div className="rounded-3xl bg-[#14171E] border border-white/10 p-5 space-y-6 shadow-2xl">
+        <div className="rounded-3xl bg-white border border-[#E6E1D6] p-5 space-y-6 shadow-sm">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-[#1E232F] via-[#161922] to-[#12141A] border border-[#D4AF37]/30">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-[#FBF6EE] border border-[#9A6B3B]/35">
             <div className="flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-2xl bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shadow-lg">
-                <BellRing className="w-6 h-6 animate-pulse" />
+              <div className="w-12 h-12 rounded-2xl bg-[#161514] border border-[#161514] flex items-center justify-center text-[#C69765] shadow-sm">
+                <BellRing className="w-6 h-6" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-base font-bold text-white tracking-tight">
+                  <h2 className="font-display text-lg font-bold text-[#161514] uppercase tracking-wide">
                     Centro de Notificaciones & Recordatorios
                   </h2>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
                     Tiempo Real
                   </span>
                 </div>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-[#5C5852] mt-0.5">
                   Controla las alertas de nuevas citas para barberos y recordatorios automáticos (24h y 2h antes) para clientes.
                 </p>
               </div>
@@ -963,10 +963,10 @@ export const AdminDashboardView: React.FC = () => {
             <div className="flex flex-wrap items-center gap-2">
               <div className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 ${
                 browserPermission === 'granted'
-                  ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
+                  ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
                   : browserPermission === 'denied'
-                  ? 'bg-rose-500/15 border-rose-500/30 text-rose-300'
-                  : 'bg-amber-500/15 border-amber-500/30 text-amber-300'
+                  ? 'bg-rose-50 border-rose-200 text-rose-800'
+                  : 'bg-amber-50 border-amber-200 text-amber-800'
               }`}>
                 <Radio className="w-3 h-3" />
                 <span>
@@ -984,9 +984,9 @@ export const AdminDashboardView: React.FC = () => {
                     const result = await requestBrowserNotifications();
                     setBrowserPermission(result);
                   }}
-                  className="px-3.5 py-1.5 rounded-xl bg-[#D4AF37] hover:bg-[#E5B869] text-slate-950 text-xs font-bold transition-all shadow-md flex items-center gap-1.5"
+                  className="px-3.5 py-1.5 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
                 >
-                  <Smartphone className="w-3.5 h-3.5" />
+                  <Smartphone className="w-3.5 h-3.5 text-[#C69765]" />
                   <span>Activar Permisos</span>
                 </button>
               )}
@@ -995,26 +995,26 @@ export const AdminDashboardView: React.FC = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             {/* 1. NOTIFICACIONES PARA BARBEROS */}
-            <div className="p-5 rounded-2xl bg-black/40 border border-white/10 space-y-4">
-              <div className="flex items-center justify-between pb-2 border-b border-white/10">
+            <div className="p-5 rounded-2xl bg-[#FAF9F6] border border-[#E6E1D6] space-y-4">
+              <div className="flex items-center justify-between pb-2 border-b border-[#E6E1D6]">
                 <div className="flex items-center gap-2.5">
-                  <Scissors className="w-4 h-4 text-[#D4AF37]" />
-                  <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                  <Scissors className="w-4 h-4 text-[#9A6B3B]" />
+                  <h3 className="font-display text-sm font-bold text-[#161514] uppercase tracking-wider">
                     Panel del Barbero (En Vivo)
                   </h3>
                 </div>
-                <span className="text-[10px] text-slate-400 font-medium">Alertas de Agenda</span>
+                <span className="text-[10px] text-[#767067] font-medium">Alertas de Agenda</span>
               </div>
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <p className="text-xs text-[#5C5852] leading-relaxed">
                 Cuando un cliente reserva un corte o servicio directamente en la agenda del barbero:
               </p>
 
               <div className="space-y-3 pt-1">
                 {/* Toggle: Toast en pantalla */}
-                <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-[#E6E1D6]">
                   <div className="pr-3">
-                    <span className="text-xs font-bold text-white block">Mensaje Toast en Pantalla</span>
-                    <span className="text-[11px] text-slate-400 block">
+                    <span className="text-xs font-bold text-[#161514] block">Mensaje Toast en Pantalla</span>
+                    <span className="text-[11px] text-[#5C5852] block">
                       Aviso emergente instantáneo con nombre del cliente, servicio y hora
                     </span>
                   </div>
@@ -1026,7 +1026,7 @@ export const AdminDashboardView: React.FC = () => {
                       })
                     }
                     className={`shrink-0 transition-colors ${
-                      notificationSettings.barberNewBookingToast ? 'text-[#D4AF37]' : 'text-slate-600'
+                      notificationSettings.barberNewBookingToast ? 'text-[#9A6B3B]' : 'text-[#8E887E]'
                     }`}
                   >
                     {notificationSettings.barberNewBookingToast ? (
@@ -1038,10 +1038,10 @@ export const AdminDashboardView: React.FC = () => {
                 </div>
 
                 {/* Toggle: Sonido de alerta */}
-                <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-[#E6E1D6]">
                   <div className="pr-3">
-                    <span className="text-xs font-bold text-white block">Sonido / Chime de Notificación</span>
-                    <span className="text-[11px] text-slate-400 block">
+                    <span className="text-xs font-bold text-[#161514] block">Sonido / Chime de Notificación</span>
+                    <span className="text-[11px] text-[#5C5852] block">
                       Tono sonoro elegante compatible con Chrome y Safari
                     </span>
                   </div>
@@ -1053,7 +1053,7 @@ export const AdminDashboardView: React.FC = () => {
                       })
                     }
                     className={`shrink-0 transition-colors ${
-                      notificationSettings.barberNewBookingSound ? 'text-[#D4AF37]' : 'text-slate-600'
+                      notificationSettings.barberNewBookingSound ? 'text-[#9A6B3B]' : 'text-[#8E887E]'
                     }`}
                   >
                     {notificationSettings.barberNewBookingSound ? (
@@ -1065,10 +1065,10 @@ export const AdminDashboardView: React.FC = () => {
                 </div>
 
                 {/* Toggle: Push de navegador */}
-                <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-[#E6E1D6]">
                   <div className="pr-3">
-                    <span className="text-xs font-bold text-white block">Notificación de Navegador (Push)</span>
-                    <span className="text-[11px] text-slate-400 block">
+                    <span className="text-xs font-bold text-[#161514] block">Notificación de Navegador (Push)</span>
+                    <span className="text-[11px] text-[#5C5852] block">
                       Aviso de escritorio o smartphone cuando la pestaña esté minimizada
                     </span>
                   </div>
@@ -1080,7 +1080,7 @@ export const AdminDashboardView: React.FC = () => {
                       })
                     }
                     className={`shrink-0 transition-colors ${
-                      notificationSettings.barberBrowserPush ? 'text-[#D4AF37]' : 'text-slate-600'
+                      notificationSettings.barberBrowserPush ? 'text-[#9A6B3B]' : 'text-[#8E887E]'
                     }`}
                   >
                     {notificationSettings.barberBrowserPush ? (
@@ -1097,7 +1097,7 @@ export const AdminDashboardView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => testNotification('barber_new_booking')}
-                  className="w-full py-2.5 rounded-xl bg-[#D4AF37]/15 hover:bg-[#D4AF37]/25 text-[#D4AF37] border border-[#D4AF37]/30 text-xs font-bold flex items-center justify-center gap-2 transition-all"
+                  className="w-full py-2.5 rounded-xl bg-[#FBF6EE] hover:bg-[#F2EFE9] text-[#7D542B] border border-[#9A6B3B]/35 text-xs font-bold flex items-center justify-center gap-2 transition-all"
                 >
                   <Send className="w-3.5 h-3.5" />
                   <span>Probar Notificación de Nueva Cita (Barbero)</span>
@@ -1106,26 +1106,26 @@ export const AdminDashboardView: React.FC = () => {
             </div>
 
             {/* 2. NOTIFICACIONES Y RECORDATORIOS PARA CLIENTES */}
-            <div className="p-5 rounded-2xl bg-black/40 border border-white/10 space-y-4">
-              <div className="flex items-center justify-between pb-2 border-b border-white/10">
+            <div className="p-5 rounded-2xl bg-[#FAF9F6] border border-[#E6E1D6] space-y-4">
+              <div className="flex items-center justify-between pb-2 border-b border-[#E6E1D6]">
                 <div className="flex items-center gap-2.5">
-                  <Users className="w-4 h-4 text-emerald-400" />
-                  <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                  <Users className="w-4 h-4 text-emerald-700" />
+                  <h3 className="font-display text-sm font-bold text-[#161514] uppercase tracking-wider">
                     Panel del Cliente (Recordatorios)
                   </h3>
                 </div>
-                <span className="text-[10px] text-slate-400 font-medium">Experiencia VIP</span>
+                <span className="text-[10px] text-[#767067] font-medium">Experiencia VIP</span>
               </div>
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <p className="text-xs text-[#5C5852] leading-relaxed">
                 Recordatorios automatizados para evitar inasistencias y confirmar citas:
               </p>
 
               <div className="space-y-3 pt-1">
                 {/* Toggle: Confirmación instantánea */}
-                <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-[#E6E1D6]">
                   <div className="pr-3">
-                    <span className="text-xs font-bold text-white block">Confirmación al Reservar</span>
-                    <span className="text-[11px] text-slate-400 block">
+                    <span className="text-xs font-bold text-[#161514] block">Confirmación al Reservar</span>
+                    <span className="text-[11px] text-[#5C5852] block">
                       Toast y notificación al momento en que el cliente confirma su cita
                     </span>
                   </div>
@@ -1137,7 +1137,7 @@ export const AdminDashboardView: React.FC = () => {
                       })
                     }
                     className={`shrink-0 transition-colors ${
-                      notificationSettings.clientBookingConfirmation ? 'text-emerald-400' : 'text-slate-600'
+                      notificationSettings.clientBookingConfirmation ? 'text-emerald-700' : 'text-[#8E887E]'
                     }`}
                   >
                     {notificationSettings.clientBookingConfirmation ? (
@@ -1149,10 +1149,10 @@ export const AdminDashboardView: React.FC = () => {
                 </div>
 
                 {/* Toggle: Recordatorio 1 día antes */}
-                <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-[#E6E1D6]">
                   <div className="pr-3">
-                    <span className="text-xs font-bold text-white block">Recordatorio 1 Día Antes (24 Horas)</span>
-                    <span className="text-[11px] text-slate-400 block">
+                    <span className="text-xs font-bold text-[#161514] block">Recordatorio 1 Día Antes (24 Horas)</span>
+                    <span className="text-[11px] text-[#5C5852] block">
                       Aviso automático previo al día de la cita con los datos de su barbero
                     </span>
                   </div>
@@ -1164,7 +1164,7 @@ export const AdminDashboardView: React.FC = () => {
                       })
                     }
                     className={`shrink-0 transition-colors ${
-                      notificationSettings.clientReminder24h ? 'text-emerald-400' : 'text-slate-600'
+                      notificationSettings.clientReminder24h ? 'text-emerald-700' : 'text-[#8E887E]'
                     }`}
                   >
                     {notificationSettings.clientReminder24h ? (
@@ -1176,10 +1176,10 @@ export const AdminDashboardView: React.FC = () => {
                 </div>
 
                 {/* Toggle: Recordatorio 2 horas antes */}
-                <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-[#E6E1D6]">
                   <div className="pr-3">
-                    <span className="text-xs font-bold text-white block">Recordatorio 2 Horas Antes</span>
-                    <span className="text-[11px] text-slate-400 block">
+                    <span className="text-xs font-bold text-[#161514] block">Recordatorio 2 Horas Antes</span>
+                    <span className="text-[11px] text-[#5C5852] block">
                       Aviso prioritario el mismo día para preparar su llegada a la barbería
                     </span>
                   </div>
@@ -1191,7 +1191,7 @@ export const AdminDashboardView: React.FC = () => {
                       })
                     }
                     className={`shrink-0 transition-colors ${
-                      notificationSettings.clientReminder2h ? 'text-emerald-400' : 'text-slate-600'
+                      notificationSettings.clientReminder2h ? 'text-emerald-700' : 'text-[#8E887E]'
                     }`}
                   >
                     {notificationSettings.clientReminder2h ? (
@@ -1203,10 +1203,10 @@ export const AdminDashboardView: React.FC = () => {
                 </div>
 
                 {/* Toggle: Push de navegador para clientes */}
-                <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-[#E6E1D6]">
                   <div className="pr-3">
-                    <span className="text-xs font-bold text-white block">Notificación de Navegador para Clientes</span>
-                    <span className="text-[11px] text-slate-400 block">
+                    <span className="text-xs font-bold text-[#161514] block">Notificación de Navegador para Clientes</span>
+                    <span className="text-[11px] text-[#5C5852] block">
                       Habilitar alertas de sistema para clientes en Chrome, Safari y PWA
                     </span>
                   </div>
@@ -1218,7 +1218,7 @@ export const AdminDashboardView: React.FC = () => {
                       })
                     }
                     className={`shrink-0 transition-colors ${
-                      notificationSettings.clientBrowserPush ? 'text-emerald-400' : 'text-slate-600'
+                      notificationSettings.clientBrowserPush ? 'text-emerald-700' : 'text-[#8E887E]'
                     }`}
                   >
                     {notificationSettings.clientBrowserPush ? (
@@ -1235,7 +1235,7 @@ export const AdminDashboardView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => testNotification('client_reminder_24h')}
-                  className="py-2.5 px-2 rounded-xl bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border border-blue-500/30 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all text-center"
+                  className="py-2.5 px-2 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all text-center"
                 >
                   <Calendar className="w-3.5 h-3.5 shrink-0" />
                   <span>Probar 1 Día Antes</span>
@@ -1243,7 +1243,7 @@ export const AdminDashboardView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => testNotification('client_reminder_2h')}
-                  className="py-2.5 px-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all text-center"
+                  className="py-2.5 px-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all text-center"
                 >
                   <Clock className="w-3.5 h-3.5 shrink-0" />
                   <span>Probar 2 Horas Antes</span>
@@ -1253,11 +1253,11 @@ export const AdminDashboardView: React.FC = () => {
           </div>
 
           {/* 3. AJUSTES GLOBALES DE AUDIO Y COMPATIBILIDAD */}
-          <div className="p-5 rounded-2xl bg-gradient-to-b from-[#181D26] to-[#12151B] border border-white/10 space-y-4">
+          <div className="p-5 rounded-2xl bg-[#FAF9F6] border border-[#E6E1D6] space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <Volume2 className="w-4 h-4 text-[#D4AF37]" />
-                <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                <Volume2 className="w-4 h-4 text-[#9A6B3B]" />
+                <h3 className="font-display text-sm font-bold text-[#161514] uppercase tracking-wider">
                   Motor de Audio & Compatibilidad Multidispositivo
                 </h3>
               </div>
@@ -1269,7 +1269,7 @@ export const AdminDashboardView: React.FC = () => {
                   })
                 }
                 className={`transition-colors ${
-                  notificationSettings.enableAudioChime ? 'text-[#D4AF37]' : 'text-slate-600'
+                  notificationSettings.enableAudioChime ? 'text-[#9A6B3B]' : 'text-[#8E887E]'
                 }`}
               >
                 {notificationSettings.enableAudioChime ? (
@@ -1281,37 +1281,37 @@ export const AdminDashboardView: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-              <div className="p-3.5 rounded-xl bg-black/30 border border-white/5">
-                <span className="text-slate-300 font-bold block flex items-center gap-1.5">
-                  <Monitor className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <div className="p-3.5 rounded-xl bg-white border border-[#E6E1D6]">
+                <span className="text-[#161514] font-bold block flex items-center gap-1.5">
+                  <Monitor className="w-3.5 h-3.5 text-[#9A6B3B]" />
                   Google Chrome (PC / Mac / Android)
                 </span>
-                <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                <p className="text-[11px] text-[#5C5852] mt-1 leading-relaxed">
                   Soporta síntesis Web Audio y notificaciones nativas de sistema en primer y segundo plano.
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-black/30 border border-white/5">
-                <span className="text-slate-300 font-bold block flex items-center gap-1.5">
-                  <Smartphone className="w-3.5 h-3.5 text-blue-400" />
+              <div className="p-3.5 rounded-xl bg-white border border-[#E6E1D6]">
+                <span className="text-[#161514] font-bold block flex items-center gap-1.5">
+                  <Smartphone className="w-3.5 h-3.5 text-sky-700" />
                   Apple Safari (iOS & macOS)
                 </span>
-                <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                <p className="text-[11px] text-[#5C5852] mt-1 leading-relaxed">
                   El motor sintetiza audio tras la primera interacción y envía push nativo en macOS e iOS 16.4+.
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-black/30 border border-white/5 flex flex-col justify-between">
+              <div className="p-3.5 rounded-xl bg-white border border-[#E6E1D6] flex flex-col justify-between">
                 <div>
-                  <span className="text-slate-300 font-bold block">Prueba Rápida de Chime</span>
-                  <p className="text-[11px] text-slate-400 mt-0.5">Escucha el tono armónico de Monarca</p>
+                  <span className="text-[#161514] font-bold block">Prueba Rápida de Chime</span>
+                  <p className="text-[11px] text-[#5C5852] mt-0.5">Escucha el tono armónico de Monarca</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => testNotification('sound_only')}
-                  className="mt-2 py-1.5 px-3 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[11px] font-semibold flex items-center justify-center gap-1.5 transition-colors"
+                  className="mt-2 py-1.5 px-3 rounded-lg bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] text-[11px] font-semibold flex items-center justify-center gap-1.5 transition-colors"
                 >
-                  <Volume2 className="w-3 h-3" />
+                  <Volume2 className="w-3 h-3 text-[#C69765]" />
                   <span>Reproducir Sonido</span>
                 </button>
               </div>
@@ -1322,22 +1322,22 @@ export const AdminDashboardView: React.FC = () => {
 
       {/* SECTION: BRAND IDENTITY & LOGO UPLOAD / SETTINGS */}
       {activeSection === 'settings' && (
-        <div className="rounded-3xl bg-[#14171E] border border-white/10 p-5 space-y-6 shadow-2xl">
+        <div className="rounded-3xl bg-white border border-[#E6E1D6] p-5 space-y-6 shadow-sm">
           {/* 1. BRAND LOGO UPLOADER */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-b from-white/[0.04] to-transparent border border-white/10 space-y-4">
+          <div className="p-4 sm:p-5 rounded-2xl bg-[#FAF9F6] border border-[#E6E1D6] space-y-4">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[#D4AF37]" />
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+              <Sparkles className="w-4 h-4 text-[#9A6B3B]" />
+              <h3 className="font-display text-base font-bold text-[#161514] uppercase tracking-wider">
                 Logotipo Oficial de Monarca Barber
               </h3>
             </div>
-            <p className="text-xs text-slate-400 leading-relaxed">
+            <p className="text-xs text-[#5C5852] leading-relaxed">
               Sube el logo de tu barbería. Este logotipo se mostrará en el encabezado de la app, tarjetas, tickets de reserva y perfiles.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center gap-4 pt-1">
               {/* Logo Preview */}
-              <div className="w-24 h-24 rounded-2xl bg-black/60 border-2 border-[#D4AF37]/60 flex items-center justify-center p-2 shrink-0 shadow-xl relative group">
+              <div className="w-24 h-24 rounded-2xl bg-white border-2 border-[#9A6B3B]/45 flex items-center justify-center p-2 shrink-0 shadow-sm relative group">
                 {settingsForm.logoUrl ? (
                   <img
                     src={settingsForm.logoUrl}
@@ -1346,15 +1346,15 @@ export const AdminDashboardView: React.FC = () => {
                     referrerPolicy="no-referrer"
                   />
                 ) : (
-                  <span className="text-xs font-bold text-slate-500 text-center">Sin Logo</span>
+                  <span className="text-xs font-bold text-[#8E887E] text-center">Sin Logo</span>
                 )}
               </div>
 
               {/* Upload Controls */}
               <div className="flex-1 space-y-2.5 w-full">
                 <div className="flex flex-wrap gap-2">
-                  <label className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#E5B869] text-slate-950 text-xs font-bold cursor-pointer transition-all shadow-md">
-                    <Upload className="w-4 h-4" />
+                  <label className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] text-xs font-bold cursor-pointer transition-all shadow-sm">
+                    <Upload className="w-4 h-4 text-[#C69765]" />
                     <span>{isUploadingLogo ? 'Subiendo archivo...' : 'Subir Logotipo desde Dispositivo'}</span>
                     <input
                       type="file"
@@ -1370,7 +1370,7 @@ export const AdminDashboardView: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setSettingsForm((prev) => ({ ...prev, logoUrl: '' }))}
-                      className="px-3 py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 text-xs font-semibold"
+                      className="px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 text-xs font-semibold"
                     >
                       Remover Logo
                     </button>
@@ -1378,13 +1378,13 @@ export const AdminDashboardView: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="text-[11px] text-slate-400 block mb-1">O escribe enlace URL directo:</label>
+                  <label className="text-[11px] text-[#5C5852] font-semibold block mb-1">O escribe enlace URL directo:</label>
                   <input
                     type="url"
                     value={settingsForm.logoUrl || ''}
                     onChange={(e) => setSettingsForm({ ...settingsForm, logoUrl: e.target.value })}
                     placeholder="https://..."
-                    className="w-full p-2 rounded-xl bg-slate-900 border border-white/10 text-white text-xs"
+                    className="w-full p-2 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] placeholder:text-[#8E887E] text-xs focus:outline-none focus:border-[#9A6B3B]"
                   />
                 </div>
               </div>
@@ -1392,18 +1392,18 @@ export const AdminDashboardView: React.FC = () => {
           </div>
 
           {/* 2. BANNER DE INICIO / HERO MODULE EDITOR */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-b from-[#181D27] to-[#12151C] border border-[#D4AF37]/30 space-y-5 shadow-xl">
+          <div className="p-4 sm:p-5 rounded-2xl bg-[#FAF9F6] border border-[#9A6B3B]/35 space-y-5 shadow-sm">
             {/* Header with Master Toggle */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E6E1D6]">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
+                <div className="w-8 h-8 rounded-xl bg-[#161514] border border-[#161514] flex items-center justify-center text-[#C69765]">
                   <Layout className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                  <h3 className="font-display text-base font-bold text-[#161514] uppercase tracking-wider">
                     Módulo de Inicio / Banner Principal (Hero)
                   </h3>
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-[11px] text-[#5C5852]">
                     Controla la visibilidad y cada elemento independiente del banner de bienvenida.
                   </p>
                 </div>
@@ -1411,10 +1411,10 @@ export const AdminDashboardView: React.FC = () => {
 
               <div className="flex items-center gap-3">
                 <div className="text-right">
-                  <span className="text-[11px] font-bold text-slate-300 block">
+                  <span className="text-[11px] font-bold text-[#161514] block">
                     {settingsForm.showHeroSection !== false ? 'Módulo Activo' : 'Módulo Desactivado'}
                   </span>
-                  <span className="text-[10px] text-slate-500 block">
+                  <span className="text-[10px] text-[#767067] block">
                     {settingsForm.showHeroSection !== false ? 'Visible en Inicio' : 'Oculto en Inicio'}
                   </span>
                 </div>
@@ -1427,7 +1427,7 @@ export const AdminDashboardView: React.FC = () => {
                     }))
                   }
                   className={`transition-colors ${
-                    settingsForm.showHeroSection !== false ? 'text-[#D4AF37]' : 'text-slate-600'
+                    settingsForm.showHeroSection !== false ? 'text-[#9A6B3B]' : 'text-[#8E887E]'
                   }`}
                   title="Activar o desactivar todo el banner principal de inicio"
                 >
@@ -1441,8 +1441,8 @@ export const AdminDashboardView: React.FC = () => {
             </div>
 
             {/* Quick Layout Presets Bar */}
-            <div className="p-3.5 rounded-2xl bg-black/40 border border-white/10 space-y-2">
-              <span className="text-[11px] font-bold text-[#D4AF37] uppercase tracking-wider block">
+            <div className="p-3.5 rounded-2xl bg-white border border-[#E6E1D6] space-y-2">
+              <span className="text-[11px] font-bold text-[#9A6B3B] uppercase tracking-wider block">
                 Plantillas Rápidas de Configuración:
               </span>
               <div className="flex flex-wrap gap-2">
@@ -1459,9 +1459,9 @@ export const AdminDashboardView: React.FC = () => {
                       heroShowButton: false,
                     }))
                   }
-                  className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-[#D4AF37]/15 hover:border-[#D4AF37]/40 border border-white/10 text-white text-xs font-semibold flex items-center gap-1.5 transition-all"
+                  className="px-3 py-1.5 rounded-xl bg-[#F2EFE9] hover:bg-[#FBF6EE] hover:border-[#9A6B3B]/45 border border-[#D2CBBF] text-[#161514] text-xs font-semibold flex items-center gap-1.5 transition-all"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <Sparkles className="w-3.5 h-3.5 text-[#9A6B3B]" />
                   <span>Solo Logotipo</span>
                 </button>
 
@@ -1478,9 +1478,9 @@ export const AdminDashboardView: React.FC = () => {
                       heroShowButton: true,
                     }))
                   }
-                  className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-[#D4AF37]/15 hover:border-[#D4AF37]/40 border border-white/10 text-white text-xs font-semibold flex items-center gap-1.5 transition-all"
+                  className="px-3 py-1.5 rounded-xl bg-[#F2EFE9] hover:bg-[#FBF6EE] hover:border-[#9A6B3B]/45 border border-[#D2CBBF] text-[#161514] text-xs font-semibold flex items-center gap-1.5 transition-all"
                 >
-                  <MousePointerClick className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <MousePointerClick className="w-3.5 h-3.5 text-[#9A6B3B]" />
                   <span>Logotipo + Botón</span>
                 </button>
 
@@ -1497,9 +1497,9 @@ export const AdminDashboardView: React.FC = () => {
                       heroShowButton: true,
                     }))
                   }
-                  className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-[#D4AF37]/15 hover:border-[#D4AF37]/40 border border-white/10 text-white text-xs font-semibold flex items-center gap-1.5 transition-all"
+                  className="px-3 py-1.5 rounded-xl bg-[#F2EFE9] hover:bg-[#FBF6EE] hover:border-[#9A6B3B]/45 border border-[#D2CBBF] text-[#161514] text-xs font-semibold flex items-center gap-1.5 transition-all"
                 >
-                  <Type className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <Type className="w-3.5 h-3.5 text-[#9A6B3B]" />
                   <span>Estándar Editorial (Textos + Botón)</span>
                 </button>
 
@@ -1516,9 +1516,9 @@ export const AdminDashboardView: React.FC = () => {
                       heroShowButton: true,
                     }))
                   }
-                  className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-[#D4AF37]/15 hover:border-[#D4AF37]/40 border border-white/10 text-white text-xs font-semibold flex items-center gap-1.5 transition-all"
+                  className="px-3 py-1.5 rounded-xl bg-[#F2EFE9] hover:bg-[#FBF6EE] hover:border-[#9A6B3B]/45 border border-[#D2CBBF] text-[#161514] text-xs font-semibold flex items-center gap-1.5 transition-all"
                 >
-                  <Crown className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <Crown className="w-3.5 h-3.5 text-[#9A6B3B]" />
                   <span>Todo Incluido (Logo + Textos + Botón)</span>
                 </button>
 
@@ -1539,9 +1539,9 @@ export const AdminDashboardView: React.FC = () => {
                       heroButtonText: 'Reservar Cita Ahora',
                     }))
                   }
-                  className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition-all ml-auto"
+                  className="px-3 py-1.5 rounded-xl bg-white hover:bg-[#F2EFE9] border border-[#D2CBBF] text-[#5C5852] hover:text-[#161514] text-xs font-semibold flex items-center gap-1.5 transition-all ml-auto"
                 >
-                  <RotateCcw className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <RotateCcw className="w-3.5 h-3.5 text-[#9A6B3B]" />
                   <span>Restaurar Predeterminados</span>
                 </button>
               </div>
@@ -1549,24 +1549,24 @@ export const AdminDashboardView: React.FC = () => {
 
             {/* LIVE PREVIEW OF THE HERO BANNER */}
             <div className="space-y-1.5 pt-1">
-              <span className="text-[11px] font-bold text-[#D4AF37] uppercase tracking-wider block">
+              <span className="text-[11px] font-bold text-[#9A6B3B] uppercase tracking-wider block">
                 Vista Previa en Tiempo Real:
               </span>
 
               {settingsForm.showHeroSection === false ? (
-                <div className="p-6 rounded-2xl bg-black/40 border-2 border-dashed border-white/15 text-center space-y-2">
-                  <EyeOff className="w-7 h-7 text-slate-500 mx-auto" />
-                  <p className="text-xs font-bold text-slate-400">
+                <div className="p-6 rounded-2xl bg-white border-2 border-dashed border-[#D2CBBF] text-center space-y-2">
+                  <EyeOff className="w-7 h-7 text-[#8E887E] mx-auto" />
+                  <p className="text-xs font-bold text-[#5C5852]">
                     El módulo Hero está actualmente DESHABILITADO
                   </p>
-                  <p className="text-[11px] text-slate-500 max-w-sm mx-auto">
+                  <p className="text-[11px] text-[#767067] max-w-sm mx-auto">
                     Los clientes no verán este banner en la pantalla de inicio; entrarán directo a las citas y servicios destacados.
                   </p>
                 </div>
               ) : (
-                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1B202B] via-[#14171F] to-[#0D0F13] border border-white/15 p-5 sm:p-6 shadow-lg">
-                  <div className="absolute -top-12 -right-12 w-40 h-40 bg-[#D4AF37]/15 rounded-full blur-2xl pointer-events-none" />
-                  <div className="absolute -bottom-12 -left-12 w-40 h-40 bg-[#996515]/10 rounded-full blur-2xl pointer-events-none" />
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#FFFFFF] via-[#FAF9F6] to-[#F2EFE9] border border-[#D2CBBF] p-5 sm:p-6 shadow-sm">
+                  <div className="absolute -top-12 -right-12 w-40 h-40 bg-[#9A6B3B]/10 rounded-full blur-2xl pointer-events-none" />
+                  <div className="absolute -bottom-12 -left-12 w-40 h-40 bg-[#C69765]/10 rounded-full blur-2xl pointer-events-none" />
 
                   {/* Logo-only centered preview */}
                   {settingsForm.heroShowLogo &&
@@ -1579,18 +1579,18 @@ export const AdminDashboardView: React.FC = () => {
                         <img
                           src={settingsForm.logoUrl}
                           alt={settingsForm.name || 'Logo'}
-                          className="h-16 sm:h-20 w-auto max-w-[240px] object-contain drop-shadow-2xl"
+                          className="h-16 sm:h-20 w-auto max-w-[240px] object-contain"
                           referrerPolicy="no-referrer"
                         />
                       ) : (
-                        <div className="flex items-center gap-2 text-[#D4AF37]">
+                        <div className="flex items-center gap-2 text-[#9A6B3B]">
                           <Crown className="w-8 h-8" />
-                          <span className="text-xl font-black text-white tracking-widest">
+                          <span className="font-display text-2xl font-black text-[#161514] tracking-widest uppercase">
                             {settingsForm.name || 'MONARCA BARBER'}
                           </span>
                         </div>
                       )}
-                      <span className="text-[10px] text-[#D4AF37] font-semibold mt-2 tracking-wide uppercase">
+                      <span className="text-[10px] text-[#9A6B3B] font-semibold mt-2 tracking-wide uppercase">
                         Modo Solo Logotipo Activo
                       </span>
                     </div>
@@ -1603,13 +1603,13 @@ export const AdminDashboardView: React.FC = () => {
                             <img
                               src={settingsForm.logoUrl}
                               alt="Logo"
-                              className="h-10 sm:h-12 w-auto max-w-[180px] object-contain drop-shadow-md"
+                              className="h-10 sm:h-12 w-auto max-w-[180px] object-contain"
                               referrerPolicy="no-referrer"
                             />
                           ) : (
-                            <div className="flex items-center gap-2 text-[#D4AF37]">
+                            <div className="flex items-center gap-2 text-[#9A6B3B]">
                               <Crown className="w-5 h-5" />
-                              <span className="text-base font-black text-white tracking-wider">
+                              <span className="font-display text-lg font-black text-[#161514] tracking-wider uppercase">
                                 {settingsForm.name || 'MONARCA BARBER'}
                               </span>
                             </div>
@@ -1620,8 +1620,8 @@ export const AdminDashboardView: React.FC = () => {
                       {/* Badge Preview */}
                       {settingsForm.heroShowBadge !== false && (
                         <div>
-                          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/30 text-[#D4AF37] text-[10px] font-bold tracking-wide">
-                            <Crown className="w-3 h-3" />
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#FBF6EE] border border-[#9A6B3B]/35 text-[#7D542B] text-[10px] font-bold tracking-wide">
+                            <Crown className="w-3 h-3 text-[#9A6B3B]" />
                             <span>{settingsForm.heroBadge || 'EXPERIENCIA EXCLUSIVA EN POLANCO'}</span>
                           </div>
                         </div>
@@ -1629,14 +1629,14 @@ export const AdminDashboardView: React.FC = () => {
 
                       {/* Title Preview */}
                       {settingsForm.heroShowTitle !== false && (
-                        <h2 className="text-lg sm:text-xl font-black text-white tracking-tight leading-snug">
+                        <h2 className="font-display text-xl sm:text-2xl font-black text-[#161514] uppercase tracking-wide leading-snug">
                           {settingsForm.heroTitle || 'El arte del corte clásico y la barbería contemporánea.'}
                         </h2>
                       )}
 
                       {/* Subtitle Preview */}
                       {settingsForm.heroShowSubtitle !== false && (
-                        <p className="text-[11px] sm:text-xs text-slate-300 font-normal leading-relaxed">
+                        <p className="text-[11px] sm:text-xs text-[#5C5852] font-normal leading-relaxed">
                           {settingsForm.heroSubtitle ||
                             settingsForm.tagline ||
                             'Donde la elegancia y la maestría se encuentran.'}
@@ -1646,10 +1646,10 @@ export const AdminDashboardView: React.FC = () => {
                       {/* Button Preview */}
                       {settingsForm.heroShowButton !== false && (
                         <div className="pt-1 flex items-center gap-2">
-                          <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-bold text-xs shadow-md shadow-[#D4AF37]/20">
-                            <Scissors className="w-3.5 h-3.5 stroke-[2.5]" />
+                          <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#161514] text-[#FAF9F6] font-bold text-xs shadow-sm">
+                            <Scissors className="w-3.5 h-3.5 text-[#C69765] stroke-[2.5]" />
                             <span>{settingsForm.heroButtonText || 'Reservar Cita Ahora'}</span>
-                            <ChevronRight className="w-3.5 h-3.5" />
+                            <ChevronRight className="w-3.5 h-3.5 text-[#C69765]" />
                           </div>
                         </div>
                       )}
@@ -1661,18 +1661,18 @@ export const AdminDashboardView: React.FC = () => {
 
             {/* GRANULAR TOGGLES & INPUTS FOR EACH ELEMENT */}
             <div className="space-y-3 pt-2">
-              <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
+              <span className="text-[11px] font-bold text-[#5C5852] uppercase tracking-wider block">
                 Personalización Elemento por Elemento:
               </span>
 
               {/* 1. LOGO TOGGLE */}
-              <div className="p-3.5 rounded-2xl bg-black/30 border border-white/10 space-y-2">
+              <div className="p-3.5 rounded-2xl bg-white border border-[#E6E1D6] space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-[#D4AF37]" />
+                    <Sparkles className="w-4 h-4 text-[#9A6B3B]" />
                     <div>
-                      <span className="text-xs font-bold text-white block">Logotipo en el Banner</span>
-                      <span className="text-[11px] text-slate-400 block">
+                      <span className="text-xs font-bold text-[#161514] block">Logotipo en el Banner</span>
+                      <span className="text-[11px] text-[#5C5852] block">
                         Muestra el logotipo oficial de tu barbería dentro del banner de portada.
                       </span>
                     </div>
@@ -1686,7 +1686,7 @@ export const AdminDashboardView: React.FC = () => {
                       }))
                     }
                     className={`transition-colors ${
-                      settingsForm.heroShowLogo ? 'text-[#D4AF37]' : 'text-slate-600'
+                      settingsForm.heroShowLogo ? 'text-[#9A6B3B]' : 'text-[#8E887E]'
                     }`}
                   >
                     {settingsForm.heroShowLogo ? (
@@ -1699,14 +1699,14 @@ export const AdminDashboardView: React.FC = () => {
               </div>
 
               {/* 2. BADGE TOGGLE & INPUT */}
-              <div className="p-3.5 rounded-2xl bg-black/30 border border-white/10 space-y-2.5">
+              <div className="p-3.5 rounded-2xl bg-white border border-[#E6E1D6] space-y-2.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Crown className="w-4 h-4 text-[#D4AF37]" />
+                    <Crown className="w-4 h-4 text-[#9A6B3B]" />
                     <div>
-                      <span className="text-xs font-bold text-white block">Insignia / Distintivo Superior</span>
-                      <span className="text-[11px] text-slate-400 block">
-                        Cápsula dorada pequeña con icono de corona arriba del título.
+                      <span className="text-xs font-bold text-[#161514] block">Insignia / Distintivo Superior</span>
+                      <span className="text-[11px] text-[#5C5852] block">
+                        Cápsula bronce pequeña con icono de corona arriba del título.
                       </span>
                     </div>
                   </div>
@@ -1719,7 +1719,7 @@ export const AdminDashboardView: React.FC = () => {
                       }))
                     }
                     className={`transition-colors ${
-                      settingsForm.heroShowBadge !== false ? 'text-[#D4AF37]' : 'text-slate-600'
+                      settingsForm.heroShowBadge !== false ? 'text-[#9A6B3B]' : 'text-[#8E887E]'
                     }`}
                   >
                     {settingsForm.heroShowBadge !== false ? (
@@ -1732,26 +1732,26 @@ export const AdminDashboardView: React.FC = () => {
 
                 {settingsForm.heroShowBadge !== false && (
                   <div>
-                    <label className="text-[11px] text-slate-400 block mb-1">Texto de la Insignia:</label>
+                    <label className="text-[11px] text-[#5C5852] font-semibold block mb-1">Texto de la Insignia:</label>
                     <input
                       type="text"
                       value={settingsForm.heroBadge ?? 'EXPERIENCIA EXCLUSIVA EN POLANCO'}
                       onChange={(e) => setSettingsForm({ ...settingsForm, heroBadge: e.target.value })}
                       placeholder="EXPERIENCIA EXCLUSIVA EN POLANCO"
-                      className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:border-[#D4AF37] transition-all"
+                      className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] placeholder:text-[#8E887E] text-xs focus:outline-none focus:border-[#9A6B3B] transition-all"
                     />
                   </div>
                 )}
               </div>
 
               {/* 3. TITLE TOGGLE & INPUT */}
-              <div className="p-3.5 rounded-2xl bg-black/30 border border-white/10 space-y-2.5">
+              <div className="p-3.5 rounded-2xl bg-white border border-[#E6E1D6] space-y-2.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Type className="w-4 h-4 text-[#D4AF37]" />
+                    <Type className="w-4 h-4 text-[#9A6B3B]" />
                     <div>
-                      <span className="text-xs font-bold text-white block">Título Principal de Portada</span>
-                      <span className="text-[11px] text-slate-400 block">
+                      <span className="text-xs font-bold text-[#161514] block">Título Principal de Portada</span>
+                      <span className="text-[11px] text-[#5C5852] block">
                         Encabezado tipográfico de mayor impacto en la portada.
                       </span>
                     </div>
@@ -1765,7 +1765,7 @@ export const AdminDashboardView: React.FC = () => {
                       }))
                     }
                     className={`transition-colors ${
-                      settingsForm.heroShowTitle !== false ? 'text-[#D4AF37]' : 'text-slate-600'
+                      settingsForm.heroShowTitle !== false ? 'text-[#9A6B3B]' : 'text-[#8E887E]'
                     }`}
                   >
                     {settingsForm.heroShowTitle !== false ? (
@@ -1778,26 +1778,26 @@ export const AdminDashboardView: React.FC = () => {
 
                 {settingsForm.heroShowTitle !== false && (
                   <div>
-                    <label className="text-[11px] text-slate-400 block mb-1">Texto del Título:</label>
+                    <label className="text-[11px] text-[#5C5852] font-semibold block mb-1">Texto del Título:</label>
                     <input
                       type="text"
                       value={settingsForm.heroTitle ?? 'El arte del corte clásico y la barbería contemporánea.'}
                       onChange={(e) => setSettingsForm({ ...settingsForm, heroTitle: e.target.value })}
                       placeholder="El arte del corte clásico y la barbería contemporánea."
-                      className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:border-[#D4AF37] transition-all"
+                      className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] placeholder:text-[#8E887E] text-xs focus:outline-none focus:border-[#9A6B3B] transition-all"
                     />
                   </div>
                 )}
               </div>
 
               {/* 4. SUBTITLE TOGGLE & INPUT */}
-              <div className="p-3.5 rounded-2xl bg-black/30 border border-white/10 space-y-2.5">
+              <div className="p-3.5 rounded-2xl bg-white border border-[#E6E1D6] space-y-2.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-[#D4AF37]" />
+                    <Sparkles className="w-4 h-4 text-[#9A6B3B]" />
                     <div>
-                      <span className="text-xs font-bold text-white block">Subtítulo o Descripción</span>
-                      <span className="text-[11px] text-slate-400 block">
+                      <span className="text-xs font-bold text-[#161514] block">Subtítulo o Descripción</span>
+                      <span className="text-[11px] text-[#5C5852] block">
                         Párrafo complementario que describe la propuesta de valor.
                       </span>
                     </div>
@@ -1811,7 +1811,7 @@ export const AdminDashboardView: React.FC = () => {
                       }))
                     }
                     className={`transition-colors ${
-                      settingsForm.heroShowSubtitle !== false ? 'text-[#D4AF37]' : 'text-slate-600'
+                      settingsForm.heroShowSubtitle !== false ? 'text-[#9A6B3B]' : 'text-[#8E887E]'
                     }`}
                   >
                     {settingsForm.heroShowSubtitle !== false ? (
@@ -1824,7 +1824,7 @@ export const AdminDashboardView: React.FC = () => {
 
                 {settingsForm.heroShowSubtitle !== false && (
                   <div>
-                    <label className="text-[11px] text-slate-400 block mb-1">Texto del Subtítulo:</label>
+                    <label className="text-[11px] text-[#5C5852] font-semibold block mb-1">Texto del Subtítulo:</label>
                     <textarea
                       rows={2}
                       value={
@@ -1833,20 +1833,20 @@ export const AdminDashboardView: React.FC = () => {
                       }
                       onChange={(e) => setSettingsForm({ ...settingsForm, heroSubtitle: e.target.value })}
                       placeholder="Donde la elegancia y la maestría se encuentran."
-                      className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:border-[#D4AF37] transition-all"
+                      className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] placeholder:text-[#8E887E] text-xs focus:outline-none focus:border-[#9A6B3B] transition-all"
                     />
                   </div>
                 )}
               </div>
 
               {/* 5. BUTTON TOGGLE & INPUT */}
-              <div className="p-3.5 rounded-2xl bg-black/30 border border-white/10 space-y-2.5">
+              <div className="p-3.5 rounded-2xl bg-white border border-[#E6E1D6] space-y-2.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <MousePointerClick className="w-4 h-4 text-[#D4AF37]" />
+                    <MousePointerClick className="w-4 h-4 text-[#9A6B3B]" />
                     <div>
-                      <span className="text-xs font-bold text-white block">Botón de Reserva de Cita</span>
-                      <span className="text-[11px] text-slate-400 block">
+                      <span className="text-xs font-bold text-[#161514] block">Botón de Reserva de Cita</span>
+                      <span className="text-[11px] text-[#5C5852] block">
                         Llamado a la acción que abre de inmediato el flujo de agendamiento.
                       </span>
                     </div>
@@ -1860,7 +1860,7 @@ export const AdminDashboardView: React.FC = () => {
                       }))
                     }
                     className={`transition-colors ${
-                      settingsForm.heroShowButton !== false ? 'text-[#D4AF37]' : 'text-slate-600'
+                      settingsForm.heroShowButton !== false ? 'text-[#9A6B3B]' : 'text-[#8E887E]'
                     }`}
                   >
                     {settingsForm.heroShowButton !== false ? (
@@ -1873,13 +1873,13 @@ export const AdminDashboardView: React.FC = () => {
 
                 {settingsForm.heroShowButton !== false && (
                   <div>
-                    <label className="text-[11px] text-slate-400 block mb-1">Texto del Botón:</label>
+                    <label className="text-[11px] text-[#5C5852] font-semibold block mb-1">Texto del Botón:</label>
                     <input
                       type="text"
                       value={settingsForm.heroButtonText ?? 'Reservar Cita Ahora'}
                       onChange={(e) => setSettingsForm({ ...settingsForm, heroButtonText: e.target.value })}
                       placeholder="Reservar Cita Ahora"
-                      className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:border-[#D4AF37] transition-all"
+                      className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] placeholder:text-[#8E887E] text-xs focus:outline-none focus:border-[#9A6B3B] transition-all"
                     />
                   </div>
                 )}
@@ -1889,88 +1889,88 @@ export const AdminDashboardView: React.FC = () => {
 
           {/* 3. GENERAL BUSINESS DETAILS */}
           <div className="space-y-4">
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+            <h3 className="font-display text-base font-bold text-[#161514] uppercase tracking-wider">
               Información de la Barbería
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div>
-                <label className="text-slate-400 block mb-1">Nombre Comercial</label>
+                <label className="text-[#5C5852] font-semibold block mb-1">Nombre Comercial</label>
                 <input
                   type="text"
                   value={settingsForm.name}
                   onChange={(e) => setSettingsForm({ ...settingsForm, name: e.target.value })}
-                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                  className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] focus:outline-none focus:border-[#9A6B3B]"
                 />
               </div>
 
               <div>
-                <label className="text-slate-400 block mb-1">Slogan / Tagline</label>
+                <label className="text-[#5C5852] font-semibold block mb-1">Slogan / Tagline</label>
                 <input
                   type="text"
                   value={settingsForm.tagline}
                   onChange={(e) => setSettingsForm({ ...settingsForm, tagline: e.target.value })}
-                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                  className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] focus:outline-none focus:border-[#9A6B3B]"
                 />
               </div>
 
               <div>
-                <label className="text-slate-400 block mb-1">Dirección Sucursal</label>
+                <label className="text-[#5C5852] font-semibold block mb-1">Dirección Sucursal</label>
                 <input
                   type="text"
                   value={settingsForm.address}
                   onChange={(e) => setSettingsForm({ ...settingsForm, address: e.target.value })}
-                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                  className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] focus:outline-none focus:border-[#9A6B3B]"
                 />
               </div>
 
               <div>
-                <label className="text-slate-400 block mb-1">WhatsApp de Atención</label>
+                <label className="text-[#5C5852] font-semibold block mb-1">WhatsApp de Atención</label>
                 <input
                   type="text"
                   value={settingsForm.whatsapp}
                   onChange={(e) => setSettingsForm({ ...settingsForm, whatsapp: e.target.value })}
-                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                  className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] font-mono focus:outline-none focus:border-[#9A6B3B]"
                 />
               </div>
 
               <div>
-                <label className="text-slate-400 block mb-1">Instagram (@usuario)</label>
+                <label className="text-[#5C5852] font-semibold block mb-1">Instagram (@usuario)</label>
                 <input
                   type="text"
                   value={settingsForm.instagram}
                   onChange={(e) => setSettingsForm({ ...settingsForm, instagram: e.target.value })}
-                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                  className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] focus:outline-none focus:border-[#9A6B3B]"
                 />
               </div>
 
               <div>
-                <label className="text-slate-400 block mb-1">Teléfono Fijo</label>
+                <label className="text-[#5C5852] font-semibold block mb-1">Teléfono Fijo</label>
                 <input
                   type="text"
                   value={settingsForm.phone}
                   onChange={(e) => setSettingsForm({ ...settingsForm, phone: e.target.value })}
-                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                  className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] font-mono focus:outline-none focus:border-[#9A6B3B]"
                 />
               </div>
 
               <div>
-                <label className="text-slate-400 block mb-1">Horas Mínimas para Cancelar Gratis</label>
+                <label className="text-[#5C5852] font-semibold block mb-1">Horas Mínimas para Cancelar Gratis</label>
                 <input
                   type="number"
                   value={settingsForm.minCancelNoticeHours}
                   onChange={(e) => setSettingsForm({ ...settingsForm, minCancelNoticeHours: Number(e.target.value) })}
-                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                  className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] font-mono focus:outline-none focus:border-[#9A6B3B]"
                 />
               </div>
 
               <div>
-                <label className="text-slate-400 block mb-1">Días Máximos de Anticipación para Reservar</label>
+                <label className="text-[#5C5852] font-semibold block mb-1">Días Máximos de Anticipación para Reservar</label>
                 <input
                   type="number"
                   value={settingsForm.maxBookingAdvanceDays}
                   onChange={(e) => setSettingsForm({ ...settingsForm, maxBookingAdvanceDays: Number(e.target.value) })}
-                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-white/10 text-white"
+                  className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] font-mono focus:outline-none focus:border-[#9A6B3B]"
                 />
               </div>
             </div>
@@ -1980,9 +1980,9 @@ export const AdminDashboardView: React.FC = () => {
             <button
               onClick={handleSaveSettingsSubmit}
               disabled={isSavingSettings || isUploadingLogo}
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#996515] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-bold text-xs shadow-xl shadow-[#D4AF37]/20 hover:scale-[1.01] active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-3.5 rounded-2xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] font-bold text-xs shadow-sm active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              <Save className="w-4 h-4" />
+              <Save className="w-4 h-4 text-[#C69765]" />
               <span>{isSavingSettings ? 'Guardando cambios...' : 'Guardar Logotipo y Configuración Global'}</span>
             </button>
           </div>
