@@ -332,7 +332,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 <form onSubmit={handleVerifyLoginIdentifier} className="space-y-4">
                   <div>
                     <label className="text-xs font-semibold text-[#161514] block mb-1.5">
-                      Ingresa tu Celular o Número de Cliente
+                      Ingresa tu Celular, No. de Cliente o Código de Acceso
                     </label>
                     <div className="relative">
                       <div className="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-[#5C5852]">
@@ -340,7 +340,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                       </div>
                       <input
                         type="text"
-                        inputMode="numeric"
+                        inputMode="text"
                         value={loginIdentifier}
                         onChange={(e) => setLoginIdentifier(e.target.value)}
                         placeholder="Ej. 55 1234 5678 o 849201"
@@ -350,7 +350,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                       />
                     </div>
                     <p className="text-[11px] text-[#5C5852] mt-1.5">
-                      Puedes ingresar tus 10 dígitos de celular o tu No. de cliente de 6 dígitos.
+                      Ingresa tus 10 dígitos de celular, tu No. de cliente o código de barbero.
                     </p>
                   </div>
 

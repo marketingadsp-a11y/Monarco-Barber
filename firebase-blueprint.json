@@ -10,6 +10,8 @@
         "nombre": { "type": "string", "maxLength": 100 },
         "correo": { "type": "string", "maxLength": 120 },
         "telefono": { "type": "string", "maxLength": 30 },
+        "numero_cliente": { "type": "string", "maxLength": 20 },
+        "pin": { "type": "string", "maxLength": 10 },
         "foto_url": { "type": "string" },
         "barberos_favoritos": { "type": "array" },
         "activo": { "type": "boolean" },
@@ -25,6 +27,7 @@
       "properties": {
         "id": { "type": "string" },
         "usuario_id": { "type": "string" },
+        "codigo_acceso": { "type": "string" },
         "nombre_mostrado": { "type": "string", "maxLength": 80 },
         "nombre_pila": { "type": "string", "maxLength": 50 },
         "apellido": { "type": "string", "maxLength": 50 },

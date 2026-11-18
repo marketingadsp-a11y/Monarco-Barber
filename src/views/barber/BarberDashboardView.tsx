@@ -81,12 +81,23 @@ export const BarberDashboardView: React.FC<BarberDashboardViewProps> = ({
   }, []);
 
   // Find logged in barber record with safe fallback
+  const normalizePhone10 = (val?: string) => {
+    if (!val) return '';
+    const d = val.replace(/\D/g, '');
+    return d.startsWith('52') && d.length === 12 ? d.substring(2) : d;
+  };
+  const userPhone10 = normalizePhone10(userProfile?.phone);
+
   const activeBarber: Barber =
     barbers.find(
       (b) =>
         b.id === currentBarberId ||
-        b.userId === userProfile?.id ||
-        b.phone === userProfile?.phone ||
+        (b.userId && userProfile?.id && b.userId === userProfile.id) ||
+        (b.accessCode &&
+          userProfile?.clientNumber &&
+          b.accessCode.trim().toLowerCase() === userProfile.clientNumber.trim().toLowerCase()) ||
+        (userPhone10.length === 10 && normalizePhone10(b.phone) === userPhone10) ||
+        (b.phone && userProfile?.phone && b.phone === userProfile.phone) ||
         b.displayName.toLowerCase() === userProfile?.name?.toLowerCase()
     ) ||
     barbers[0] || {

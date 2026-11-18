@@ -42,12 +42,17 @@ import {
   Package,
   Eye,
   EyeOff,
+  KeyRound,
+  Lock,
+  Phone,
+  Hash,
 } from 'lucide-react';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { Barber, Service, Appointment, BusinessSettings, NotificationSettings } from '../../types';
+import { Barber, Service, Appointment, BusinessSettings, NotificationSettings, UserProfile } from '../../types';
 import { formatCurrency, formatDateSpanish, formatTime12h, getTodayDateString } from '../../utils/dateTime';
 import { imageService } from '../../services/imgbb/imageService';
+import { dataService } from '../../services/firebase/dataService';
 import { AdminUsersSection } from '../../components/admin/AdminUsersSection';
 import { AdminProductsSection } from '../../components/products/AdminProductsSection';
 import { AdminMetricsSection } from '../../components/admin/AdminMetricsSection';
@@ -67,6 +72,7 @@ export const AdminDashboardView: React.FC = () => {
     deleteService,
     toggleServiceActive,
     saveBarber,
+    saveBarberWithCredentials,
     deleteBarber,
     toggleBarberActive,
     updateAppointmentStatus,
@@ -80,11 +86,19 @@ export const AdminDashboardView: React.FC = () => {
   const [activeSection, setActiveSection] = useState<'overview' | 'users' | 'appointments' | 'barbers' | 'services' | 'products' | 'notifications' | 'settings'>('overview');
   const [browserPermission, setBrowserPermission] = useState<NotificationPermission>('default');
   const [isSavingNotifications, setIsSavingNotifications] = useState(false);
+  const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
 
   useEffect(() => {
     if (isBrowserNotificationSupported()) {
       setBrowserPermission(getBrowserNotificationPermission());
     }
+  }, []);
+
+  useEffect(() => {
+    const unsub = dataService.subscribeToUsers((users) => {
+      setAllUsers(users);
+    });
+    return () => unsub();
   }, []);
 
   // Service Edit/Create Modal State
@@ -95,9 +109,17 @@ export const AdminDashboardView: React.FC = () => {
 
   // Barber Edit/Create Modal State
   const [editingBarber, setEditingBarber] = useState<Partial<Barber> | null>(null);
+  const [barberAccessCode, setBarberAccessCode] = useState('');
+  const [barberAccessPhone, setBarberAccessPhone] = useState('');
+  const [barberAccessPin, setBarberAccessPin] = useState('');
+  const [showBarberAccessPin, setShowBarberAccessPin] = useState(false);
+  const [isLoadingBarberCreds, setIsLoadingBarberCreds] = useState(false);
   const [isSavingBarber, setIsSavingBarber] = useState(false);
   const [isUploadingBarberPhoto, setIsUploadingBarberPhoto] = useState(false);
+  const [isUploadingBarberGallery, setIsUploadingBarberGallery] = useState(false);
+  const [barberGalleryUrlInput, setBarberGalleryUrlInput] = useState('');
   const barberPhotoInputRef = useRef<HTMLInputElement>(null);
+  const barberGalleryInputRef = useRef<HTMLInputElement>(null);
 
   // Settings State
   const [settingsForm, setSettingsForm] = useState<BusinessSettings>(businessSettings);
@@ -178,7 +200,70 @@ export const AdminDashboardView: React.FC = () => {
       showToast('error', 'Error al subir foto', err.message);
     } finally {
       setIsUploadingBarberPhoto(false);
+      if (barberPhotoInputRef.current) barberPhotoInputRef.current.value = '';
     }
+  };
+
+  // Upload Portfolio Gallery Photos for Barber (supports multiple files)
+  const handleBarberGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files: File[] = e.target.files ? Array.from(e.target.files) : [];
+    if (files.length === 0) return;
+
+    setIsUploadingBarberGallery(true);
+    try {
+      const uploadedUrls: string[] = [];
+      for (const file of files) {
+        const uploadedResult = await imageService.uploadImage(file);
+        const cleanUrl = typeof uploadedResult === 'string' ? uploadedResult : (uploadedResult as any)?.url || '';
+        if (cleanUrl) uploadedUrls.push(cleanUrl);
+      }
+
+      if (uploadedUrls.length > 0) {
+        setEditingBarber((prev) =>
+          prev
+            ? {
+                ...prev,
+                gallery: [...(prev.gallery || []), ...uploadedUrls],
+              }
+            : prev
+        );
+        showToast(
+          'success',
+          uploadedUrls.length > 1 ? 'Fotos agregadas al portafolio' : 'Foto agregada al portafolio',
+          `Se ${uploadedUrls.length > 1 ? `agregaron ${uploadedUrls.length} imágenes` : 'agregó 1 imagen'}. Recuerda guardar los cambios del barbero.`
+        );
+      }
+    } catch (err: any) {
+      showToast('error', 'Error al subir portafolio', err.message);
+    } finally {
+      setIsUploadingBarberGallery(false);
+      if (barberGalleryInputRef.current) barberGalleryInputRef.current.value = '';
+    }
+  };
+
+  const handleAddBarberGalleryUrl = () => {
+    const url = barberGalleryUrlInput.trim();
+    if (!url) return;
+    setEditingBarber((prev) =>
+      prev
+        ? {
+            ...prev,
+            gallery: [...(prev.gallery || []), url],
+          }
+        : prev
+    );
+    setBarberGalleryUrlInput('');
+  };
+
+  const handleRemoveBarberGalleryPhoto = (indexToRemove: number) => {
+    setEditingBarber((prev) =>
+      prev
+        ? {
+            ...prev,
+            gallery: (prev.gallery || []).filter((_, idx) => idx !== indexToRemove),
+          }
+        : prev
+    );
   };
 
   const handleSaveServiceSubmit = async () => {
@@ -207,6 +292,86 @@ export const AdminDashboardView: React.FC = () => {
     }
   };
 
+  const normalizeDigits10 = (val?: string) => {
+    if (!val) return '';
+    const d = val.replace(/\D/g, '');
+    return d.startsWith('52') && d.length === 12 ? d.substring(2) : d;
+  };
+
+  const findLinkedUserForBarber = (barber: Barber): UserProfile | undefined => {
+    if (barber.userId) {
+      const byId = allUsers.find((u) => u.id === barber.userId);
+      if (byId) return byId;
+    }
+    if (barber.accessCode) {
+      const byCode = allUsers.find(
+        (u) =>
+          u.role === 'barber' &&
+          u.clientNumber &&
+          u.clientNumber.trim().toLowerCase() === barber.accessCode!.trim().toLowerCase()
+      );
+      if (byCode) return byCode;
+    }
+    const barberPhone10 = normalizeDigits10(barber.phone);
+    if (barberPhone10.length === 10) {
+      const byPhone = allUsers.find(
+        (u) => u.role === 'barber' && normalizeDigits10(u.phone) === barberPhone10
+      );
+      if (byPhone) return byPhone;
+    }
+    return undefined;
+  };
+
+  const handleOpenNewBarber = () => {
+    const suggestedCode = Math.floor(100000 + Math.random() * 900000).toString();
+    setEditingBarber({
+      displayName: '',
+      firstName: '',
+      lastName: '',
+      photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+      bio: 'Maestro barbero especialista en cortes modernos.',
+      specialties: ['Corte Clásico', 'Fade'],
+      rating: 5.0,
+      reviewCount: 0,
+      experienceYears: 5,
+      active: true,
+      featured: false,
+      serviceIds: [],
+      gallery: [],
+    });
+    setBarberAccessCode(suggestedCode);
+    setBarberAccessPhone('');
+    setBarberAccessPin('');
+    setShowBarberAccessPin(false);
+    setBarberGalleryUrlInput('');
+    setIsLoadingBarberCreds(false);
+  };
+
+  const handleOpenEditBarber = async (barber: Barber) => {
+    const linked = findLinkedUserForBarber(barber);
+    setEditingBarber(barber);
+    setBarberAccessCode(linked?.clientNumber || barber.accessCode || '');
+    setBarberAccessPhone(linked?.phone || barber.phone || '');
+    setBarberAccessPin(linked?.pin || '');
+    setShowBarberAccessPin(false);
+    setBarberGalleryUrlInput('');
+
+    setIsLoadingBarberCreds(true);
+    try {
+      const creds = await dataService.getBarberAccessCredentials(barber);
+      setBarberAccessCode(creds.accessCode || '');
+      setBarberAccessPhone(creds.phone || '');
+      setBarberAccessPin(creds.pin || '');
+      if (creds.userId && !barber.userId) {
+        setEditingBarber((prev) => (prev && prev.id === barber.id ? { ...prev, userId: creds.userId } : prev));
+      }
+    } catch {
+      // keep prefilled values from allUsers
+    } finally {
+      setIsLoadingBarberCreds(false);
+    }
+  };
+
   const handleSaveBarberSubmit = async () => {
     if (!editingBarber?.displayName) {
       showToast('error', 'Nombre requerido', 'El barbero debe tener un nombre.');
@@ -214,7 +379,11 @@ export const AdminDashboardView: React.FC = () => {
     }
     setIsSavingBarber(true);
     try {
-      await saveBarber(editingBarber);
+      await saveBarberWithCredentials(editingBarber, {
+        accessCode: barberAccessCode,
+        phone: barberAccessPhone,
+        pin: barberAccessPin,
+      });
       setEditingBarber(null);
     } catch (err: any) {
       showToast('error', 'Error al guardar', err.message);
@@ -719,32 +888,16 @@ export const AdminDashboardView: React.FC = () => {
       {/* SECTION: BARBERS TEAM */}
       {activeSection === 'barbers' && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             <div>
               <h3 className="font-display text-xl font-bold text-[#161514] uppercase tracking-wide">Equipo de Barberos</h3>
               <p className="text-xs text-[#5C5852]">
-                Gestiona perfiles, estados y asignación de servicios
+                Gestiona perfiles, credenciales de acceso al panel de barbero y estados
               </p>
             </div>
             <button
-              onClick={() =>
-                setEditingBarber({
-                  displayName: '',
-                  firstName: '',
-                  lastName: '',
-                  photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-                  bio: 'Maestro barbero especialista en cortes modernos.',
-                  specialties: ['Corte Clásico', 'Fade'],
-                  rating: 5.0,
-                  reviewCount: 0,
-                  experienceYears: 5,
-                  active: true,
-                  featured: false,
-                  serviceIds: [],
-                  gallery: [],
-                })
-              }
-              className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-[#161514] text-[#FAF9F6] text-xs font-bold shadow-sm hover:bg-[#2A2826] transition-all"
+              onClick={handleOpenNewBarber}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-[#161514] text-[#FAF9F6] text-xs font-bold shadow-sm hover:bg-[#2A2826] transition-all shrink-0"
             >
               <Plus className="w-4 h-4 text-[#C69765]" />
               <span>Nuevo Barbero</span>
@@ -752,51 +905,94 @@ export const AdminDashboardView: React.FC = () => {
           </div>
 
           <div className="grid gap-3">
-            {barbers.map((barber) => (
-              <div
-                key={barber.id}
-                className="rounded-2xl bg-white border border-[#E6E1D6] p-4 flex items-center justify-between gap-3 shadow-sm"
-              >
-                <div className="flex items-center gap-3.5 min-w-0">
-                  <img
-                    src={barber.photoUrl}
-                    alt={barber.displayName}
-                    className="w-12 h-12 rounded-xl object-cover border border-[#E6E1D6]"
-                    referrerPolicy="no-referrer"
-                  />
-                  <div>
-                    <h4 className="font-bold text-[#161514] text-sm">{barber.displayName}</h4>
-                    <p className="text-xs text-[#9A6B3B] font-semibold">
-                      ★ {barber.rating.toFixed(1)} ({barber.reviewCount} citas) • <span className="text-[#5C5852] font-normal">{barber.specialties.join(', ')}</span>
-                    </p>
+            {barbers.map((barber) => {
+              const linkedUser = findLinkedUserForBarber(barber);
+              const displayCode = linkedUser?.clientNumber || barber.accessCode || '';
+              const displayPhone = linkedUser?.phone || barber.phone || '';
+              const hasPin = Boolean(linkedUser?.pin);
+              const hasPanelAccess = Boolean(hasPin && (displayCode || displayPhone));
+
+              return (
+                <div
+                  key={barber.id}
+                  className="rounded-2xl bg-white border border-[#E6E1D6] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm"
+                >
+                  <div className="flex items-start sm:items-center gap-3.5 min-w-0">
+                    <img
+                      src={barber.photoUrl}
+                      alt={barber.displayName}
+                      className="w-12 h-12 rounded-xl object-cover border border-[#E6E1D6] shrink-0"
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="min-w-0 space-y-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="font-bold text-[#161514] text-sm">{barber.displayName}</h4>
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                            hasPanelAccess
+                              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                              : 'bg-amber-50 text-amber-800 border-amber-200'
+                          }`}
+                        >
+                          <KeyRound className="w-2.5 h-2.5" />
+                          <span>{hasPanelAccess ? 'Acceso activo' : 'Sin acceso configurado'}</span>
+                        </span>
+                      </div>
+                      <p className="text-xs text-[#9A6B3B] font-semibold truncate">
+                        ★ {barber.rating.toFixed(1)} ({barber.reviewCount} citas) • <span className="text-[#5C5852] font-normal">{barber.specialties.join(', ')}</span>
+                      </p>
+                      <div className="flex items-center gap-2 flex-wrap text-[11px] text-[#5C5852] pt-0.5">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#FAF9F6] border border-[#E6E1D6] font-mono tabular-nums">
+                          <Hash className="w-3 h-3 text-[#9A6B3B]" />
+                          {displayCode ? `Cód: ${displayCode}` : 'Sin código'}
+                        </span>
+                        {displayPhone && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#FAF9F6] border border-[#E6E1D6] font-mono tabular-nums">
+                            <Phone className="w-3 h-3 text-[#9A6B3B]" />
+                            {displayPhone}
+                          </span>
+                        )}
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#FAF9F6] border border-[#E6E1D6] font-mono tabular-nums">
+                          <Lock className="w-3 h-3 text-[#9A6B3B]" />
+                          {hasPin ? 'NIP: ••••' : 'Sin NIP'}
+                        </span>
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#FAF9F6] border border-[#E6E1D6] font-mono tabular-nums">
+                          <ImageIcon className="w-3 h-3 text-[#9A6B3B]" />
+                          {(barber.gallery || []).length > 0
+                            ? `${barber.gallery.length} ${(barber.gallery.length === 1 ? 'foto' : 'fotos')} portafolio`
+                            : 'Sin portafolio'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                    <button
+                      onClick={() => toggleBarberActive(barber.id, !barber.active)}
+                      className="p-2 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] text-[#5C5852] transition-all"
+                      title={barber.active ? 'Desactivar barbero' : 'Activar barbero'}
+                    >
+                      {barber.active ? <ToggleRight className="w-5 h-5 text-emerald-700" /> : <ToggleLeft className="w-5 h-5 text-[#8E887E]" />}
+                    </button>
+                    <button
+                      onClick={() => handleOpenEditBarber(barber)}
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] text-[#161514] text-xs font-semibold transition-all"
+                      title="Editar datos y acceso al panel"
+                    >
+                      <Edit2 className="w-3.5 h-3.5 text-[#9A6B3B]" />
+                      <span className="hidden sm:inline">Editar</span>
+                    </button>
+                    <button
+                      onClick={() => handleDeleteBarberSubmit(barber.id, barber.displayName)}
+                      className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 transition-all"
+                      title="Eliminar barbero del equipo"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
-
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    onClick={() => toggleBarberActive(barber.id, !barber.active)}
-                    className="p-2 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] text-[#5C5852] transition-all"
-                    title={barber.active ? 'Desactivar barbero' : 'Activar barbero'}
-                  >
-                    {barber.active ? <ToggleRight className="w-5 h-5 text-emerald-700" /> : <ToggleLeft className="w-5 h-5 text-[#8E887E]" />}
-                  </button>
-                  <button
-                    onClick={() => setEditingBarber(barber)}
-                    className="p-2 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] text-[#5C5852] hover:text-[#161514] transition-all"
-                    title="Editar datos del barbero"
-                  >
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteBarberSubmit(barber.id, barber.displayName)}
-                    className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 transition-all"
-                    title="Eliminar barbero del equipo"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Barber Edit Modal */}
@@ -861,6 +1057,102 @@ export const AdminDashboardView: React.FC = () => {
                     />
                   </div>
 
+                  {/* Acceso al Panel de Barbero */}
+                  <div className="p-3.5 rounded-2xl bg-[#FBF6EE] border border-[#9A6B3B]/35 space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-xl bg-[#161514] text-[#C69765] flex items-center justify-center shrink-0">
+                          <KeyRound className="w-3.5 h-3.5" />
+                        </div>
+                        <div>
+                          <h4 className="font-display text-sm font-bold text-[#161514] uppercase tracking-wide leading-tight">
+                            Acceso al Panel de Barbero
+                          </h4>
+                          <p className="text-[11px] text-[#5C5852] leading-snug">
+                            Credenciales para iniciar sesión y entrar a su panel
+                          </p>
+                        </div>
+                      </div>
+                      {isLoadingBarberCreds && (
+                        <RefreshCw className="w-3.5 h-3.5 text-[#9A6B3B] animate-spin shrink-0 mt-1" />
+                      )}
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="text-[#5C5852] font-semibold">Código de Acceso</label>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setBarberAccessCode(Math.floor(100000 + Math.random() * 900000).toString())
+                          }
+                          className="text-[10px] font-bold text-[#9A6B3B] hover:text-[#161514] flex items-center gap-1"
+                        >
+                          <RefreshCw className="w-2.5 h-2.5" />
+                          <span>Generar 6 dígitos</span>
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        maxLength={12}
+                        value={barberAccessCode}
+                        onChange={(e) => setBarberAccessCode(e.target.value.replace(/\s+/g, ''))}
+                        placeholder="Ej. 849201 o CARLOS01"
+                        className="w-full p-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] placeholder:text-[#8E887E] font-mono tabular-nums tracking-wider focus:outline-none focus:border-[#9A6B3B]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[#5C5852] font-semibold block mb-1">Celular de Acceso (10 dígitos)</label>
+                      <input
+                        type="tel"
+                        value={barberAccessPhone}
+                        onChange={(e) => setBarberAccessPhone(e.target.value)}
+                        placeholder="Ej. 55 1234 5678"
+                        className="w-full p-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] placeholder:text-[#8E887E] font-mono tabular-nums focus:outline-none focus:border-[#9A6B3B]"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="text-[#5C5852] font-semibold">Contraseña / NIP (4 dígitos)</label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setBarberAccessPin(Math.floor(1000 + Math.random() * 9000).toString());
+                            setShowBarberAccessPin(true);
+                          }}
+                          className="text-[10px] font-bold text-[#9A6B3B] hover:text-[#161514] flex items-center gap-1"
+                        >
+                          <RefreshCw className="w-2.5 h-2.5" />
+                          <span>Generar NIP</span>
+                        </button>
+                      </div>
+                      <div className="relative">
+                        <input
+                          type={showBarberAccessPin ? 'text' : 'password'}
+                          inputMode="numeric"
+                          maxLength={4}
+                          value={barberAccessPin}
+                          onChange={(e) => setBarberAccessPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                          placeholder="•••• (4 dígitos)"
+                          className="w-full p-2.5 pr-10 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] placeholder:text-[#8E887E] font-mono tabular-nums tracking-[0.35em] focus:outline-none focus:border-[#9A6B3B]"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowBarberAccessPin(!showBarberAccessPin)}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-[#5C5852] hover:text-[#161514]"
+                          title={showBarberAccessPin ? 'Ocultar contraseña' : 'Ver contraseña'}
+                        >
+                          {showBarberAccessPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                      <p className="text-[10px] text-[#767067] mt-1">
+                        El barbero podrá entrar desde "Iniciar Sesión" usando su código o celular junto con este NIP de 4 dígitos.
+                      </p>
+                    </div>
+                  </div>
+
                   <div>
                     <label className="text-[#5C5852] font-semibold block mb-1">Especialidades (separadas por coma)</label>
                     <input
@@ -880,21 +1172,34 @@ export const AdminDashboardView: React.FC = () => {
                     />
                   </div>
 
-                  <div>
-                    <label className="text-[#5C5852] font-semibold block mb-1">Años de Experiencia</label>
-                    <input
-                      type="number"
-                      min={0}
-                      max={50}
-                      value={editingBarber.experienceYears !== undefined ? editingBarber.experienceYears : 5}
-                      onChange={(e) =>
-                        setEditingBarber({
-                          ...editingBarber,
-                          experienceYears: Number(e.target.value) || 0,
-                        })
-                      }
-                      className="w-full p-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] font-mono focus:outline-none focus:border-[#9A6B3B]"
-                    />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[#5C5852] font-semibold block mb-1">Años de Experiencia</label>
+                      <input
+                        type="number"
+                        min={0}
+                        max={50}
+                        value={editingBarber.experienceYears !== undefined ? editingBarber.experienceYears : 5}
+                        onChange={(e) =>
+                          setEditingBarber({
+                            ...editingBarber,
+                            experienceYears: Number(e.target.value) || 0,
+                          })
+                        }
+                        className="w-full p-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] font-mono focus:outline-none focus:border-[#9A6B3B]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[#5C5852] font-semibold block mb-1">Instagram (opcional)</label>
+                      <input
+                        type="text"
+                        value={editingBarber.instagram || ''}
+                        onChange={(e) => setEditingBarber({ ...editingBarber, instagram: e.target.value })}
+                        placeholder="@carlos.monarca"
+                        className="w-full p-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] placeholder:text-[#8E887E] focus:outline-none focus:border-[#9A6B3B]"
+                      />
+                    </div>
                   </div>
 
                   <div>
@@ -907,6 +1212,94 @@ export const AdminDashboardView: React.FC = () => {
                       className="w-full p-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] placeholder:text-[#8E887E] focus:outline-none focus:border-[#9A6B3B]"
                     />
                   </div>
+
+                  {/* Portafolio de Trabajos del Barbero */}
+                  <div className="p-3.5 rounded-2xl bg-white border border-[#E6E1D6] space-y-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <div>
+                        <h4 className="font-display text-sm font-bold text-[#161514] uppercase tracking-wide flex items-center gap-1.5">
+                          <ImageIcon className="w-3.5 h-3.5 text-[#9A6B3B]" />
+                          <span>Portafolio de Trabajos ({(editingBarber.gallery || []).length})</span>
+                        </h4>
+                        <p className="text-[11px] text-[#5C5852]">
+                          Sube fotos de sus mejores cortes para mostrar en su perfil público
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => barberGalleryInputRef.current?.click()}
+                        disabled={isUploadingBarberGallery}
+                        className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] font-bold text-[11px] transition-all shrink-0 disabled:opacity-60"
+                      >
+                        <Upload className="w-3.5 h-3.5 text-[#C69765]" />
+                        <span>{isUploadingBarberGallery ? 'Subiendo...' : 'Subir Fotos'}</span>
+                      </button>
+                      <input
+                        type="file"
+                        ref={barberGalleryInputRef}
+                        accept="image/*"
+                        multiple
+                        onChange={handleBarberGalleryUpload}
+                        disabled={isUploadingBarberGallery}
+                        className="hidden"
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="url"
+                        value={barberGalleryUrlInput}
+                        onChange={(e) => setBarberGalleryUrlInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddBarberGalleryUrl();
+                          }
+                        }}
+                        placeholder="O pega la URL de una foto de trabajo..."
+                        className="flex-1 p-2 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] placeholder:text-[#8E887E] text-[11px] focus:outline-none focus:border-[#9A6B3B]"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddBarberGalleryUrl}
+                        disabled={!barberGalleryUrlInput.trim()}
+                        className="px-3 py-2 rounded-xl bg-[#F2EFE9] hover:bg-[#E8E3D9] border border-[#D2CBBF] text-[#161514] font-semibold text-[11px] disabled:opacity-50"
+                      >
+                        Agregar
+                      </button>
+                    </div>
+
+                    {(editingBarber.gallery || []).length === 0 ? (
+                      <div className="p-4 rounded-xl bg-[#FAF9F6] border border-dashed border-[#D2CBBF] text-center text-[#767067] text-[11px]">
+                        Este barbero aún no tiene fotos en su portafolio.
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                        {(editingBarber.gallery || []).map((imgUrl, idx) => (
+                          <div
+                            key={`${imgUrl}-${idx}`}
+                            className="relative aspect-square rounded-xl overflow-hidden bg-[#F2EFE9] border border-[#E6E1D6] group"
+                          >
+                            <img
+                              src={imgUrl}
+                              alt={`Trabajo ${idx + 1}`}
+                              className="w-full h-full object-cover"
+                              referrerPolicy="no-referrer"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveBarberGalleryPhoto(idx)}
+                              className="absolute top-1 right-1 p-1 rounded-lg bg-white/95 text-rose-700 hover:bg-rose-600 hover:text-white border border-[#E6E1D6] shadow-xs transition-colors"
+                              title="Eliminar foto del portafolio"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-2 pt-2">
@@ -918,8 +1311,8 @@ export const AdminDashboardView: React.FC = () => {
                   </button>
                   <button
                     onClick={handleSaveBarberSubmit}
-                    disabled={isSavingBarber || isUploadingBarberPhoto}
-                    className="flex-1 py-2.5 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] text-xs font-bold"
+                    disabled={isSavingBarber || isUploadingBarberPhoto || isUploadingBarberGallery}
+                    className="flex-1 py-2.5 rounded-xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] text-xs font-bold disabled:opacity-60"
                   >
                     {isSavingBarber ? 'Guardando...' : 'Guardar Barbero'}
                   </button>

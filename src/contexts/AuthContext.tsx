@@ -82,9 +82,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setUserProfile(fresh);
             setCurrentRole(fresh.role);
             saveStoredSession(fresh);
+            if (fresh.role === 'barber') {
+              const barberId = await dataService.findBarberIdForUser(fresh);
+              setCurrentBarberId(barberId);
+            } else {
+              setCurrentBarberId(null);
+            }
           } else {
             setUserProfile(stored);
             setCurrentRole(stored.role || 'client');
+            if (stored.role === 'barber') {
+              const barberId = await dataService.findBarberIdForUser(stored);
+              setCurrentBarberId(barberId);
+            }
           }
         }
       } catch (err) {
@@ -111,7 +121,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const cleanPin = pin.trim();
 
       if (!cleanIdentifier) {
-        throw new Error('Por favor ingresa tu número celular o número de cliente.');
+        throw new Error('Por favor ingresa tu número celular, número de cliente o código de acceso.');
       }
       if (!cleanPin || cleanPin.length !== 4) {
         throw new Error('La contraseña debe ser de exactamente 4 dígitos numéricos.');
@@ -132,6 +142,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           await dataService.saveUserProfile(user);
           setUserProfile(user);
           setCurrentRole('admin');
+          setCurrentBarberId(null);
           saveStoredSession(user);
           return user;
         } else {
@@ -157,6 +168,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           await dataService.saveUserProfile(adminProfile);
           setUserProfile(adminProfile);
           setCurrentRole('admin');
+          setCurrentBarberId(null);
           saveStoredSession(adminProfile);
           return adminProfile;
         }
@@ -166,8 +178,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const user = await dataService.findUserByIdentifier(cleanIdentifier);
       if (!user) {
         throw new Error(
-          'No encontramos ninguna cuenta con este celular o número de cliente. Si eres nuevo, selecciona "Soy Nuevo" para obtener tu tarjeta.'
+          'No encontramos ninguna cuenta con este celular o código. Si eres nuevo, selecciona "Soy Nuevo" para obtener tu tarjeta.'
         );
+      }
+
+      if (user.active === false) {
+        throw new Error('Esta cuenta se encuentra desactivada. Contacta al administrador.');
       }
 
       // Check PIN
@@ -183,6 +199,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       setUserProfile(user);
       setCurrentRole(user.role || 'client');
+      if (user.role === 'barber') {
+        const barberId = await dataService.findBarberIdForUser(user);
+        setCurrentBarberId(barberId);
+      } else {
+        setCurrentBarberId(null);
+      }
       saveStoredSession(user);
       return user;
     } catch (err: any) {

@@ -62,6 +62,10 @@ interface BarbershopContextType {
     options?: { notes?: string; cancelledBy?: 'client' | 'barber' | 'admin'; cancelReason?: string }
   ) => Promise<void>;
   saveBarber: (barber: Partial<Barber> & { id?: string }) => Promise<string>;
+  saveBarberWithCredentials: (
+    barber: Partial<Barber> & { id?: string },
+    credentials: { accessCode?: string; phone?: string; pin?: string }
+  ) => Promise<string>;
   deleteBarber: (barberId: string) => Promise<void>;
   toggleBarberActive: (barberId: string, active: boolean) => Promise<void>;
   saveService: (service: Partial<Service> & { id?: string }) => Promise<string>;
@@ -423,6 +427,20 @@ export const BarbershopProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   };
 
+  const saveBarberWithCredentials = async (
+    barber: Partial<Barber> & { id?: string },
+    credentials: { accessCode?: string; phone?: string; pin?: string }
+  ) => {
+    try {
+      const id = await dataService.saveBarberWithCredentials(barber, credentials);
+      showToast('success', 'Barbero Guardado', 'Perfil y credenciales de acceso guardados correctamente.');
+      return id;
+    } catch (error: any) {
+      showToast('error', 'Error al guardar barbero', error.message || 'No se pudo guardar el barbero y su acceso.');
+      throw error;
+    }
+  };
+
   const deleteBarber = async (barberId: string) => {
     try {
       await dataService.deleteBarber(barberId);
@@ -673,6 +691,7 @@ export const BarbershopProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         rescheduleAppointment,
         updateAppointmentStatus,
         saveBarber,
+        saveBarberWithCredentials,
         deleteBarber,
         toggleBarberActive,
         saveService,

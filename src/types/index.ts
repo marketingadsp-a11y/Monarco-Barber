@@ -51,6 +51,7 @@ export interface UserProfile {
 export interface Barber {
   id: string;
   userId?: string;
+  accessCode?: string;
   displayName: string;
   firstName: string;
   lastName: string;

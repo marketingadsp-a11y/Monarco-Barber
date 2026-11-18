@@ -145,6 +145,7 @@ export function toSpanishBarber(barber: Barber): Record<string, any> {
   return removeUndefinedFields({
     id: barber.id,
     usuario_id: barber.userId || '',
+    codigo_acceso: barber.accessCode || '',
     nombre_mostrado: barber.displayName || '',
     nombre_pila: barber.firstName || '',
     apellido: barber.lastName || '',
@@ -170,6 +171,7 @@ export function fromSpanishBarber(data: any, docId: string): Barber {
   return {
     id: data.id || docId,
     userId: data.usuario_id || data.userId || '',
+    accessCode: data.codigo_acceso || data.accessCode || '',
     displayName: data.nombre_mostrado || data.displayName || data.nombre || 'Barbero',
     firstName: data.nombre_pila || data.firstName || '',
     lastName: data.apellido || data.lastName || '',
@@ -703,10 +705,15 @@ export class DataService {
         );
       }
 
-      // 2. Query by client number (exact 6 digits)
-      if (cleanRaw.length === 6 && /^\d+$/.test(cleanRaw)) {
+      // 2. Query by client number / barber access code (exact or uppercase)
+      lookupPromises.push(
+        getDocs(query(collection(db, 'usuarios'), where('numero_cliente', '==', cleanRaw), limit(1)))
+          .then((snap) => (!snap.empty ? fromSpanishUser(snap.docs[0].data(), snap.docs[0].id) : null))
+          .catch(() => null)
+      );
+      if (cleanRaw.toUpperCase() !== cleanRaw) {
         lookupPromises.push(
-          getDocs(query(collection(db, 'usuarios'), where('numero_cliente', '==', cleanRaw), limit(1)))
+          getDocs(query(collection(db, 'usuarios'), where('numero_cliente', '==', cleanRaw.toUpperCase()), limit(1)))
             .then((snap) => (!snap.empty ? fromSpanishUser(snap.docs[0].data(), snap.docs[0].id) : null))
             .catch(() => null)
         );
@@ -744,10 +751,10 @@ export class DataService {
       }
 
       // Fallback: fast limited scan if not found via direct index (e.g. legacy documents)
-      const fallbackSnap = await getDocs(query(collection(db, 'usuarios'), limit(50)));
+      const fallbackSnap = await getDocs(query(collection(db, 'usuarios'), limit(100)));
       for (const docSnap of fallbackSnap.docs) {
         const u = fromSpanishUser(docSnap.data(), docSnap.id);
-        if (u.clientNumber && u.clientNumber.trim() === cleanRaw) return u;
+        if (u.clientNumber && u.clientNumber.trim().toLowerCase() === cleanRaw.toLowerCase()) return u;
         if (u.phone) {
           const uDigits = u.phone.replace(/\D/g, '');
           const uTenDigits = uDigits.startsWith('52') && uDigits.length === 12 ? uDigits.substring(2) : uDigits;
@@ -829,6 +836,7 @@ export class DataService {
             const newBarber: Barber = {
               id: newBarberId,
               userId: userId,
+              accessCode: u.clientNumber || '',
               displayName: u.name,
               firstName: u.name.split(' ')[0] || u.name,
               lastName: u.name.split(' ').slice(1).join(' ') || '',
@@ -848,9 +856,14 @@ export class DataService {
             };
             await setDoc(doc(db, 'barberos', newBarberId), toSpanishBarber(newBarber));
           } else {
-            // Activate existing barber record
+            // Activate existing barber record and ensure accessCode is synced
             const barberDoc = barbersSnap.docs[0];
-            await updateDoc(doc(db, 'barberos', barberDoc.id), { activo: true, actualizado_en: new Date().toISOString() });
+            await updateDoc(doc(db, 'barberos', barberDoc.id), {
+              activo: true,
+              codigo_acceso: u.clientNumber || '',
+              telefono: u.phone || '',
+              actualizado_en: new Date().toISOString(),
+            });
           }
         }
       }
@@ -932,6 +945,30 @@ export class DataService {
       }
 
       await updateDoc(userRef, removeUndefinedFields(updatePayload));
+
+      // Sync phone, accessCode, and active status to linked barber record if one exists
+      if (
+        profileData.phone !== undefined ||
+        profileData.clientNumber !== undefined ||
+        profileData.active !== undefined
+      ) {
+        try {
+          const barbersSnap = await getDocs(
+            query(collection(db, 'barberos'), where('usuario_id', '==', userId))
+          );
+          if (!barbersSnap.empty) {
+            const barberUpdates: Record<string, any> = {
+              actualizado_en: new Date().toISOString(),
+            };
+            if (profileData.phone !== undefined) barberUpdates.telefono = profileData.phone;
+            if (profileData.clientNumber !== undefined) barberUpdates.codigo_acceso = profileData.clientNumber;
+            if (profileData.active !== undefined) barberUpdates.activo = profileData.active;
+            await updateDoc(doc(db, 'barberos', barbersSnap.docs[0].id), barberUpdates);
+          }
+        } catch (syncErr) {
+          console.warn('Could not sync linked barber record:', syncErr);
+        }
+      }
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, `usuarios/${userId}`);
     }
@@ -1024,6 +1061,8 @@ export class DataService {
       const now = new Date().toISOString();
       const barberData: Barber = {
         id: barberId,
+        userId: barber.userId || '',
+        accessCode: barber.accessCode || '',
         displayName: barber.displayName || 'Nuevo Barbero',
         firstName: barber.firstName || 'Barbero',
         lastName: barber.lastName || '',
@@ -1063,9 +1102,227 @@ export class DataService {
     }
   }
 
+  /**
+   * Finds the matching barber ID in 'barberos' for a logged-in UserProfile.
+   */
+  static async findBarberIdForUser(user: UserProfile): Promise<string | null> {
+    try {
+      const snap = await getDocs(collection(db, 'barberos'));
+      const barbers: Barber[] = [];
+      snap.forEach((docSnap) => {
+        barbers.push(fromSpanishBarber(docSnap.data(), docSnap.id));
+      });
+
+      const normDigits = (val?: string) => {
+        if (!val) return '';
+        const d = val.replace(/\D/g, '');
+        return d.startsWith('52') && d.length === 12 ? d.substring(2) : d;
+      };
+
+      const userDigits = normDigits(user.phone);
+
+      const byUserId = barbers.find((b) => b.userId && b.userId === user.id);
+      if (byUserId) return byUserId.id;
+
+      if (user.clientNumber) {
+        const byCode = barbers.find(
+          (b) => b.accessCode && b.accessCode.trim().toLowerCase() === user.clientNumber!.trim().toLowerCase()
+        );
+        if (byCode) return byCode.id;
+      }
+
+      if (userDigits.length === 10) {
+        const byPhone = barbers.find((b) => normDigits(b.phone) === userDigits);
+        if (byPhone) return byPhone.id;
+      }
+
+      const byName = barbers.find(
+        (b) => b.displayName.trim().toLowerCase() === user.name.trim().toLowerCase()
+      );
+      return byName ? byName.id : null;
+    } catch (err) {
+      console.warn('Error resolving barberId for user:', err);
+      return null;
+    }
+  }
+
+  /**
+   * Loads current login credentials (accessCode, phone, pin) for a barber.
+   */
+  static async getBarberAccessCredentials(barber: Barber): Promise<{
+    userId?: string;
+    accessCode: string;
+    phone: string;
+    pin: string;
+  }> {
+    let linkedUser: UserProfile | null = null;
+    if (barber.userId) {
+      linkedUser = await this.getUserProfile(barber.userId);
+    }
+    if (!linkedUser && barber.accessCode) {
+      const candidate = await this.findUserByIdentifier(barber.accessCode);
+      if (candidate && candidate.role === 'barber') linkedUser = candidate;
+    }
+    if (!linkedUser && barber.phone) {
+      const candidate = await this.findUserByIdentifier(barber.phone);
+      if (candidate && candidate.role === 'barber') linkedUser = candidate;
+    }
+
+    return {
+      userId: linkedUser?.id || barber.userId || undefined,
+      accessCode: linkedUser?.clientNumber || barber.accessCode || '',
+      phone: linkedUser?.phone || barber.phone || '',
+      pin: linkedUser?.pin || '',
+    };
+  }
+
+  /**
+   * Saves a barber and synchronizes their login credentials (access code, phone, 4-digit PIN)
+   * with a 'barber' account in 'usuarios'.
+   */
+  static async saveBarberWithCredentials(
+    barber: Partial<Barber> & { id?: string },
+    credentials: { accessCode?: string; phone?: string; pin?: string }
+  ): Promise<string> {
+    const cleanCode = (credentials.accessCode || '').trim();
+    const rawPhone = (credentials.phone || '').trim();
+    const cleanPin = (credentials.pin || '').trim();
+
+    const phoneDigits = rawPhone.replace(/\D/g, '');
+    const tenDigits =
+      phoneDigits.startsWith('52') && phoneDigits.length === 12
+        ? phoneDigits.substring(2)
+        : phoneDigits;
+
+    if (rawPhone && phoneDigits.length > 0 && tenDigits.length !== 10) {
+      throw new Error('El número celular debe tener exactamente 10 dígitos numéricos (ej. 55 1234 5678).');
+    }
+
+    const formattedPhone =
+      tenDigits.length === 10
+        ? `+52 ${tenDigits.substring(0, 2)} ${tenDigits.substring(2, 6)} ${tenDigits.substring(6)}`
+        : rawPhone;
+
+    if (cleanPin && !/^\d{4}$/.test(cleanPin)) {
+      throw new Error('La contraseña (NIP) debe ser de exactamente 4 dígitos numéricos.');
+    }
+
+    const hasAnyCredential = Boolean(cleanCode || formattedPhone || cleanPin);
+    if (cleanPin && !cleanCode && !formattedPhone) {
+      throw new Error('Ingresa al menos un código de acceso o un número celular para iniciar sesión.');
+    }
+
+    // Resolve existing linked user (if any)
+    let targetUser: UserProfile | null = null;
+    if (barber.userId) {
+      targetUser = await this.getUserProfile(barber.userId);
+    }
+
+    // Check collisions for accessCode
+    if (cleanCode) {
+      const codeMatch = await this.findUserByIdentifier(cleanCode);
+      if (codeMatch && codeMatch.id !== targetUser?.id) {
+        if (codeMatch.role === 'admin') {
+          throw new Error(`El código "${cleanCode}" pertenece a una cuenta de Administrador.`);
+        }
+        if (codeMatch.role === 'barber' && !targetUser) {
+          // Verify no other barber owns this user
+          const otherBarbersSnap = await getDocs(
+            query(collection(db, 'barberos'), where('usuario_id', '==', codeMatch.id))
+          );
+          const ownedByOther = otherBarbersSnap.docs.some((d) => d.id !== barber.id);
+          if (ownedByOther) {
+            throw new Error(`El código "${cleanCode}" ya está asignado a otro barbero (${codeMatch.name}).`);
+          }
+          targetUser = codeMatch;
+        } else {
+          throw new Error(`El código "${cleanCode}" ya está en uso por ${codeMatch.name}. Usa un código distinto.`);
+        }
+      }
+    }
+
+    // Check collisions for phone
+    if (tenDigits.length === 10) {
+      const phoneMatch = await this.findUserByIdentifier(tenDigits);
+      if (phoneMatch && phoneMatch.id !== targetUser?.id) {
+        if (phoneMatch.role === 'admin') {
+          throw new Error('Ese número celular pertenece a una cuenta de Administrador.');
+        }
+        if (phoneMatch.role === 'barber' && !targetUser) {
+          const otherBarbersSnap = await getDocs(
+            query(collection(db, 'barberos'), where('usuario_id', '==', phoneMatch.id))
+          );
+          const ownedByOther = otherBarbersSnap.docs.some((d) => d.id !== barber.id);
+          if (ownedByOther) {
+            throw new Error(`El celular ya está asignado a otro barbero (${phoneMatch.name}).`);
+          }
+          targetUser = phoneMatch;
+        } else {
+          throw new Error(`El número celular ya está registrado en la cuenta de ${phoneMatch.name}. Usa otro número.`);
+        }
+      }
+    }
+
+    if ((cleanCode || formattedPhone) && !cleanPin && !targetUser?.pin) {
+      throw new Error('Ingresa una contraseña (NIP) de 4 dígitos para el acceso al panel de barbero.');
+    }
+
+    const barberId = barber.id || `barbero_${Date.now()}`;
+    const now = new Date().toISOString();
+    let finalUserId = targetUser?.id || barber.userId || '';
+
+    if (hasAnyCredential || targetUser) {
+      if (!finalUserId) {
+        finalUserId = `usr_barber_${barberId.replace(/^barbero?_/, '')}`;
+      }
+      const nextPin = cleanPin || targetUser?.pin || '';
+      const updatedUserProfile: UserProfile = {
+        id: finalUserId,
+        role: 'barber',
+        name: (barber.displayName || targetUser?.name || 'Barbero').trim(),
+        email: barber.email || targetUser?.email || '',
+        phone: formattedPhone,
+        clientNumber: cleanCode,
+        pin: nextPin,
+        points: targetUser?.points !== undefined ? targetUser.points : 100,
+        manualVisits: targetUser?.manualVisits || 0,
+        notes: targetUser?.notes || '',
+        birthday: targetUser?.birthday || '',
+        membershipTier: targetUser?.membershipTier || 'VIP',
+        qrCodeData: cleanCode || targetUser?.qrCodeData || '',
+        photoUrl: barber.photoUrl || targetUser?.photoUrl || '',
+        favoriteBarberIds: targetUser?.favoriteBarberIds || [],
+        pointsHistory: targetUser?.pointsHistory || [],
+        purchases: targetUser?.purchases || [],
+        active: barber.active !== undefined ? barber.active : true,
+        createdAt: targetUser?.createdAt || now,
+        updatedAt: now,
+      };
+      await this.saveUserProfile(updatedUserProfile);
+    }
+
+    await this.saveBarber({
+      ...barber,
+      id: barberId,
+      userId: finalUserId,
+      accessCode: cleanCode,
+      phone: formattedPhone,
+    });
+
+    return barberId;
+  }
+
   static async toggleBarberActive(barberId: string, active: boolean): Promise<void> {
     try {
-      await updateDoc(doc(db, 'barberos', barberId), { activo: active, actualizado_en: new Date().toISOString() });
+      const now = new Date().toISOString();
+      await updateDoc(doc(db, 'barberos', barberId), { activo: active, actualizado_en: now });
+      const barberSnap = await getDoc(doc(db, 'barberos', barberId));
+      if (barberSnap.exists()) {
+        const b = fromSpanishBarber(barberSnap.data(), barberSnap.id);
+        if (b.userId) {
+          await updateDoc(doc(db, 'usuarios', b.userId), { activo: active, actualizado_en: now }).catch(() => {});
+        }
+      }
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, `barberos/${barberId}`);
     }
