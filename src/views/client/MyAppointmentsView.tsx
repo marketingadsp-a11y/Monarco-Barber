@@ -8,8 +8,10 @@ import {
   CalendarCheck,
 } from 'lucide-react';
 import { useBarbershop } from '../../contexts/BarbershopContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { Appointment } from '../../types';
 import { formatDateSpanish, formatTime12h, formatCurrency } from '../../utils/dateTime';
+import { isAppointmentOwnedByCurrentBrowser } from '../../utils/guestSession';
 
 interface MyAppointmentsViewProps {
   onOpenAppointmentDetail: (appointment: Appointment) => void;
@@ -21,13 +23,18 @@ export const MyAppointmentsView: React.FC<MyAppointmentsViewProps> = ({
   onStartBooking,
 }) => {
   const { appointments } = useBarbershop();
+  const { userProfile } = useAuth();
   const [activeSegment, setActiveSegment] = useState<'upcoming' | 'history'>('upcoming');
 
-  const upcomingAppointments = appointments.filter(
+  const myAppointments = appointments.filter((a) =>
+    userProfile?.id ? a.clientId === userProfile.id : isAppointmentOwnedByCurrentBrowser(a)
+  );
+
+  const upcomingAppointments = myAppointments.filter(
     (a) => a.status === 'confirmed' || a.status === 'pending'
   );
 
-  const pastAppointments = appointments.filter(
+  const pastAppointments = myAppointments.filter(
     (a) => a.status === 'completed' || a.status === 'cancelled' || a.status === 'no_show' || a.status === 'rejected'
   );
 

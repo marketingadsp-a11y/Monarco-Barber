@@ -10,6 +10,7 @@ import {
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { formatCurrency, formatDateSpanish, formatTime12h } from '../../utils/dateTime';
+import { isAppointmentOwnedByCurrentBrowser } from '../../utils/guestSession';
 import { Barber, Appointment } from '../../types';
 
 interface HomeViewProps {
@@ -26,9 +27,13 @@ export const HomeView: React.FC<HomeViewProps> = ({
   onNavigateTab,
 }) => {
   const { services, barbers, appointments, businessSettings } = useBarbershop();
-  useAuth();
+  const { userProfile } = useAuth();
 
-  const nextAppointment = appointments.find(
+  const myAppointments = appointments.filter((a) =>
+    userProfile?.id ? a.clientId === userProfile.id : isAppointmentOwnedByCurrentBrowser(a)
+  );
+
+  const nextAppointment = myAppointments.find(
     (a) => a.status === 'confirmed' || a.status === 'pending'
   );
 

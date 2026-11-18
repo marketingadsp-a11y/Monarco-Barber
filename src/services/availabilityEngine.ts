@@ -7,11 +7,11 @@ import {
   BusinessSettings,
   AvailableTimeSlot,
   AlternativeBarberSuggestion,
+  DaySchedule,
 } from '../types';
 import {
   timeToMinutes,
   minutesToTime,
-  addMinutesToTime,
   isTimeSlotInPast,
 } from '../utils/dateTime';
 
@@ -24,6 +24,7 @@ export interface AvailabilityParams {
   blockedSlots: BlockedSlot[];
   exceptions?: ScheduleException[];
   settings?: BusinessSettings | null;
+  ignoreMinNotice?: boolean;
 }
 
 export interface AlternativeBarberParams {
@@ -53,6 +54,43 @@ export function doIntervalsOverlap(startA: string, endA: string, startB: string,
 }
 
 /**
+ * Returns the day of week index (0 = Sunday ... 6 = Saturday) for a YYYY-MM-DD string.
+ */
+export function getDayOfWeekFromDateStr(date: string): 0 | 1 | 2 | 3 | 4 | 5 | 6 {
+  const [year, month, day] = date.split('-').map(Number);
+  const dateObj = new Date(year, month - 1, day);
+  return dateObj.getDay() as 0 | 1 | 2 | 3 | 4 | 5 | 6;
+}
+
+/**
+ * Returns whether the barbershop is open on a given YYYY-MM-DD date according to BusinessSettings.
+ */
+export function isShopOpenOnDate(date: string, settings?: BusinessSettings | null): boolean {
+  const dayOfWeek = getDayOfWeekFromDateStr(date);
+  const weekly = settings?.weeklySchedule;
+  if (weekly && weekly[dayOfWeek]) {
+    const dayCfg: DaySchedule = weekly[dayOfWeek];
+    return Boolean(dayCfg.isOpen && Array.isArray(dayCfg.slots) && dayCfg.slots.length > 0);
+  }
+  return dayOfWeek !== 0;
+}
+
+/**
+ * Computes effective slot grid step based on configured base interval and registered service duration.
+ * - If service is shorter than base interval (e.g., 15 or 20 min on a 30 min grid), step adapts to serviceDurationMinutes.
+ * - If service is equal or longer than base interval (e.g., 40 or 60 min on a 30 min grid), keeps baseInterval so
+ *   existing appointments round cleanly (e.g. 3:00 PM + 40 min -> 3:40 PM -> next slot at 4:00 PM with 20 min buffer).
+ */
+export function getAdaptiveSlotStep(baseIntervalMinutes: number, serviceDurationMinutes: number): number {
+  const safeBase = Math.max(5, baseIntervalMinutes || 30);
+  const safeDuration = Math.max(5, serviceDurationMinutes || safeBase);
+  if (safeDuration < safeBase) {
+    return safeDuration;
+  }
+  return safeBase;
+}
+
+/**
  * Main Availability Engine: calculates valid bookable time slots for a specific barber, date and duration.
  */
 export function getAvailableSlots(params: AvailabilityParams): AvailableTimeSlot[] {
@@ -65,43 +103,56 @@ export function getAvailableSlots(params: AvailabilityParams): AvailableTimeSlot
     blockedSlots,
     exceptions = [],
     settings,
+    ignoreMinNotice = false,
   } = params;
 
   const result: AvailableTimeSlot[] = [];
-  const slotInterval = settings?.slotIntervalMinutes || 30;
-  const minNoticeMinutes = settings?.minBookingNoticeMinutes || 30;
+  const baseInterval = Math.max(5, settings?.slotIntervalMinutes || 30);
+  const effectiveStep = getAdaptiveSlotStep(baseInterval, serviceDurationMinutes);
+  const minNoticeMinutes = ignoreMinNotice ? 0 : (settings?.minBookingNoticeMinutes ?? 30);
 
   // 1. Get Day of Week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
-  const [year, month, day] = date.split('-').map(Number);
-  const dateObj = new Date(year, month - 1, day);
-  const dayOfWeek = dateObj.getDay() as 0 | 1 | 2 | 3 | 4 | 5 | 6;
+  const dayOfWeek = getDayOfWeekFromDateStr(date);
 
-  // 2. Check for exceptions for this date
+  // 2. Check for barber-specific exceptions for this date
   const exception = exceptions.find((e) => e.barberId === barberId && e.date === date);
   if (exception?.isDayOff) {
     return []; // Barber is on vacation / day off
   }
 
-  // 3. Determine working windows
+  // 3. Determine working windows: Barbershop weekly schedule is authoritative
   let workingWindows: Array<{ start: string; end: string }> = [];
 
-  if (exception?.customSlots && exception.customSlots.length > 0) {
-    workingWindows = exception.customSlots;
+  if (settings?.weeklySchedule && settings.weeklySchedule[dayOfWeek]) {
+    const shopDay = settings.weeklySchedule[dayOfWeek];
+    if (!shopDay.isOpen || !shopDay.slots || shopDay.slots.length === 0) {
+      return []; // Barbershop closed this day
+    }
+    workingWindows = [...shopDay.slots].sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start));
+  } else if (settings?.openingTime && settings?.closingTime) {
+    if (dayOfWeek === 0) {
+      return [];
+    }
+    workingWindows = [{ start: settings.openingTime, end: settings.closingTime }];
   } else if (barberSchedule?.weeklySchedule && barberSchedule.weeklySchedule[dayOfWeek]) {
     const dayConfig = barberSchedule.weeklySchedule[dayOfWeek];
     if (!dayConfig.isOpen || !dayConfig.slots || dayConfig.slots.length === 0) {
-      return []; // Not working this day
+      return [];
     }
-    workingWindows = dayConfig.slots;
+    workingWindows = [...dayConfig.slots].sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start));
   } else {
-    // Default fallback schedule: Mon-Sat 10:00 - 20:00 with lunch break 14:00 - 15:00
     if (dayOfWeek === 0) {
-      return []; // Sunday closed by default
+      return [];
     }
     workingWindows = [
       { start: '10:00', end: '14:00' },
       { start: '15:00', end: '20:00' },
     ];
+  }
+
+  // Apply custom barber exception slots if provided (clamped inside shop open hours when defined)
+  if (exception?.customSlots && exception.customSlots.length > 0) {
+    workingWindows = [...exception.customSlots].sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start));
   }
 
   // Filter relevant appointments for this barber and date
@@ -123,8 +174,9 @@ export function getAvailableSlots(params: AvailabilityParams): AvailableTimeSlot
   for (const window of workingWindows) {
     const windowStartMin = timeToMinutes(window.start);
     const windowEndMin = timeToMinutes(window.end);
+    if (windowEndMin <= windowStartMin) continue;
 
-    for (let currentMin = windowStartMin; currentMin + serviceDurationMinutes <= windowEndMin; currentMin += slotInterval) {
+    for (let currentMin = windowStartMin; currentMin + serviceDurationMinutes <= windowEndMin; currentMin += effectiveStep) {
       const slotStartTime = minutesToTime(currentMin);
       const slotEndTime = minutesToTime(currentMin + serviceDurationMinutes);
 
@@ -133,13 +185,13 @@ export function getAvailableSlots(params: AvailabilityParams): AvailableTimeSlot
         continue;
       }
 
-      // Check overlap with existing appointments with rounded-up end times for grid alignment
+      // Check overlap with existing appointments with grid-aligned cleanup buffer
       let hasAppointmentConflict = false;
       let conflictReason: string | undefined = undefined;
 
       for (const app of activeAppointments) {
-        const appDuration = timeToMinutes(app.endTime) - timeToMinutes(app.startTime);
-        const roundedDuration = Math.ceil(appDuration / slotInterval) * slotInterval;
+        const appDuration = Math.max(1, timeToMinutes(app.endTime) - timeToMinutes(app.startTime));
+        const roundedDuration = Math.ceil(appDuration / effectiveStep) * effectiveStep;
         const appRoundedEndTime = minutesToTime(timeToMinutes(app.startTime) + roundedDuration);
 
         if (doIntervalsOverlap(slotStartTime, slotEndTime, app.startTime, appRoundedEndTime)) {

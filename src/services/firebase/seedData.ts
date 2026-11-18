@@ -294,6 +294,7 @@ export const SEED_BUSINESS_SETTINGS: BusinessSettings = {
   currencySymbol: '$',
   openingTime: '10:00',
   closingTime: '21:00',
+  weeklySchedule: DEFAULT_WEEKLY_SCHEDULE,
   announcement: 'Bebidas de cortesía en cortes VIP: Café espresso o whisky premium.',
   showHeroSection: true,
   heroShowLogo: false,

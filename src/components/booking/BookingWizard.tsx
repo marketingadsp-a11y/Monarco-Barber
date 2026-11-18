@@ -31,6 +31,7 @@ import { Barber, Service, AvailableTimeSlot, AlternativeBarberSuggestion, Appoin
 import {
   getAvailableSlots,
   findAlternativeBarbers,
+  isShopOpenOnDate,
 } from '../../services/availabilityEngine';
 import {
   formatCurrency,
@@ -40,6 +41,7 @@ import {
   getUpcomingDays,
   addMinutesToTime,
 } from '../../utils/dateTime';
+import { getOrCreateGuestClientId, addGuestAppointmentId } from '../../utils/guestSession';
 
 interface BookingWizardProps {
   initialServiceId?: string;
@@ -57,7 +59,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
   const {
     services,
     barbers,
-    appointments,
+    availabilityAppointments,
     schedules,
     blockedSlots,
     businessSettings,
@@ -88,6 +90,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
   const [clientEmail, setClientEmail] = useState<string>(userProfile?.email || '');
   const [clientPin, setClientPin] = useState<string>('');
   const [showPin, setShowPin] = useState<boolean>(false);
+  const [wantToRegister, setWantToRegister] = useState<boolean>(false);
   const [notes, setNotes] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [bookingError, setBookingError] = useState<string | null>(null);
@@ -97,7 +100,28 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
   const [serviceSearchQuery, setServiceSearchQuery] = useState<string>('');
   const [serviceCategoryFilter, setServiceCategoryFilter] = useState<string>('all');
 
-  const upcomingDays = useMemo(() => getUpcomingDays(14), []);
+  const upcomingDays = useMemo(() => {
+    const daysCount = Math.min(60, Math.max(7, businessSettings?.maxBookingAdvanceDays || 14));
+    return getUpcomingDays(daysCount);
+  }, [businessSettings?.maxBookingAdvanceDays]);
+
+  // Auto-select first open day if current selectedDate falls on a closed day
+  useEffect(() => {
+    if (!isShopOpenOnDate(selectedDate, businessSettings)) {
+      const firstOpen = upcomingDays.find((d) => isShopOpenOnDate(d.dateStr, businessSettings));
+      if (firstOpen) {
+        setSelectedDate(firstOpen.dateStr);
+        setSelectedTimeSlot(null);
+        setSelectedUnavailableTime(null);
+      }
+    }
+  }, [businessSettings, upcomingDays, selectedDate]);
+
+  // Reset selected slot when service or barber changes so duration-adapted slots re-validate cleanly
+  useEffect(() => {
+    setSelectedTimeSlot(null);
+    setSelectedUnavailableTime(null);
+  }, [selectedServiceId, selectedBarberId]);
 
   const activeServices = useMemo(() => services.filter((s) => s.active), [services]);
   const activeBarbers = useMemo(() => barbers.filter((b) => b.active), [barbers]);
@@ -168,11 +192,11 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
       serviceDurationMinutes: selectedService.durationMinutes,
       date: selectedDate,
       barberSchedule: schedules[effectiveBarberId],
-      appointments,
+      appointments: availabilityAppointments,
       blockedSlots,
       settings: businessSettings,
     });
-  }, [effectiveBarberId, selectedService, selectedDate, schedules, appointments, blockedSlots, businessSettings]);
+  }, [effectiveBarberId, selectedService, selectedDate, schedules, availabilityAppointments, blockedSlots, businessSettings]);
 
   const availableSlotsCount = useMemo(
     () => timeSlots.filter((s) => s.available).length,
@@ -193,12 +217,12 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
       preferredBarberId: effectiveBarberId,
       allBarbers: activeBarbers,
       favoriteBarberIds: userProfile?.favoriteBarberIds || [],
-      allAppointments: appointments,
+      allAppointments: availabilityAppointments,
       allSchedules: schedules,
       allBlockedSlots: blockedSlots,
       settings: businessSettings,
     });
-  }, [selectedService, selectedDate, effectiveBarberId, selectedUnavailableTime, selectedTimeSlot, activeBarbers, userProfile, appointments, schedules, blockedSlots, businessSettings]);
+  }, [selectedService, selectedDate, effectiveBarberId, selectedUnavailableTime, selectedTimeSlot, activeBarbers, userProfile, availabilityAppointments, schedules, blockedSlots, businessSettings]);
 
   // Trigger celebration confetti on success
   const triggerConfetti = () => {
@@ -225,7 +249,11 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
     let activeClientName = userProfile?.name || clientName.trim();
     let activeClientPhone = userProfile?.phone || clientPhone.trim();
 
-    // Si el cliente aún no ha iniciado sesión, crear cuenta o iniciar sesión con su celular y NIP
+    // Si el cliente aún no ha iniciado sesión:
+    // - Siempre validar Nombre Completo y Celular
+    // - Solo pedir contraseña/NIP y crear o iniciar cuenta si marcó "¿Quieres registrarte?"
+    let isGuestBooking = false;
+
     if (!userProfile) {
       const cleanName = clientName.trim();
       const rawDigits = clientPhone.replace(/\D/g, '');
@@ -244,45 +272,50 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
         setIsSubmitting(false);
         return;
       }
-      if (cleanPin.length !== 4 || !/^\d{4}$/.test(cleanPin)) {
-        setBookingError('Por favor crea un NIP de acceso de exactamente 4 dígitos numéricos.');
-        setIsSubmitting(false);
-        return;
-      }
 
-      try {
-        // Verificar si ya existe una cuenta con este número de celular
-        const existing = await findUser(tenDigits);
-        let authenticatedUser;
-
-        if (existing) {
-          // Iniciar sesión con el NIP proporcionado
-          authenticatedUser = await loginWithPhoneOrClientNumber(tenDigits, cleanPin);
-        } else {
-          // Registrar nuevo cliente con tarjeta VIP digital y NIP de 4 dígitos
-          authenticatedUser = await registerWithCard({
-            name: cleanName,
-            phone: tenDigits,
-            pin: cleanPin,
-          });
+      if (wantToRegister) {
+        if (cleanPin.length !== 4 || !/^\d{4}$/.test(cleanPin)) {
+          setBookingError('Por favor ingresa una contraseña (NIP) de exactamente 4 dígitos numéricos.');
+          setIsSubmitting(false);
+          return;
         }
 
-        activeClientId = authenticatedUser.id;
-        activeClientName = authenticatedUser.name;
-        activeClientPhone = authenticatedUser.phone;
-      } catch (authErr: any) {
-        console.error('Auth error during booking:', authErr);
-        setBookingError(
-          authErr.message || 'No se pudo crear o validar tu cuenta con este NIP. Verifica tus datos.'
-        );
-        setIsSubmitting(false);
-        return;
+        try {
+          const existing = await findUser(tenDigits);
+          let authenticatedUser;
+
+          if (existing) {
+            authenticatedUser = await loginWithPhoneOrClientNumber(tenDigits, cleanPin);
+          } else {
+            authenticatedUser = await registerWithCard({
+              name: cleanName,
+              phone: tenDigits,
+              pin: cleanPin,
+            });
+          }
+
+          activeClientId = authenticatedUser.id;
+          activeClientName = authenticatedUser.name;
+          activeClientPhone = authenticatedUser.phone;
+        } catch (authErr: any) {
+          console.error('Auth error during booking:', authErr);
+          setBookingError(
+            authErr.message || 'No se pudo crear o validar tu cuenta con esta contraseña. Verifica tus datos.'
+          );
+          setIsSubmitting(false);
+          return;
+        }
+      } else {
+        isGuestBooking = true;
+        activeClientId = getOrCreateGuestClientId();
+        activeClientName = cleanName;
+        activeClientPhone = `+52 ${tenDigits.substring(0, 2)} ${tenDigits.substring(2, 6)} ${tenDigits.substring(6)}`;
       }
     }
 
     try {
       const newAppointment = await bookAppointment({
-        clientId: activeClientId || `guest_${Date.now()}`,
+        clientId: activeClientId || getOrCreateGuestClientId(),
         clientName: activeClientName,
         clientPhone: activeClientPhone,
         clientEmail: clientEmail.trim() || undefined,
@@ -302,6 +335,10 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
         cancelledBy: null,
         cancelReason: null,
       });
+
+      if (isGuestBooking) {
+        addGuestAppointmentId(newAppointment.id);
+      }
 
       setConfirmedAppointment(newAppointment);
       setCurrentStep(6); // Success screen
@@ -692,33 +729,46 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
             <div className="flex items-center gap-2.5 min-w-max">
               {upcomingDays.map((day) => {
                 const isSelected = selectedDate === day.dateStr;
+                const isOpen = isShopOpenOnDate(day.dateStr, businessSettings);
                 return (
                   <button
                     key={day.dateStr}
+                    type="button"
+                    disabled={!isOpen}
                     onClick={() => {
+                      if (!isOpen) return;
                       setSelectedDate(day.dateStr);
                       setSelectedTimeSlot(null);
                       setSelectedUnavailableTime(null);
                     }}
                     className={`flex flex-col items-center justify-center w-18 py-3.5 px-2 rounded-2xl border transition-all tabular-nums ${
-                      isSelected
+                      !isOpen
+                        ? 'bg-[#F2EFE9]/70 border-[#E6E1D6] text-[#9E978D] opacity-55 cursor-not-allowed'
+                        : isSelected
                         ? 'bg-[#161514] border-[#161514] text-[#FAF9F6] shadow-md scale-[1.03]'
                         : 'bg-white hover:bg-[#F7F5F0] border-[#E6E1D6] text-[#5C5852]'
                     }`}
+                    title={!isOpen ? 'Barbería cerrada este día' : undefined}
                   >
                     <span className="text-[11px] font-semibold uppercase tracking-wider mb-1">
                       {day.dayName}
                     </span>
-                    <span className={`font-display text-2xl font-bold ${isSelected ? 'text-[#C69765]' : 'text-[#161514]'}`}>
+                    <span className={`font-display text-2xl font-bold ${isSelected && isOpen ? 'text-[#C69765]' : 'text-[#161514]'}`}>
                       {day.dayNumber}
                     </span>
                     <span className="text-[10px] mt-0.5 opacity-80">
                       {day.monthName}
                     </span>
-                    {day.isToday && (
-                      <span className={`mt-1 text-[9px] font-bold uppercase tracking-wider ${isSelected ? 'text-[#C69765]' : 'text-[#9A6B3B]'}`}>
-                        HOY
+                    {!isOpen ? (
+                      <span className="mt-1 text-[9px] font-bold uppercase tracking-wider text-rose-700">
+                        Cerrado
                       </span>
+                    ) : (
+                      day.isToday && (
+                        <span className={`mt-1 text-[9px] font-bold uppercase tracking-wider ${isSelected ? 'text-[#C69765]' : 'text-[#9A6B3B]'}`}>
+                          HOY
+                        </span>
+                      )
                     )}
                   </button>
                 );
@@ -782,7 +832,17 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
             </div>
           </div>
 
-          {timeSlots.length === 0 || availableSlotsCount === 0 ? (
+          {!isShopOpenOnDate(selectedDate, businessSettings) ? (
+            <div className="p-6 rounded-2xl bg-white border border-[#E6E1D6] text-center space-y-3">
+              <AlertTriangle className="w-8 h-8 text-[#9A6B3B] mx-auto" />
+              <h3 className="font-display text-xl font-bold text-[#161514] uppercase tracking-wide">
+                Barbería cerrada este día
+              </h3>
+              <p className="text-xs text-[#5C5852] max-w-xs mx-auto">
+                De acuerdo con nuestro horario de atención, no laboramos en la fecha seleccionada. Regresa al paso anterior para elegir otro día.
+              </p>
+            </div>
+          ) : timeSlots.length === 0 || availableSlotsCount === 0 ? (
             <div className="p-6 rounded-2xl bg-white border border-[#E6E1D6] text-center space-y-3">
               <AlertTriangle className="w-8 h-8 text-[#9A6B3B] mx-auto" />
               <h3 className="font-display text-xl font-bold text-[#161514] uppercase tracking-wide">
@@ -1081,20 +1141,20 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
               </div>
             ) : (
               <div className="space-y-3 pt-2">
-                <div>
-                  <label className="text-xs font-semibold text-[#161514] block mb-1">
-                    Nombre completo *
-                  </label>
-                  <input
-                    type="text"
-                    value={clientName}
-                    onChange={(e) => setClientName(e.target.value)}
-                    placeholder="Tu nombre y apellido"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF9F6] border border-[#E6E1D6] text-[#161514] placeholder-[#5C5852]/60 text-xs focus:outline-none focus:border-[#9A6B3B] transition-colors"
-                  />
-                </div>
-
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div>
+                    <label className="text-xs font-semibold text-[#161514] block mb-1">
+                      Nombre Completo *
+                    </label>
+                    <input
+                      type="text"
+                      value={clientName}
+                      onChange={(e) => setClientName(e.target.value)}
+                      placeholder="Tu nombre y apellido"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF9F6] border border-[#E6E1D6] text-[#161514] placeholder-[#5C5852]/60 text-xs focus:outline-none focus:border-[#9A6B3B] transition-colors"
+                    />
+                  </div>
+
                   <div>
                     <label className="text-xs font-semibold text-[#161514] block mb-1">
                       Celular (10 dígitos) *
@@ -1108,37 +1168,11 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
                       className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF9F6] border border-[#E6E1D6] text-[#161514] placeholder-[#5C5852]/60 text-xs font-mono tabular-nums focus:outline-none focus:border-[#9A6B3B] transition-colors"
                     />
                   </div>
-
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="text-xs font-semibold text-[#161514]">
-                        NIP de acceso (4 dígitos) *
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => setShowPin(!showPin)}
-                        className="text-[11px] text-[#9A6B3B] hover:underline flex items-center gap-1"
-                      >
-                        {showPin ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                        <span>{showPin ? 'Ocultar' : 'Ver'}</span>
-                      </button>
-                    </div>
-                    <div className="relative">
-                      <input
-                        type={showPin ? 'text' : 'password'}
-                        maxLength={4}
-                        value={clientPin}
-                        onChange={(e) => setClientPin(e.target.value.replace(/\D/g, ''))}
-                        placeholder="Ej. 1234"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF9F6] border border-[#E6E1D6] text-[#161514] text-xs font-mono tracking-widest tabular-nums focus:outline-none focus:border-[#9A6B3B] transition-colors"
-                      />
-                    </div>
-                  </div>
                 </div>
 
                 <div>
                   <label className="text-xs font-semibold text-[#161514] block mb-1">
-                    Notas o requerimientos especiales (opcional)
+                    Notas (opcional)
                   </label>
                   <input
                     type="text"
@@ -1147,6 +1181,52 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
                     placeholder="Ej. Prefiero corte a tijera o degradado medio"
                     className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF9F6] border border-[#E6E1D6] text-[#161514] placeholder-[#5C5852]/60 text-xs focus:outline-none focus:border-[#9A6B3B] transition-colors"
                   />
+                </div>
+
+                <div className="pt-0.5 space-y-2.5">
+                  <label className="inline-flex items-center gap-2 cursor-pointer select-none group">
+                    <input
+                      type="checkbox"
+                      checked={wantToRegister}
+                      onChange={(e) => {
+                        setWantToRegister(e.target.checked);
+                        if (!e.target.checked) setClientPin('');
+                      }}
+                      className="w-3.5 h-3.5 rounded border-[#D2CBBF] text-[#9A6B3B] focus:ring-[#9A6B3B]/40 cursor-pointer accent-[#161514]"
+                    />
+                    <span className="text-[11px] text-[#5C5852] group-hover:text-[#161514] transition-colors">
+                      ¿Quieres registrarte? <span className="text-[#8E887E]">(opcional)</span>
+                    </span>
+                  </label>
+
+                  {wantToRegister && (
+                    <div className="p-3 rounded-xl bg-[#FAF9F6] border border-[#E6E1D6] space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-[#161514]">
+                          Contraseña / NIP de acceso (4 dígitos) *
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setShowPin(!showPin)}
+                          className="text-[11px] text-[#9A6B3B] hover:underline flex items-center gap-1"
+                        >
+                          {showPin ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                          <span>{showPin ? 'Ocultar' : 'Ver'}</span>
+                        </button>
+                      </div>
+                      <input
+                        type={showPin ? 'text' : 'password'}
+                        maxLength={4}
+                        value={clientPin}
+                        onChange={(e) => setClientPin(e.target.value.replace(/\D/g, ''))}
+                        placeholder="Ej. 1234"
+                        className="w-full px-3.5 py-2 rounded-xl bg-white border border-[#E6E1D6] text-[#161514] text-xs font-mono tracking-widest tabular-nums focus:outline-none focus:border-[#9A6B3B] transition-colors"
+                      />
+                      <p className="text-[10px] text-[#5C5852]">
+                        Crearemos tu cuenta con este NIP de 4 dígitos para guardar tus citas y puntos VIP.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

@@ -173,6 +173,7 @@
         "simbolo_moneda": { "type": "string" },
         "horario_apertura": { "type": "string" },
         "horario_cierre": { "type": "string" },
+        "horario_semanal_negocio": { "type": "object" },
         "anuncio": { "type": "string" },
         "actualizado_en": { "type": "string" }
       }

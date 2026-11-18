@@ -22,9 +22,8 @@ import {
   formatTime12h,
   formatCurrency,
   addMinutesToTime,
-  timeToMinutes,
-  minutesToTime,
 } from '../../utils/dateTime';
+import { getAvailableSlots, isShopOpenOnDate } from '../../services/availabilityEngine';
 import { dataService } from '../../services/firebase/dataService';
 
 interface BarberBookAppointmentModalProps {
@@ -42,7 +41,7 @@ export const BarberBookAppointmentModal: React.FC<BarberBookAppointmentModalProp
   initialClient,
   onBookingSuccess,
 }) => {
-  const { services, appointments, blockedSlots, businessSettings, bookAppointment, showToast } =
+  const { services, availabilityAppointments, schedules, blockedSlots, businessSettings, bookAppointment, showToast } =
     useBarbershop();
 
   // Wizard Steps: 1: Service, 2: Date & Time, 3: Client Info, 4: Summary/Confirm
@@ -101,69 +100,30 @@ export const BarberBookAppointmentModal: React.FC<BarberBookAppointmentModalProp
     }
   }, [barberServices, selectedServiceId]);
 
-  // Calculate available time slots for selected date
-  const generateSlots = () => {
-    const opening = businessSettings.openingTime || '09:00';
-    const closing = businessSettings.closingTime || '21:00';
-    const interval = businessSettings.slotIntervalMinutes || 30;
-    const duration = activeSelectedService?.durationMinutes || 45;
+  const isShopOpen = isShopOpenOnDate(selectedDate, businessSettings);
 
-    const slots: { start: string; end: string; available: boolean; conflictReason?: string }[] = [];
-    let current = opening;
+  // Calculate available time slots using unified availability engine (barbershop schedule + duration-adaptive grid)
+  const availableSlots = getAvailableSlots({
+    barberId: activeBarber.id,
+    serviceDurationMinutes: activeSelectedService?.durationMinutes || 45,
+    date: selectedDate,
+    barberSchedule: schedules[activeBarber.id],
+    appointments: availabilityAppointments,
+    blockedSlots,
+    settings: businessSettings,
+    ignoreMinNotice: true,
+  });
 
-    // Existing appointments for this barber on selected date
-    const dayAppointments = appointments.filter(
-      (a) =>
-        a.barberId === activeBarber.id &&
-        a.date === selectedDate &&
-        a.status !== 'cancelled' &&
-        a.status !== 'rejected'
+  // Reset selectedTimeSlot if it is no longer valid after switching service or date
+  useEffect(() => {
+    if (!selectedTimeSlot) return;
+    const stillValid = availableSlots.some(
+      (s) => s.startTime === selectedTimeSlot && s.available
     );
-
-    // Blocked slots for this barber on selected date
-    const dayBlocks = blockedSlots.filter(
-      (b) => b.barberId === activeBarber.id && b.date === selectedDate
-    );
-
-    while (current < closing) {
-      const end = addMinutesToTime(current, duration);
-      if (end > closing) break;
-
-      // Check appointment conflict with rounded-up end times for grid alignment
-      const hasAppConflict = dayAppointments.some((a) => {
-        const appDuration = timeToMinutes(a.endTime) - timeToMinutes(a.startTime);
-        const roundedDuration = Math.ceil(appDuration / interval) * interval;
-        const appRoundedEndTime = minutesToTime(timeToMinutes(a.startTime) + roundedDuration);
-
-        return (
-          (current >= a.startTime && current < appRoundedEndTime) ||
-          (end > a.startTime && end <= appRoundedEndTime) ||
-          (current <= a.startTime && end >= appRoundedEndTime)
-        );
-      });
-
-      // Check block conflict
-      const hasBlockConflict = dayBlocks.some(
-        (b) =>
-          (current >= b.startTime && current < b.endTime) ||
-          (end > b.startTime && end <= b.endTime) ||
-          (current <= b.startTime && end >= b.endTime)
-      );
-
-      slots.push({
-        start: current,
-        end,
-        available: !hasAppConflict && !hasBlockConflict,
-        conflictReason: hasAppConflict ? 'Ocupado' : hasBlockConflict ? 'Bloqueado' : undefined,
-      });
-
-      current = addMinutesToTime(current, interval);
+    if (!stillValid) {
+      setSelectedTimeSlot('');
     }
-
-    return slots;
-  };
-
-  const availableSlots = generateSlots();
+  }, [selectedServiceId, selectedDate, availableSlots, selectedTimeSlot]);
 
   // Filter registered clients by search query
   const filteredUsers = registeredUsers.filter((u) => {
@@ -445,30 +405,52 @@ export const BarberBookAppointmentModal: React.FC<BarberBookAppointmentModalProp
                   </span>
                 </div>
 
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-[260px] overflow-y-auto p-1">
-                  {availableSlots.map((slot) => (
-                    <button
-                      key={slot.start}
-                      type="button"
-                      disabled={!slot.available}
-                      onClick={() => setSelectedTimeSlot(slot.start)}
-                      className={`p-2.5 rounded-xl text-xs font-mono tabular-nums font-semibold text-center border transition-all ${
-                        selectedTimeSlot === slot.start
-                          ? 'bg-[#161514] text-[#FAF9F6] border-[#161514] shadow-sm scale-[1.02]'
-                          : slot.available
-                          ? 'bg-white hover:bg-[#FAF7F0] hover:border-[#9A6B3B] border-[#E6E1D6] text-[#161514]'
-                          : 'bg-[#F2EFE9] border-[#E6E1D6] text-[#9E978D] cursor-not-allowed opacity-60'
-                      }`}
-                    >
-                      <span>{formatTime12h(slot.start)}</span>
-                      {slot.conflictReason && (
-                        <span className="font-sans block text-[9px] font-medium text-rose-700 mt-0.5">
-                          {slot.conflictReason}
-                        </span>
-                      )}
-                    </button>
-                  ))}
-                </div>
+                {availableSlots.length === 0 ? (
+                  <div className="p-5 rounded-2xl bg-white border border-[#E6E1D6] text-center space-y-1.5">
+                    <AlertCircle className="w-6 h-6 text-[#9A6B3B] mx-auto" />
+                    <p className="font-bold text-[#161514] text-xs">
+                      {!isShopOpen ? 'Barbería cerrada en esta fecha' : 'Sin horarios disponibles'}
+                    </p>
+                    <p className="text-[11px] text-[#5C5852]">
+                      {!isShopOpen
+                        ? 'De acuerdo con el horario de la barbería, este día no hay atención. Elige otra fecha.'
+                        : 'No hay bloques libres para este servicio en la fecha elegida.'}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-[260px] overflow-y-auto p-1">
+                    {availableSlots.map((slot) => (
+                      <button
+                        key={slot.startTime}
+                        type="button"
+                        disabled={!slot.available}
+                        onClick={() => setSelectedTimeSlot(slot.startTime)}
+                        className={`p-2.5 rounded-xl text-xs font-mono tabular-nums font-semibold text-center border transition-all ${
+                          selectedTimeSlot === slot.startTime
+                            ? 'bg-[#161514] text-[#FAF9F6] border-[#161514] shadow-sm scale-[1.02]'
+                            : slot.available
+                            ? 'bg-white hover:bg-[#FAF7F0] hover:border-[#9A6B3B] border-[#E6E1D6] text-[#161514]'
+                            : 'bg-[#F2EFE9] border-[#E6E1D6] text-[#9E978D] cursor-not-allowed opacity-60'
+                        }`}
+                      >
+                        <span>{formatTime12h(slot.startTime)}</span>
+                        {slot.available ? (
+                          <span className={`font-sans block text-[9px] font-medium mt-0.5 ${
+                            selectedTimeSlot === slot.startTime ? 'text-[#C69765]' : 'text-[#5C5852]'
+                          }`}>
+                            hasta {formatTime12h(slot.endTime)}
+                          </span>
+                        ) : (
+                          slot.conflictReason && (
+                            <span className="font-sans block text-[9px] font-medium text-rose-700 mt-0.5 truncate">
+                              {slot.conflictReason}
+                            </span>
+                          )
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}

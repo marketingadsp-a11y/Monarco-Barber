@@ -30,6 +30,7 @@ import {
   Product,
   PosSale,
   PosSaleItem,
+  WeeklySchedule,
 } from '../../types';
 import {
   SEED_BARBERS,
@@ -39,8 +40,9 @@ import {
   SEED_BUSINESS_SETTINGS,
   DEFAULT_WEEKLY_SCHEDULE,
 } from './seedData';
-import { doIntervalsOverlap } from '../availabilityEngine';
-import { timeToMinutes, minutesToTime } from '../../utils/dateTime';
+import { doIntervalsOverlap, getDayOfWeekFromDateStr } from '../availabilityEngine';
+import { timeToMinutes } from '../../utils/dateTime';
+import { isAppointmentOwnedByCurrentBrowser } from '../../utils/guestSession';
 
 // ============================================================================
 // MAPPER FUNCTIONS: Typescript Model <-> Firestore Document en Español
@@ -478,7 +480,67 @@ export function fromSpanishPosSale(data: any, docId: string): PosSale {
 }
 
 // 10. CONFIGURACION DEL NEGOCIO
+function normalizeWeeklySchedule(raw: any, fallbackOpen = '10:00', fallbackClose = '21:00'): WeeklySchedule {
+  const days = [0, 1, 2, 3, 4, 5, 6] as const;
+  const result: any = {};
+
+  for (const d of days) {
+    const rawDay = raw?.[d] ?? raw?.[String(d)];
+    if (rawDay && typeof rawDay === 'object') {
+      const slots = Array.isArray(rawDay.slots)
+        ? rawDay.slots
+            .filter((s: any) => s && typeof s.start === 'string' && typeof s.end === 'string')
+            .map((s: any) => ({ start: s.start, end: s.end }))
+        : [];
+      result[d] = {
+        isOpen: rawDay.isOpen !== undefined ? Boolean(rawDay.isOpen) : slots.length > 0,
+        slots,
+      };
+    } else if (raw) {
+      result[d] = DEFAULT_WEEKLY_SCHEDULE[d];
+    } else {
+      result[d] =
+        d === 0
+          ? { isOpen: false, slots: [] }
+          : { isOpen: true, slots: [{ start: fallbackOpen, end: fallbackClose }] };
+    }
+  }
+
+  return result as WeeklySchedule;
+}
+
+function deriveOpeningAndClosing(weekly?: WeeklySchedule, currentOpen = '10:00', currentClose = '21:00') {
+  if (!weekly) return { openingTime: currentOpen, closingTime: currentClose };
+  let minStartMin = Infinity;
+  let maxEndMin = -Infinity;
+  let openingTime = currentOpen;
+  let closingTime = currentClose;
+
+  for (const d of [0, 1, 2, 3, 4, 5, 6] as const) {
+    const day = weekly[d];
+    if (day?.isOpen && Array.isArray(day.slots)) {
+      for (const s of day.slots) {
+        const sMin = timeToMinutes(s.start);
+        const eMin = timeToMinutes(s.end);
+        if (sMin < minStartMin) {
+          minStartMin = sMin;
+          openingTime = s.start;
+        }
+        if (eMin > maxEndMin) {
+          maxEndMin = eMin;
+          closingTime = s.end;
+        }
+      }
+    }
+  }
+
+  return { openingTime, closingTime };
+}
+
 export function toSpanishSettings(st: BusinessSettings): Record<string, any> {
+  const weekly = st.weeklySchedule || DEFAULT_WEEKLY_SCHEDULE;
+  const derived = deriveOpeningAndClosing(weekly, st.openingTime || '10:00', st.closingTime || '21:00');
+
   return removeUndefinedFields({
     id: st.id || 'principal',
     nombre: st.name || 'MONARCA BARBER',
@@ -497,8 +559,9 @@ export function toSpanishSettings(st: BusinessSettings): Record<string, any> {
     zona_horaria: st.timeZone || 'America/Mexico_City',
     moneda: st.currency || 'MXN',
     simbolo_moneda: st.currencySymbol || '$',
-    horario_apertura: st.openingTime || '10:00',
-    horario_cierre: st.closingTime || '21:00',
+    horario_apertura: derived.openingTime,
+    horario_cierre: derived.closingTime,
+    horario_semanal_negocio: weekly,
     anuncio: st.announcement || '',
     mostrar_banner_hero: st.showHeroSection !== undefined ? st.showHeroSection : true,
     banner_mostrar_logo: st.heroShowLogo !== undefined ? st.heroShowLogo : false,
@@ -530,6 +593,15 @@ export function toSpanishSettings(st: BusinessSettings): Record<string, any> {
 
 export function fromSpanishSettings(data: any, docId: string): BusinessSettings {
   const notifRaw = data.configuracion_notificaciones || data.notificationSettings || {};
+  const opening = data.horario_apertura || data.openingTime || '10:00';
+  const closing = data.horario_cierre || data.closingTime || '21:00';
+  const rawWeekly = data.horario_semanal_negocio || data.weeklySchedule;
+  const weeklySchedule = rawWeekly
+    ? normalizeWeeklySchedule(rawWeekly, opening, closing)
+    : data.horario_apertura || data.openingTime
+    ? normalizeWeeklySchedule(null, opening, closing)
+    : DEFAULT_WEEKLY_SCHEDULE;
+
   return {
     id: data.id || docId || 'principal',
     name: data.nombre || data.name || 'MONARCA BARBER',
@@ -540,7 +612,7 @@ export function fromSpanishSettings(data: any, docId: string): BusinessSettings 
     phone: data.telefono || data.phone || '+52 55 1234 5678',
     whatsapp: data.whatsapp || '+525512345678',
     instagram: data.instagram || '@monarcabarber.oficial',
-    minBookingNoticeMinutes: Number(data.anticipacion_minima_reserva_minutos || data.minBookingNoticeMinutes) || 30,
+    minBookingNoticeMinutes: Number(data.anticipacion_minima_reserva_minutos ?? data.minBookingNoticeMinutes ?? 30),
     maxBookingAdvanceDays: Number(data.anticipacion_maxima_reserva_dias || data.maxBookingAdvanceDays) || 30,
     minCancelNoticeHours: Number(data.tiempo_minimo_cancelacion_horas || data.minCancelNoticeHours) || 2,
     minRescheduleNoticeHours: Number(data.tiempo_minimo_reprogramacion_horas || data.minRescheduleNoticeHours) || 2,
@@ -548,8 +620,9 @@ export function fromSpanishSettings(data: any, docId: string): BusinessSettings 
     timeZone: data.zona_horaria || data.timeZone || 'America/Mexico_City',
     currency: data.moneda || data.currency || 'MXN',
     currencySymbol: data.simbolo_moneda || data.currencySymbol || '$',
-    openingTime: data.horario_apertura || data.openingTime || '10:00',
-    closingTime: data.horario_cierre || data.closingTime || '21:00',
+    openingTime: opening,
+    closingTime: closing,
+    weeklySchedule,
     announcement: data.anuncio || data.announcement || '',
     showHeroSection: data.mostrar_banner_hero !== undefined ? Boolean(data.mostrar_banner_hero) : (data.showHeroSection !== undefined ? Boolean(data.showHeroSection) : true),
     heroShowLogo: data.banner_mostrar_logo !== undefined ? Boolean(data.banner_mostrar_logo) : (data.heroShowLogo !== undefined ? Boolean(data.heroShowLogo) : false),
@@ -1407,7 +1480,7 @@ export class DataService {
   // ==================== CITAS & VALIDACIÓN ATÓMICA ====================
 
   static subscribeToAppointments(
-    role: 'client' | 'barber' | 'admin',
+    role: UserRole,
     userId?: string,
     barberId?: string,
     callback?: (appointments: Appointment[]) => void
@@ -1422,11 +1495,19 @@ export class DataService {
           appointments.push(fromSpanishAppointment(docSnap.data(), docSnap.id));
         });
 
-        // Filtrar según rol y contexto
-        if (role === 'client' && userId) {
-          appointments = appointments.filter((app) => app.clientId === userId);
-        } else if (role === 'barber' && barberId) {
-          appointments = appointments.filter((app) => app.barberId === barberId);
+        // Filtrado estricto de privacidad según rol y propietario
+        if (role === 'admin') {
+          // El administrador puede ver todas las citas
+        } else if (role === 'barber') {
+          // El barbero SOLO puede ver sus propias citas asignadas o agendadas con él
+          appointments = barberId ? appointments.filter((app) => app.barberId === barberId) : [];
+        } else {
+          // Cliente: solo ve sus propias citas (cuenta iniciada o reservas guardadas en este navegador)
+          if (userId) {
+            appointments = appointments.filter((app) => app.clientId === userId);
+          } else {
+            appointments = appointments.filter((app) => isAppointmentOwnedByCurrentBrowser(app));
+          }
         }
 
         // Ordenar por fecha y hora de inicio
@@ -1445,7 +1526,86 @@ export class DataService {
   }
 
   /**
-   * Crea una cita con validación transaccional para evitar empalmes.
+   * Suscripción anonimizada exclusivamente para calcular bloques de tiempo ocupados
+   * sin exponer datos personales de otros clientes ni detalles de otras citas.
+   */
+  static subscribeToOccupiedAppointments(
+    callback?: (occupiedSlots: Appointment[]) => void
+  ): () => void {
+    const q = collection(db, 'citas');
+
+    return onSnapshot(
+      q,
+      (snapshot) => {
+        const occupied: Appointment[] = [];
+        snapshot.forEach((docSnap) => {
+          const full = fromSpanishAppointment(docSnap.data(), docSnap.id);
+          occupied.push({
+            id: full.id,
+            clientId: '',
+            clientName: '',
+            barberId: full.barberId,
+            barberName: '',
+            serviceId: '',
+            serviceNameSnapshot: '',
+            servicePriceSnapshot: 0,
+            serviceDurationSnapshot: full.serviceDurationSnapshot,
+            date: full.date,
+            startTime: full.startTime,
+            endTime: full.endTime,
+            status: full.status,
+            createdAt: '',
+            updatedAt: '',
+          });
+        });
+        callback?.(occupied);
+      },
+      (error) => {
+        handleFirestoreError(error, OperationType.LIST, 'citas');
+      }
+    );
+  }
+
+  /**
+   * Valida si un rango horario [startTime, endTime] cabe dentro del horario operativo de la barbería.
+   */
+  private static async validateWithinShopSchedule(date: string, startTime: string, endTime: string): Promise<void> {
+    try {
+      const settingsSnap = await getDoc(doc(db, 'configuracion_negocio', 'principal'));
+      const settings = settingsSnap.exists()
+        ? fromSpanishSettings(settingsSnap.data(), settingsSnap.id)
+        : SEED_BUSINESS_SETTINGS;
+
+      const dayOfWeek = getDayOfWeekFromDateStr(date);
+      const weekly = settings.weeklySchedule;
+
+      if (weekly && weekly[dayOfWeek]) {
+        const dayConfig = weekly[dayOfWeek];
+        if (!dayConfig.isOpen || !dayConfig.slots || dayConfig.slots.length === 0) {
+          throw new Error('Conflicto de horario: La barbería se encuentra cerrada el día seleccionado.');
+        }
+
+        const startMin = timeToMinutes(startTime);
+        const endMin = timeToMinutes(endTime);
+        const fitsInAnyWindow = dayConfig.slots.some(
+          (win) => startMin >= timeToMinutes(win.start) && endMin <= timeToMinutes(win.end)
+        );
+        if (!fitsInAnyWindow) {
+          throw new Error(
+            `Conflicto de horario: El turno (${startTime} - ${endTime}) está fuera del horario de atención de la barbería.`
+          );
+        }
+      }
+    } catch (err: any) {
+      if (err.message && err.message.includes('Conflicto de horario')) {
+        throw err;
+      }
+      console.warn('No se pudo verificar horario de negocio, continuando:', err);
+    }
+  }
+
+  /**
+   * Crea una cita con validación transaccional para evitar empalmes y respetar el horario de la barbería.
    */
   static async createAppointment(appointment: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>): Promise<Appointment> {
     const appointmentId = `cita_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
@@ -1459,6 +1619,8 @@ export class DataService {
     };
 
     try {
+      await this.validateWithinShopSchedule(appointment.date, appointment.startTime, appointment.endTime);
+
       await runTransaction(db, async (transaction) => {
         // Consultar citas existentes del barbero en la misma fecha
         const appointmentsRef = collection(db, 'citas');
@@ -1473,16 +1635,28 @@ export class DataService {
         for (const docSnap of existingSnapshots.docs) {
           const existing = fromSpanishAppointment(docSnap.data(), docSnap.id);
           if (existing.status !== 'cancelled' && existing.status !== 'rejected') {
-            const appDuration = timeToMinutes(existing.endTime) - timeToMinutes(existing.startTime);
-            const interval = 30; // 30-minute block rounding for grid optimization
-            const roundedDuration = Math.ceil(appDuration / interval) * interval;
-            const existingRoundedEndTime = minutesToTime(timeToMinutes(existing.startTime) + roundedDuration);
-
-            if (doIntervalsOverlap(appointment.startTime, appointment.endTime, existing.startTime, existingRoundedEndTime)) {
+            if (doIntervalsOverlap(appointment.startTime, appointment.endTime, existing.startTime, existing.endTime)) {
               throw new Error(
                 `Conflicto de horario: Este espacio (${appointment.startTime} - ${appointment.endTime}) acaba de ser reservado por otro cliente.`
               );
             }
+          }
+        }
+
+        // Consultar bloqueos de horario del barbero en la misma fecha
+        const blockedSnap = await getDocs(
+          query(
+            collection(db, 'bloqueos_horarios'),
+            where('barbero_id', '==', appointment.barberId),
+            where('fecha', '==', appointment.date)
+          )
+        );
+        for (const blockDoc of blockedSnap.docs) {
+          const block = fromSpanishBlockedSlot(blockDoc.data(), blockDoc.id);
+          if (doIntervalsOverlap(appointment.startTime, appointment.endTime, block.startTime, block.endTime)) {
+            throw new Error(
+              `Conflicto de horario: El horario (${appointment.startTime} - ${appointment.endTime}) se encuentra bloqueado (${block.reason || 'Descanso'}).`
+            );
           }
         }
 
@@ -1547,6 +1721,8 @@ export class DataService {
 
       const current = fromSpanishAppointment(appSnap.data(), appSnap.id);
 
+      await this.validateWithinShopSchedule(newDate, newStartTime, newEndTime);
+
       await runTransaction(db, async (transaction) => {
         // Verificar empalmes
         const q = query(
@@ -1566,6 +1742,20 @@ export class DataService {
           }
         }
 
+        const blockedSnap = await getDocs(
+          query(
+            collection(db, 'bloqueos_horarios'),
+            where('barbero_id', '==', current.barberId),
+            where('fecha', '==', newDate)
+          )
+        );
+        for (const blockDoc of blockedSnap.docs) {
+          const block = fromSpanishBlockedSlot(blockDoc.data(), blockDoc.id);
+          if (doIntervalsOverlap(newStartTime, newEndTime, block.startTime, block.endTime)) {
+            throw new Error(`El nuevo horario seleccionado (${newStartTime} - ${newEndTime}) está bloqueado y no está disponible.`);
+          }
+        }
+
         transaction.update(appRef, {
           fecha: newDate,
           hora_inicio: newStartTime,
@@ -1575,7 +1765,7 @@ export class DataService {
         });
       });
     } catch (error: any) {
-      if (error.message && error.message.includes('disponible')) throw error;
+      if (error.message && (error.message.includes('disponible') || error.message.includes('Conflicto de horario'))) throw error;
       handleFirestoreError(error, OperationType.UPDATE, `citas/${appointmentId}`);
     }
   }

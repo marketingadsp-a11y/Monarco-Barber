@@ -49,10 +49,11 @@ import {
 } from 'lucide-react';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { Barber, Service, Appointment, BusinessSettings, NotificationSettings, UserProfile } from '../../types';
-import { formatCurrency, formatDateSpanish, formatTime12h, getTodayDateString } from '../../utils/dateTime';
+import { Barber, Service, Appointment, BusinessSettings, NotificationSettings, UserProfile, WeeklySchedule } from '../../types';
+import { formatCurrency, formatDateSpanish, formatTime12h, getTodayDateString, timeToMinutes } from '../../utils/dateTime';
 import { imageService } from '../../services/imgbb/imageService';
 import { dataService } from '../../services/firebase/dataService';
+import { DEFAULT_WEEKLY_SCHEDULE } from '../../services/firebase/seedData';
 import { AdminUsersSection } from '../../components/admin/AdminUsersSection';
 import { AdminProductsSection } from '../../components/products/AdminProductsSection';
 import { AdminMetricsSection } from '../../components/admin/AdminMetricsSection';
@@ -402,10 +403,60 @@ export const AdminDashboardView: React.FC = () => {
     }
   };
 
+  const SHOP_DAYS: Array<{ key: 0 | 1 | 2 | 3 | 4 | 5 | 6; label: string }> = [
+    { key: 1, label: 'Lunes' },
+    { key: 2, label: 'Martes' },
+    { key: 3, label: 'Miércoles' },
+    { key: 4, label: 'Jueves' },
+    { key: 5, label: 'Viernes' },
+    { key: 6, label: 'Sábado' },
+    { key: 0, label: 'Domingo' },
+  ];
+
+  const activeWeeklySchedule: WeeklySchedule = settingsForm.weeklySchedule || DEFAULT_WEEKLY_SCHEDULE;
+
+  const updateShopDaySchedule = (
+    dayKey: 0 | 1 | 2 | 3 | 4 | 5 | 6,
+    updater: (prevDay: WeeklySchedule[0]) => WeeklySchedule[0]
+  ) => {
+    setSettingsForm((prev) => {
+      const baseWeekly = prev.weeklySchedule || DEFAULT_WEEKLY_SCHEDULE;
+      const currentDay = baseWeekly[dayKey] || { isOpen: false, slots: [] };
+      const nextWeekly: WeeklySchedule = {
+        ...baseWeekly,
+        [dayKey]: updater(currentDay),
+      };
+      return {
+        ...prev,
+        weeklySchedule: nextWeekly,
+      };
+    });
+  };
+
   const handleSaveSettingsSubmit = async () => {
+    const weekly = settingsForm.weeklySchedule || DEFAULT_WEEKLY_SCHEDULE;
+    for (const d of SHOP_DAYS) {
+      const cfg = weekly[d.key];
+      if (cfg?.isOpen) {
+        if (!cfg.slots || cfg.slots.length === 0) {
+          showToast('error', 'Horario incompleto', `Agrega al menos un bloque de horario para ${d.label} o márcalo como cerrado.`);
+          return;
+        }
+        for (const slot of cfg.slots) {
+          if (!slot.start || !slot.end || timeToMinutes(slot.end) <= timeToMinutes(slot.start)) {
+            showToast('error', 'Horario inválido', `En ${d.label}, la hora de cierre (${slot.end}) debe ser mayor a la hora de apertura (${slot.start}).`);
+            return;
+          }
+        }
+      }
+    }
+
     setIsSavingSettings(true);
     try {
-      await saveSettings(settingsForm);
+      await saveSettings({
+        ...settingsForm,
+        weeklySchedule: weekly,
+      });
     } catch (err: any) {
       showToast('error', 'Error', err.message);
     } finally {
@@ -2361,11 +2412,244 @@ export const AdminDashboardView: React.FC = () => {
                 <label className="text-[#5C5852] font-semibold block mb-1">Días Máximos de Anticipación para Reservar</label>
                 <input
                   type="number"
+                  min={1}
+                  max={90}
                   value={settingsForm.maxBookingAdvanceDays}
                   onChange={(e) => setSettingsForm({ ...settingsForm, maxBookingAdvanceDays: Number(e.target.value) })}
                   className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] font-mono focus:outline-none focus:border-[#9A6B3B]"
                 />
               </div>
+            </div>
+          </div>
+
+          {/* 4. BARBERSHOP OPERATING HOURS & ADAPTIVE AGENDA */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-[#FAF9F6] border border-[#9A6B3B]/35 space-y-4 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E6E1D6]">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-[#161514] flex items-center justify-center text-[#C69765]">
+                  <Clock className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-display text-base font-bold text-[#161514] uppercase tracking-wider">
+                    Horario de la Barbería & Agenda Adaptativa
+                  </h3>
+                  <p className="text-[11px] text-[#5C5852]">
+                    Define los días y turnos en que está abierta la barbería. Las citas se limitan a este horario y los bloques se adaptan a la duración de cada servicio.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-1.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const monday = activeWeeklySchedule[1];
+                    if (!monday?.isOpen || !monday.slots.length) return;
+                    setSettingsForm((prev) => {
+                      const base = prev.weeklySchedule || DEFAULT_WEEKLY_SCHEDULE;
+                      const next: WeeklySchedule = { ...base };
+                      ([2, 3, 4, 5, 6] as const).forEach((k) => {
+                        if (next[k]?.isOpen) {
+                          next[k] = {
+                            isOpen: true,
+                            slots: monday.slots.map((s) => ({ ...s })),
+                          };
+                        }
+                      });
+                      return { ...prev, weeklySchedule: next };
+                    });
+                    showToast('info', 'Horario copiado', 'Se aplicó el horario del Lunes a todos los días abiertos.');
+                  }}
+                  className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-[#F2EFE9] border border-[#D2CBBF] text-[#161514] text-[11px] font-semibold transition-colors"
+                >
+                  Copiar Lunes a abiertos
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSettingsForm((prev) => ({
+                      ...prev,
+                      weeklySchedule: {
+                        0: { isOpen: false, slots: [] },
+                        1: { isOpen: true, slots: [{ start: '10:00', end: '20:00' }] },
+                        2: { isOpen: true, slots: [{ start: '10:00', end: '20:00' }] },
+                        3: { isOpen: true, slots: [{ start: '10:00', end: '20:00' }] },
+                        4: { isOpen: true, slots: [{ start: '10:00', end: '20:00' }] },
+                        5: { isOpen: true, slots: [{ start: '10:00', end: '21:00' }] },
+                        6: { isOpen: true, slots: [{ start: '09:00', end: '18:00' }] },
+                      },
+                    }));
+                  }}
+                  className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-[#F2EFE9] border border-[#D2CBBF] text-[#9A6B3B] text-[11px] font-semibold transition-colors"
+                >
+                  Horario Continuo L-S
+                </button>
+              </div>
+            </div>
+
+            {/* Slot Grid Base & Minimum Notice */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
+              <div className="p-3.5 rounded-2xl bg-white border border-[#E6E1D6] space-y-1.5">
+                <label className="text-[#161514] font-bold block">
+                  Intervalo Base de Horarios en Agenda
+                </label>
+                <select
+                  value={settingsForm.slotIntervalMinutes || 30}
+                  onChange={(e) =>
+                    setSettingsForm({ ...settingsForm, slotIntervalMinutes: Number(e.target.value) })
+                  }
+                  className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] font-mono font-semibold focus:outline-none focus:border-[#9A6B3B]"
+                >
+                  <option value={15}>Cada 15 minutos</option>
+                  <option value={20}>Cada 20 minutos</option>
+                  <option value={30}>Cada 30 minutos (Estándar recomendado)</option>
+                  <option value={45}>Cada 45 minutos</option>
+                  <option value={60}>Cada 60 minutos</option>
+                </select>
+                <p className="text-[10px] text-[#5C5852] leading-relaxed">
+                  Los turnos se adaptan automáticamente a la duración de cada servicio registrado: si un servicio dura menos que el intervalo base, se ajusta a su duración exacta; si dura más (ej. 40 min en bloque de 30 min), optimiza el cierre para evitar empalmes y tiempos muertos.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-white border border-[#E6E1D6] space-y-1.5">
+                <label className="text-[#161514] font-bold block">
+                  Anticipación Mínima para Agendar (minutos)
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  max={720}
+                  value={settingsForm.minBookingNoticeMinutes ?? 30}
+                  onChange={(e) =>
+                    setSettingsForm({ ...settingsForm, minBookingNoticeMinutes: Math.max(0, Number(e.target.value)) })
+                  }
+                  className="w-full p-2.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] font-mono font-semibold focus:outline-none focus:border-[#9A6B3B]"
+                />
+                <p className="text-[10px] text-[#5C5852] leading-relaxed">
+                  Tiempo mínimo antes de la cita para que un cliente pueda reservar en línea el mismo día (ej. 30 min).
+                </p>
+              </div>
+            </div>
+
+            {/* 7-Day Operating Schedule List */}
+            <div className="space-y-2">
+              {SHOP_DAYS.map(({ key, label }) => {
+                const dayCfg = activeWeeklySchedule[key] || { isOpen: false, slots: [] };
+                return (
+                  <div
+                    key={key}
+                    className={`p-3 rounded-2xl border transition-all ${
+                      dayCfg.isOpen
+                        ? 'bg-white border-[#E6E1D6]'
+                        : 'bg-[#F2EFE9]/60 border-[#E6E1D6] opacity-80'
+                    }`}
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                      <div className="flex items-center justify-between sm:justify-start gap-3 min-w-[140px]">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            updateShopDaySchedule(key, (prevDay) => ({
+                              isOpen: !prevDay.isOpen,
+                              slots: !prevDay.isOpen
+                                ? prevDay.slots && prevDay.slots.length > 0
+                                  ? prevDay.slots
+                                  : [{ start: '10:00', end: '20:00' }]
+                                : prevDay.slots,
+                            }))
+                          }
+                          className={`transition-colors ${dayCfg.isOpen ? 'text-[#9A6B3B]' : 'text-[#8E887E]'}`}
+                          title={dayCfg.isOpen ? 'Marcar como cerrado' : 'Marcar como abierto'}
+                        >
+                          {dayCfg.isOpen ? <ToggleRight className="w-7 h-7" /> : <ToggleLeft className="w-7 h-7" />}
+                        </button>
+                        <div>
+                          <span className="font-bold text-[#161514] text-xs block">{label}</span>
+                          <span className={`text-[10px] font-semibold ${dayCfg.isOpen ? 'text-emerald-700' : 'text-[#767067]'}`}>
+                            {dayCfg.isOpen ? 'Abierto' : 'Cerrado'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {dayCfg.isOpen ? (
+                        <div className="flex-1 flex flex-col gap-2">
+                          {dayCfg.slots.map((slot, sIdx) => (
+                            <div key={sIdx} className="flex flex-wrap items-center gap-2 text-xs">
+                              <span className="text-[10px] text-[#5C5852] font-semibold uppercase tracking-wider w-14">
+                                {dayCfg.slots.length > 1 ? `Turno ${sIdx + 1}` : 'Horario'}
+                              </span>
+                              <input
+                                type="time"
+                                value={slot.start}
+                                onChange={(e) =>
+                                  updateShopDaySchedule(key, (prevDay) => ({
+                                    ...prevDay,
+                                    slots: prevDay.slots.map((item, idx) =>
+                                      idx === sIdx ? { ...item, start: e.target.value } : item
+                                    ),
+                                  }))
+                                }
+                                className="px-2.5 py-1.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] font-mono text-xs focus:outline-none focus:border-[#9A6B3B]"
+                              />
+                              <span className="text-[#5C5852] font-semibold">a</span>
+                              <input
+                                type="time"
+                                value={slot.end}
+                                onChange={(e) =>
+                                  updateShopDaySchedule(key, (prevDay) => ({
+                                    ...prevDay,
+                                    slots: prevDay.slots.map((item, idx) =>
+                                      idx === sIdx ? { ...item, end: e.target.value } : item
+                                    ),
+                                  }))
+                                }
+                                className="px-2.5 py-1.5 rounded-xl bg-[#FAF9F6] border border-[#D2CBBF] text-[#161514] font-mono text-xs focus:outline-none focus:border-[#9A6B3B]"
+                              />
+
+                              {dayCfg.slots.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    updateShopDaySchedule(key, (prevDay) => ({
+                                      ...prevDay,
+                                      slots: prevDay.slots.filter((_, idx) => idx !== sIdx),
+                                    }))
+                                  }
+                                  className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700"
+                                  title="Eliminar turno"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+
+                              {sIdx === dayCfg.slots.length - 1 && dayCfg.slots.length < 3 && (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    updateShopDaySchedule(key, (prevDay) => ({
+                                      ...prevDay,
+                                      slots: [...prevDay.slots, { start: '15:00', end: '20:00' }],
+                                    }))
+                                  }
+                                  className="px-2 py-1 rounded-lg bg-[#F2EFE9] hover:bg-[#E8E3D9] border border-[#D2CBBF] text-[#161514] text-[10px] font-semibold flex items-center gap-1"
+                                  title="Agregar descanso o segundo turno"
+                                >
+                                  <Plus className="w-3 h-3 text-[#9A6B3B]" />
+                                  <span>Turno / Comida</span>
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-[11px] text-[#767067] italic">
+                          Sin citas disponibles este día
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -2376,7 +2660,7 @@ export const AdminDashboardView: React.FC = () => {
               className="w-full py-3.5 rounded-2xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] font-bold text-xs shadow-sm active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
             >
               <Save className="w-4 h-4 text-[#C69765]" />
-              <span>{isSavingSettings ? 'Guardando cambios...' : 'Guardar Logotipo y Configuración Global'}</span>
+              <span>{isSavingSettings ? 'Guardando cambios...' : 'Guardar Logotipo, Horarios y Configuración'}</span>
             </button>
           </div>
         </div>

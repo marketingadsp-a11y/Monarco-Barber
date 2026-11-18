@@ -25,6 +25,7 @@ import {
   markReminderDispatched,
 } from '../services/notificationService';
 import { formatDateSpanish, formatTime12h, getMinutesUntilAppointment } from '../utils/dateTime';
+import { GUEST_APPOINTMENTS_EVENT, isAppointmentOwnedByCurrentBrowser } from '../utils/guestSession';
 
 export interface ToastMessage {
   id: string;
@@ -40,6 +41,7 @@ interface BarbershopContextType {
   products: Product[];
   posSales: PosSale[];
   appointments: Appointment[];
+  availabilityAppointments: Appointment[];
   schedules: Record<string, BarberSchedule>;
   blockedSlots: BlockedSlot[];
   businessSettings: BusinessSettings;
@@ -95,6 +97,8 @@ export const BarbershopProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [products, setProducts] = useState<Product[]>([]);
   const [posSales, setPosSales] = useState<PosSale[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [availabilityAppointments, setAvailabilityAppointments] = useState<Appointment[]>([]);
+  const [guestSessionVersion, setGuestSessionVersion] = useState<number>(0);
   const [schedules, setSchedules] = useState<Record<string, BarberSchedule>>({});
   const [blockedSlots, setBlockedSlots] = useState<BlockedSlot[]>([]);
   const [businessSettings, setBusinessSettings] = useState<BusinessSettings>(SEED_BUSINESS_SETTINGS);
@@ -181,6 +185,10 @@ export const BarbershopProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       if (isMounted) setPosSales(sales);
     });
 
+    const unsubOccupied = dataService.subscribeToOccupiedAppointments((occupied) => {
+      if (isMounted) setAvailabilityAppointments(occupied);
+    });
+
     return () => {
       isMounted = false;
       unsubServices();
@@ -190,6 +198,18 @@ export const BarbershopProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       unsubSettings();
       unsubProducts();
       unsubPosSales();
+      unsubOccupied();
+    };
+  }, []);
+
+  // Re-sync appointments whenever guest bookings are recorded in localStorage
+  useEffect(() => {
+    const handleGuestUpdate = () => setGuestSessionVersion((v) => v + 1);
+    window.addEventListener(GUEST_APPOINTMENTS_EVENT, handleGuestUpdate);
+    window.addEventListener('storage', handleGuestUpdate);
+    return () => {
+      window.removeEventListener(GUEST_APPOINTMENTS_EVENT, handleGuestUpdate);
+      window.removeEventListener('storage', handleGuestUpdate);
     };
   }, []);
 
@@ -202,9 +222,10 @@ export const BarbershopProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   // 2. Appointments subscription & Real-time Barber New Booking Notification
   useEffect(() => {
-    // Reset initial load state when role or user switches
+    // Reset initial load state & clear prior role/user list when role or user switches
     isInitialApptsLoadRef.current = true;
     prevAppointmentIdsRef.current = new Set();
+    setAppointments([]);
 
     const unsubAppts = dataService.subscribeToAppointments(
       currentRole,
@@ -263,15 +284,17 @@ export const BarbershopProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     );
 
     return () => unsubAppts();
-  }, [currentRole, userProfile?.id, currentBarberId, activeNotificationSettings.barberNewBookingToast, activeNotificationSettings.barberNewBookingSound, activeNotificationSettings.barberBrowserPush, activeNotificationSettings.enableAudioChime]);
+  }, [currentRole, userProfile?.id, currentBarberId, guestSessionVersion, activeNotificationSettings.barberNewBookingToast, activeNotificationSettings.barberNewBookingSound, activeNotificationSettings.barberBrowserPush, activeNotificationSettings.enableAudioChime]);
 
   // 3. Client Automated Reminders Engine (24h before & 2h before)
   useEffect(() => {
-    if (currentRole !== 'client' || !userProfile?.id) return;
+    if (currentRole !== 'client') return;
 
     const checkClientReminders = () => {
       const activeAppts = appointments.filter(
-        (a) => (a.status === 'confirmed' || a.status === 'pending') && a.clientId === userProfile.id
+        (a) =>
+          (a.status === 'confirmed' || a.status === 'pending') &&
+          (userProfile?.id ? a.clientId === userProfile.id : isAppointmentOwnedByCurrentBrowser(a))
       );
 
       for (const app of activeAppts) {
@@ -678,6 +701,7 @@ export const BarbershopProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         products,
         posSales,
         appointments,
+        availabilityAppointments,
         schedules,
         blockedSlots,
         businessSettings,

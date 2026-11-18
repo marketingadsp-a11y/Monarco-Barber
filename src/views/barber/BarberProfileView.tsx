@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   User,
   Camera,
@@ -18,6 +18,11 @@ import {
   LogOut,
   Image as ImageIcon,
   Award,
+  KeyRound,
+  Lock,
+  Eye,
+  EyeOff,
+  RefreshCw,
 } from 'lucide-react';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -44,7 +49,7 @@ export const BarberProfileView: React.FC<BarberProfileViewProps> = ({ activeBarb
   // Basic Profile State
   const [displayName, setDisplayName] = useState(activeBarber.displayName || '');
   const [photoUrl, setPhotoUrl] = useState(activeBarber.photoUrl || '');
-  const [phone, setPhone] = useState(activeBarber.phone || '');
+  const [phone, setPhone] = useState(activeBarber.phone || userProfile?.phone || '');
   const [bio, setBio] = useState(activeBarber.bio || '');
   const [instagram, setInstagram] = useState(activeBarber.instagram || '');
   const [experienceYears, setExperienceYears] = useState(activeBarber.experienceYears || 3);
@@ -53,10 +58,39 @@ export const BarberProfileView: React.FC<BarberProfileViewProps> = ({ activeBarb
   );
   const [gallery, setGallery] = useState<string[]>(activeBarber.gallery || []);
 
+  // Access Credentials State
+  const [accessCode, setAccessCode] = useState(
+    userProfile?.role === 'barber' ? userProfile.clientNumber || activeBarber.accessCode || '' : activeBarber.accessCode || ''
+  );
+  const [pin, setPin] = useState(userProfile?.role === 'barber' ? userProfile.pin || '' : '');
+  const [showPin, setShowPin] = useState(false);
+  const [isLoadingCreds, setIsLoadingCreds] = useState(false);
+  const [isSavingCreds, setIsSavingCreds] = useState(false);
+
   // Upload States
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isUploadingGallery, setIsUploadingGallery] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    setIsLoadingCreds(true);
+    dataService
+      .getBarberAccessCredentials(activeBarber)
+      .then((creds) => {
+        if (!mounted) return;
+        if (creds.accessCode) setAccessCode(creds.accessCode);
+        if (creds.phone) setPhone(creds.phone);
+        if (creds.pin) setPin(creds.pin);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (mounted) setIsLoadingCreds(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [activeBarber.id]);
 
   // Custom Service State
   const [editingCustomService, setEditingCustomService] = useState<Partial<Service> | null>(null);
@@ -116,7 +150,7 @@ export const BarberProfileView: React.FC<BarberProfileViewProps> = ({ activeBarb
     showToast('info', 'Foto eliminada', 'La imagen fue retirada de tu portafolio.');
   };
 
-  // Save All Profile Info
+  // Save All Profile Info & Credentials
   const handleSaveProfile = async () => {
     if (!displayName.trim()) {
       showToast('error', 'Nombre requerido', 'Por favor ingresa tu nombre.');
@@ -136,6 +170,8 @@ export const BarberProfileView: React.FC<BarberProfileViewProps> = ({ activeBarb
 
       const updatedBarber: Barber = {
         ...activeBarber,
+        userId: activeBarber.userId || (userProfile?.role === 'barber' ? userProfile.id : ''),
+        accessCode: accessCode.trim(),
         displayName: displayName.trim(),
         firstName,
         lastName,
@@ -149,31 +185,82 @@ export const BarberProfileView: React.FC<BarberProfileViewProps> = ({ activeBarb
         updatedAt: new Date().toISOString(),
       };
 
-      await saveBarber(updatedBarber);
-
-      // Also update user profile in Firestore and session if matching
-      if (userProfile?.id) {
-        await dataService.updateUserFullProfile(userProfile.id, {
-          name: displayName.trim(),
-          photoUrl: photoUrl.trim() || activeBarber.photoUrl,
+      const hasCredChanges = Boolean(accessCode.trim() || phone.trim() || pin.trim());
+      if (hasCredChanges) {
+        await dataService.saveBarberWithCredentials(updatedBarber, {
+          accessCode: accessCode.trim(),
           phone: phone.trim(),
+          pin: pin.trim(),
         });
+      } else {
+        await saveBarber(updatedBarber);
+      }
+
+      // Sync active barber session if logged in as this barber
+      if (userProfile?.id && (userProfile.role === 'barber' || userProfile.id === updatedBarber.userId)) {
+        const freshCreds = await dataService.getBarberAccessCredentials(updatedBarber);
+        setPhone(freshCreds.phone || phone.trim());
+        setAccessCode(freshCreds.accessCode || accessCode.trim());
+        if (freshCreds.pin) setPin(freshCreds.pin);
+
         await updateUserPreferences({
           name: displayName.trim(),
           photoUrl: photoUrl.trim() || activeBarber.photoUrl,
-          phone: phone.trim(),
+          phone: freshCreds.phone || phone.trim(),
+          clientNumber: freshCreds.accessCode || accessCode.trim(),
+          ...(freshCreds.pin ? { pin: freshCreds.pin } : {}),
         });
       }
 
       showToast(
         'success',
         '¡Perfil Actualizado!',
-        'Tu nombre, foto y datos profesionales ahora son visibles para todos los clientes.'
+        'Tu perfil profesional y credenciales de acceso han sido guardados.'
       );
     } catch (err: any) {
       showToast('error', 'Error al guardar perfil', err.message);
     } finally {
       setIsSavingProfile(false);
+    }
+  };
+
+  // Dedicated Save for Access Credentials
+  const handleSaveCredentialsOnly = async () => {
+    setIsSavingCreds(true);
+    try {
+      const targetBarber: Barber = {
+        ...activeBarber,
+        userId: activeBarber.userId || (userProfile?.role === 'barber' ? userProfile.id : ''),
+      };
+
+      await dataService.saveBarberWithCredentials(targetBarber, {
+        accessCode: accessCode.trim(),
+        phone: phone.trim(),
+        pin: pin.trim(),
+      });
+
+      const freshCreds = await dataService.getBarberAccessCredentials(targetBarber);
+      setPhone(freshCreds.phone || phone.trim());
+      setAccessCode(freshCreds.accessCode || accessCode.trim());
+      if (freshCreds.pin) setPin(freshCreds.pin);
+
+      if (userProfile?.id && (userProfile.role === 'barber' || userProfile.id === targetBarber.userId)) {
+        await updateUserPreferences({
+          phone: freshCreds.phone || phone.trim(),
+          clientNumber: freshCreds.accessCode || accessCode.trim(),
+          ...(freshCreds.pin ? { pin: freshCreds.pin } : {}),
+        });
+      }
+
+      showToast(
+        'success',
+        'Credenciales Actualizadas',
+        'Tu código de acceso, celular y contraseña para entrar al panel se actualizaron correctamente.'
+      );
+    } catch (err: any) {
+      showToast('error', 'Error en credenciales', err.message);
+    } finally {
+      setIsSavingCreds(false);
     }
   };
 
@@ -404,6 +491,114 @@ export const BarberProfileView: React.FC<BarberProfileViewProps> = ({ activeBarb
         >
           <Save className="w-4 h-4 text-[#C69765]" />
           <span>{isSavingProfile ? 'Guardando Perfil...' : 'Guardar Cambios de Perfil'}</span>
+        </button>
+      </div>
+
+      {/* Access Credentials Editor Card */}
+      <div className="rounded-3xl bg-[#FBF6EE] border border-[#9A6B3B]/35 p-5 space-y-4 shadow-xs text-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h2 className="text-xs font-bold uppercase tracking-wider text-[#9A6B3B] flex items-center gap-2">
+              <KeyRound className="w-4 h-4" />
+              <span>Acceso a Mi Panel de Barbero</span>
+            </h2>
+            <p className="text-[#5C5852] text-[11px] mt-0.5">
+              Edita el código, celular y contraseña (NIP de 4 dígitos) que utilizas para iniciar sesión.
+            </p>
+          </div>
+          {isLoadingCreds && (
+            <span className="text-[11px] text-[#9A6B3B] font-semibold">Cargando datos...</span>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          <div>
+            <label className="text-[#5C5852] font-semibold block mb-1">
+              Código de Acceso
+            </label>
+            <div className="flex items-center gap-1.5">
+              <input
+                type="text"
+                value={accessCode}
+                onChange={(e) => setAccessCode(e.target.value)}
+                placeholder="Ej. 482910"
+                className="w-full p-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] font-mono font-semibold focus:outline-none focus:border-[#161514]"
+              />
+              <button
+                type="button"
+                onClick={() => setAccessCode(Math.floor(100000 + Math.random() * 900000).toString())}
+                className="p-2.5 rounded-xl bg-white hover:bg-[#F2EFE9] border border-[#D2CBBF] text-[#9A6B3B] transition-colors shrink-0"
+                title="Generar nuevo código de 6 dígitos"
+              >
+                <RefreshCw className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-[#5C5852] font-semibold block mb-1">
+              Celular de Acceso (10 dígitos)
+            </label>
+            <div className="relative">
+              <Phone className="w-3.5 h-3.5 text-[#8E887E] absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="55 1234 5678"
+                className="w-full pl-8 pr-2.5 py-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] font-mono font-medium focus:outline-none focus:border-[#161514]"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-[#5C5852] font-semibold block mb-1">
+              Contraseña / NIP (4 dígitos)
+            </label>
+            <div className="flex items-center gap-1.5">
+              <div className="relative flex-1">
+                <Lock className="w-3.5 h-3.5 text-[#8E887E] absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type={showPin ? 'text' : 'password'}
+                  inputMode="numeric"
+                  maxLength={4}
+                  value={pin}
+                  onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                  placeholder="••••"
+                  className="w-full pl-8 pr-9 py-2.5 rounded-xl bg-white border border-[#D2CBBF] text-[#161514] font-mono font-bold tracking-widest focus:outline-none focus:border-[#161514]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPin((prev) => !prev)}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#767067] hover:text-[#161514]"
+                  title={showPin ? 'Ocultar NIP' : 'Mostrar NIP'}
+                >
+                  {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setPin(Math.floor(1000 + Math.random() * 9000).toString());
+                  setShowPin(true);
+                }}
+                className="p-2.5 rounded-xl bg-white hover:bg-[#F2EFE9] border border-[#D2CBBF] text-[#9A6B3B] transition-colors shrink-0"
+                title="Generar nuevo NIP de 4 dígitos"
+              >
+                <RefreshCw className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleSaveCredentialsOnly}
+          disabled={isSavingCreds || isSavingProfile}
+          className="w-full py-3 rounded-2xl bg-[#161514] hover:bg-[#2A2826] text-[#FAF9F6] font-semibold text-xs shadow-sm active:scale-[0.99] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+        >
+          <KeyRound className="w-4 h-4 text-[#C69765]" />
+          <span>{isSavingCreds ? 'Actualizando Credenciales...' : 'Guardar Código, Celular y Contraseña'}</span>
         </button>
       </div>
 

@@ -16,7 +16,7 @@ import {
   getUpcomingDays,
   getTodayDateString,
 } from '../../utils/dateTime';
-import { getAvailableSlots } from '../../services/availabilityEngine';
+import { getAvailableSlots, isShopOpenOnDate } from '../../services/availabilityEngine';
 
 interface AppointmentDetailModalProps {
   appointment: Appointment | null;
@@ -32,7 +32,7 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
   const {
     barbers,
     schedules,
-    appointments,
+    availabilityAppointments,
     blockedSlots,
     businessSettings,
     cancelAppointment,
@@ -56,7 +56,7 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
     serviceDurationMinutes: appointment.serviceDurationSnapshot,
     date: rescheduleDate,
     barberSchedule: schedules[appointment.barberId],
-    appointments,
+    appointments: availabilityAppointments,
     blockedSlots,
     settings: businessSettings,
   });
@@ -330,23 +330,32 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
                   Selecciona la nueva fecha
                 </label>
                 <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
-                  {upcomingDays.slice(0, 8).map((d) => (
-                    <button
-                      key={d.dateStr}
-                      onClick={() => {
-                        setRescheduleDate(d.dateStr);
-                        setSelectedSlot(null);
-                      }}
-                      className={`flex flex-col items-center px-3 py-2 rounded-xl border text-xs min-w-16 transition-all tabular-nums ${
-                        rescheduleDate === d.dateStr
-                          ? 'bg-[#161514] text-[#FAF9F6] font-bold border-[#161514]'
-                          : 'bg-white text-[#5C5852] border-[#E6E1D6] hover:border-[#9A6B3B]'
-                      }`}
-                    >
-                      <span className="text-[10px] uppercase">{d.dayName}</span>
-                      <span className="text-sm font-bold">{d.dayNumber}</span>
-                    </button>
-                  ))}
+                  {upcomingDays.slice(0, 14).map((d) => {
+                    const isOpen = isShopOpenOnDate(d.dateStr, businessSettings);
+                    return (
+                      <button
+                        key={d.dateStr}
+                        type="button"
+                        disabled={!isOpen}
+                        onClick={() => {
+                          if (!isOpen) return;
+                          setRescheduleDate(d.dateStr);
+                          setSelectedSlot(null);
+                        }}
+                        className={`flex flex-col items-center px-3 py-2 rounded-xl border text-xs min-w-16 transition-all tabular-nums ${
+                          !isOpen
+                            ? 'bg-[#F2EFE9]/70 text-[#9E978D] border-[#E6E1D6] opacity-55 cursor-not-allowed'
+                            : rescheduleDate === d.dateStr
+                            ? 'bg-[#161514] text-[#FAF9F6] font-bold border-[#161514]'
+                            : 'bg-white text-[#5C5852] border-[#E6E1D6] hover:border-[#9A6B3B]'
+                        }`}
+                      >
+                        <span className="text-[10px] uppercase">{d.dayName}</span>
+                        <span className="text-sm font-bold">{d.dayNumber}</span>
+                        {!isOpen && <span className="text-[8px] font-bold text-rose-700 uppercase">Cerrado</span>}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -354,23 +363,33 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
                 <label className="text-xs font-semibold text-[#161514] block mb-1.5">
                   Selecciona nuevo horario
                 </label>
-                <div className="grid grid-cols-3 gap-2 max-h-44 overflow-y-auto pr-1">
-                  {availableRescheduleSlots
-                    .filter((s) => s.available)
-                    .map((s) => (
-                      <button
-                        key={s.startTime}
-                        onClick={() => setSelectedSlot(s)}
-                        className={`p-2 rounded-xl border text-xs font-mono text-center transition-all tabular-nums ${
-                          selectedSlot?.startTime === s.startTime
-                            ? 'bg-[#161514] text-[#FAF9F6] font-bold border-[#161514]'
-                            : 'bg-white hover:bg-[#F2EFE9] text-[#161514] border-[#E6E1D6]'
-                        }`}
-                      >
-                        {formatTime12h(s.startTime)}
-                      </button>
-                    ))}
-                </div>
+                {!isShopOpenOnDate(rescheduleDate, businessSettings) ? (
+                  <p className="text-xs text-[#5C5852] p-3 rounded-xl bg-white border border-[#E6E1D6] text-center">
+                    La barbería está cerrada en esta fecha. Elige otro día.
+                  </p>
+                ) : availableRescheduleSlots.filter((s) => s.available).length === 0 ? (
+                  <p className="text-xs text-[#5C5852] p-3 rounded-xl bg-white border border-[#E6E1D6] text-center">
+                    No hay horarios disponibles para esta fecha.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-3 gap-2 max-h-44 overflow-y-auto pr-1">
+                    {availableRescheduleSlots
+                      .filter((s) => s.available)
+                      .map((s) => (
+                        <button
+                          key={s.startTime}
+                          onClick={() => setSelectedSlot(s)}
+                          className={`p-2 rounded-xl border text-xs font-mono text-center transition-all tabular-nums ${
+                            selectedSlot?.startTime === s.startTime
+                              ? 'bg-[#161514] text-[#FAF9F6] font-bold border-[#161514]'
+                              : 'bg-white hover:bg-[#F2EFE9] text-[#161514] border-[#E6E1D6]'
+                          }`}
+                        >
+                          {formatTime12h(s.startTime)}
+                        </button>
+                      ))}
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center gap-2 pt-2">

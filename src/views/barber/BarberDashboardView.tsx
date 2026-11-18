@@ -88,18 +88,20 @@ export const BarberDashboardView: React.FC<BarberDashboardViewProps> = ({
   };
   const userPhone10 = normalizePhone10(userProfile?.phone);
 
+  const matchedBarber = barbers.find(
+    (b) =>
+      b.id === currentBarberId ||
+      (b.userId && userProfile?.id && b.userId === userProfile.id) ||
+      (b.accessCode &&
+        userProfile?.clientNumber &&
+        b.accessCode.trim().toLowerCase() === userProfile.clientNumber.trim().toLowerCase()) ||
+      (userPhone10.length === 10 && normalizePhone10(b.phone) === userPhone10) ||
+      (b.phone && userProfile?.phone && b.phone === userProfile.phone) ||
+      b.displayName.toLowerCase() === userProfile?.name?.toLowerCase()
+  );
+
   const activeBarber: Barber =
-    barbers.find(
-      (b) =>
-        b.id === currentBarberId ||
-        (b.userId && userProfile?.id && b.userId === userProfile.id) ||
-        (b.accessCode &&
-          userProfile?.clientNumber &&
-          b.accessCode.trim().toLowerCase() === userProfile.clientNumber.trim().toLowerCase()) ||
-        (userPhone10.length === 10 && normalizePhone10(b.phone) === userPhone10) ||
-        (b.phone && userProfile?.phone && b.phone === userProfile.phone) ||
-        b.displayName.toLowerCase() === userProfile?.name?.toLowerCase()
-    ) ||
+    matchedBarber ||
     barbers[0] || {
       id: currentBarberId || 'barber_1',
       displayName: userProfile?.name || 'Barbero Monarca',
@@ -162,9 +164,12 @@ export const BarberDashboardView: React.FC<BarberDashboardViewProps> = ({
     );
   }
 
-  // Filter barber appointments for Today
+  // Filter barber appointments strictly for the authenticated barber
+  const resolvedBarberId = currentBarberId || matchedBarber?.id || '';
   const todayStr = getTodayDateString();
-  const barberAppointments = appointments.filter((a) => a.barberId === activeBarber.id);
+  const barberAppointments = resolvedBarberId
+    ? appointments.filter((a) => a.barberId === resolvedBarberId)
+    : [];
   const todayAppointments = barberAppointments.filter((a) => a.date === todayStr);
   const completedToday = todayAppointments.filter((a) => a.status === 'completed');
   const pendingToday = todayAppointments.filter((a) => a.status === 'confirmed' || a.status === 'pending');

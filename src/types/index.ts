@@ -243,6 +243,7 @@ export interface BusinessSettings {
   currencySymbol: string; // "$"
   openingTime: string; // "09:00"
   closingTime: string; // "21:00"
+  weeklySchedule?: WeeklySchedule;
   announcement?: string;
   // Hero Banner Customization & Component Toggles
   showHeroSection?: boolean; // Habilitar o deshabilitar todo el módulo de Hero Banner
